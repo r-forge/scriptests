@@ -1,0 +1,248 @@
+Testing:
+
+Duplicating what happens in script diffout.R:
+
+> source.pkg("RtTests")
+Reading 3 .R files into env at pos 2: 'pkgcode:RtTests'
+Sourcing RtTests/R/createRfromRt.R
+Sourcing RtTests/R/plus.R
+Sourcing RtTests/R/rttests.R
+list()
+> rtBase <- "infowarn1"
+> rtOut <- paste("RtTests.Rcheck/tests/", rtBase, ".Rout", sep="")
+> rtSave <- paste("RtTests.Rcheck/tests/", rtBase, ".Rt.save", sep="")
+> resOut <- paste("RtTests.Rcheck/tests/", rtBase, ".Rtres", sep="")
+> load(file=rtSave)
+> ls()
+[1] "resOut" "rtOut"  "rtSave" "tests"
+> resList <- parseTranscriptFile(rtOut, ignoreUpToRegExpr="> # generated automatically")
+> res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", rtOut), tests, resList, progress=TRUE)
+> class(res)
+[1] "RtTestSetResults"
+>
+
+> library(RtTests)
+> rtBase <- "allperfect"
+> rttPkg <- "RtTestsExample3"
+> rtOut <- paste(rttPkg, ".Rcheck/tests/", rtBase, ".Rout", sep="")
+> rtSave <- paste(rttPkg, ".Rcheck/tests/", rtBase, ".Rt.save", sep="")
+> resOut <- paste(rttPkg, ".Rcheck/tests/", rtBase, ".Rtres", sep="")
+> load(file=rtSave)
+> ls()
+[1] "resOut" "rtOut"  "rtSave" "tests"
+> resList <- parseTranscriptFile(rtOut, ignoreUpToRegExpr="> # generated automatically")
+> res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", rtOut), tests, resList, progress=TRUE)
+> class(res)
+[1] "RtTestSetResults"
+
+TODO:
+* DONE comparing actual & target output, & printing differences
+
+* comparison control:
+   - DONE detect warn/info control
+   - DONE regexpr subs
+   - ignore regions
+   - precision on numbers
+   - use http://en.wikipedia.org/wiki/Levenshtein_distance to calculate diffs
+
+* aggregating results from Rtres files
+   - DONE create a script that parse the first line of each .Rtres file (it can get the names from arguments passed to the script by the Makefile, 
+
+* interactive test running (incl subst of ::: when appropriate?)
+
+* check that tests/Makefile is up-to-date in a target package
+   - make an easily scripted way of updating the Makefile
+
+*************************
+Interactive test running:
+* Use same functions for parsing tests and comparing output (see above, and RtTests/inst/scripts/{prepin,diffout,summary}.R
+* Run tests using evalCapture() in RtTests/R/oldcode.R (move this function out of there, and need a loop for running all the tests in a file)
+* Make this work with source.pkg() function in package tap.misc:
+  - Look for the construct 'ThisPkg:::name' in tests and replace it with 'name' if ThisPkg is not attached as a package
+
+
+> rtBase <- "simple1"
+> tests <- parseTranscriptFile(paste("RtTests/tests/", rtBase, ".Rt", sep=""))
+> test1 <- tests[[3]]
+> evalCapture(test1$expr)
+[1] "[1] 4"
+> compareSingleTest(test1$input, test1$control, test1$output, evalCapture(test1$expr), 3, "foo", T)
+.$status
+[1] "ok"
+
+$msg
+character(0)
+
+$i
+[1] 3
+
+> 
+
+=================== older notes (from NOTES.testing.txt)
+What I want from a testing harness:
+  (1) works from transcripts (to avoid unnecessary duplication of commands in .R and .Rout.save files)
+  (2) control which tests within a transcript are run based on env vars, R version, etc.
+  (3) control which transcripts are used from the command line
+  (4) all specified tests should be run even if the output for some doesn't match or if
+      any test stops with an error.
+  (5) flexibility in matching output
+  (6) concise reporting of which tests failed
+  (7) automatic detection of whether some tests failed or succeeded
+  (8) want tests to run normally on other installations (don't need 6 & 7)
+
+***** Aug 24, 2007 Thinking about how to achieve this within Rcmd check ...
+
+(1) have this, via createRfromRt.R (need to put this in a .Rin file -- could automatically generate this in a harness around Rcmd check)
+(2) could implement by enhancing createRfromRt.R
+(3) harness around Rcmd check could generate tests/Makevars (see R-2.5.0/bin/check, line "open(MAKEVARS,...") - or could have an R function to run test scripts and report the results (using the facilities I put in RUnit for which I never got a reply)
+(4) need to put something like: options(error=function() NULL) at the start of the file of commands
+(5) use a custom Rdiff, and have it leave summary files - can specify Rdiff program in tests/Makefile (not in tests/Makevars because we can't leave that file in the distribution, because it contains installation specific paths)
+(6) harness can do the concise reporting - or can do it with a final 'make' target
+(7) harness can automatically detect how many important tests failed
+(8) is a problem because Makevars has installation-specific paths
+
+Note that the makefile that runs each test is a sub-make,
+and it only gets passed "Makevars" and not "Makefile" (that
+exists in the tests directory).  This makes it difficult to
+modify the value of RDIFF in the makefile.
+
+Sub-make gets invoked like this:
+make -f /usr/local/lib64/R/share/make/tests.mk -f Makevars ${out}
+
+However, a line in tests/Makefile to modify
+tests/Makevars might work, except that the changes don't
+appear to be picked up when running...
+
+Need to think about how I could automatically process .Rt
+files to create .R and .Rout.save files.  Not easy to add
+these to the list of targets (test-src-1 or test-src-auto
+because those are set in Makevars, which is read after
+Makefile, and I can't modify Makevars before Makefile is
+read...)
+
+Can have a tests/Makefile that will be read in addition to the regular makefile.  Note the following:
+ * best not to have tests/Makevars, because having a permanent one makes Rcmd check not use its own Makevars - it contains paths and the list of targets
+ * tests/Makefile is NOT read by the sub-make that runs the tests
+ * tests/Makefile can add to tests/Makevars once it is created
+ * tests/Makefile can change the targets
+
+So a plan could be to have a custom tests/Makefile that does the following:
+ (a) redefine default targets to do the following:
+ (b) add a line to tests/Makevars to redefine RDIFF
+ (c) create .R and .Rout.save files from .Rt files
+ (d) add targets for the .Rt files in new targets (can't
+     redefine test-src-1 because tests/Makefile is read
+     before tests/Makevars) But maybe could redefine test-out
+     to add targets for the .Rt files -- no -- because
+     the redefinition has to happen in the top level
+     invocation of make.
+I think the best approach might be to have tests/Makefile
+have a special target for Rt files, and it generates a list
+of .Rout targets using file listing, and calls a sub-make
+the same way the 'all' target in tests.mk does.
+
+Note that it would be good to use the .Rout rule in the system
+makefile because it differs for Windows.
+
+Windows wrinkle: need to specify wintests.mk in the rt-tests
+rule under windows ... how can make find out the
+architecture? -- or can use both Makefile and Makefile.win
+(Makefile.win could just define a var and include Makefile
+...?)
+
+Also, using R to implement the diff would be a good
+application for a scripting version of R, if that exists yet
+(look up 'littler'?)
+
+test-out = change-Rdiff.Rout $(test-src:.R=.Rout)
+
+
+Thinking about if I could write a diff program in R (that would be more flexible ...)
+$ Rterm --slave --vanilla -e 'library(trackObjs);cat("Hello",commandArgs(TRUE),"\n")' --args a b c
+Hello a b c
+
+Some more techniques for using in make files:
+
+allrt := $(wildcard *.Rt)
+allout := $(allrt:.Rt=.Rout.save)
+allin := $(allrt:.Rt=.R)
+
+all: $(allout)
+
+$(allout): %.Rout.save: %.Rt
+	@echo Creating $@ and $*.R from $<
+	@echo '> # file generated automatically in' `pwd` on `date` | cat - $< > $@
+	@sed -rne 's/^[>+] ?//p' $@ > $*.R
+	@# massage the .Rout.save file to make the Rdiff.sh return no differences
+	@echo '' > $*.R.tmp ; echo '' >> $*.R.tmp
+	@echo '> ' | cat $@ - >> $*.R.tmp
+	@mv $*.R.tmp $@
+
+clean1:
+	rm $(allrt:.Rt=.R)
+
+$(allin): %.R: %.Rout.save
+	sed -rne 's/^[>+] ?//p' $< > $@
+	echo '' > $@.tmp ; echo '' >> $@.tmp
+	echo '> ' | cat $< - >> $@.tmp
+	mv $@.tmp $<
+	touch $@
+
+****** Old notes
+in bin/check:
+	## Option '--no-install' turns off installation and the tests
+	## which require the package to be installed.  When testing
+	## recommended packages bundled with R we can skip installation,
+	## and do so if '--install=skip' was given.  If command line
+	## option '--install' is of the form 'check:FILE', it is assumed
+	## that installation was already performed with stdout/stderr to
+	## FILE, the contents of which need to be checked (without
+	## repeating the installation).
+	## <NOTE>
+	## In this case, one also needs to specify *where* the package
+	## was installed to using command line option '--library'.
+	## Perhaps we should check for that, although '--install=check'
+	## is really only meant for repository maintainers.
+	## </NOTE>
+
+tests are run in bin/check, code starting at line 1858: 
+    ## Run the package-specific tests.
+
+Looks like make is used in the tests directory - to run the tests?
+
+Looks like make is run with this command:
+        if(R_system("${R::Vars::MAKE} $makefiles $makevars")) {
+
+a "Makevars" file is constructed and left in the tests directory
+
+The makefiles are in:
+./share/make/tests.mk
+./src/gnuwin32/fixed/share/tests.mk
+./bin/check
+
+added a rule for Rt->R&Rout.save to tests.mk
+
+added code to bin/check to write .R for .Rt files to the Makevars
+
+then that worked to have just .Rt files.... :-)
+
+Next want to investigate how to run individual tests, and tests
+without building..., and how to provide better comparing of test
+output and targets
+
+Maybe I can have .Rin files construct .R and .Rout.save
+files from .Rt files (or maybe the .Rin file can use the
+.Rout.save file because .Rout.save files are referred to in
+the original source location, not in the directory where
+tests are run and files created -- yes, I think that will
+work)
+
+Another way would be to have a .R file that reads the
+.Rout.save file, executes the commands within it & puts the
+output in .Rout, and lets R CMD check compare .Rout and
+.Rout.save.
+
+Another way would be to have a .R file that reads the
+corresponding .Rt file, executes commands and compares
+output, and exits with an error if errors are found (or
+continues, if the environment is set up in a certain way.)

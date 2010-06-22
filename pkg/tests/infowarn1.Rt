@@ -1,0 +1,15 @@
+> # These tests generate some warnings & informational messages, but no errors
+> 1 + 1
+[1] 2
+> 2 +
++ 2
+[1] 4
+> 2 + 2
+#@ Info-only
+#@ diff-msg: This test intentionally has the wrong answer but should just generate an info message
+[1] 5
+> 1 + 2
+#@ Warn-only
+#@ diff-msg: This test intentionally has the wrong answer but should just generate a warning
+[1] 2
+> 

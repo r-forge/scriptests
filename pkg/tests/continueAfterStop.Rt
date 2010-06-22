@@ -1,0 +1,11 @@
+> # To make a non-interactive R session continue after stop() is called
+> # the error handler should be set to something other than the default NULL
+> options(error=function() NULL)
+> stop("should continue with next test")
+Error: should continue with next test
+> foo <- function(x) if (casefold(substring(x, 1, 6))=="monday") stop("I don't like mondays") else x
+> foo("monday")
+Error in foo("monday") : I don't like mondays
+> foo("friday")
+[1] "friday"
+>

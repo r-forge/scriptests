@@ -1,0 +1,14 @@
+> # Some tests of the internals of ScripTests
+> # Need to work out whether evalCapture should return \n terminated strings
+> options(error=function() NULL)
+> eval(parse(text="(function(x) {if (x==42) stop('eek! 42') else warning('bar'); return(x)})(23)")[[1]])
+Warning in (function(x) { : bar
+[1] 23
+> evalCapture(parse(text="(function(x) {if (x==42) stop('eek! 42') else warning('bar'); return(x)})(23)")[[1]])
+[1] "Warning in (function(x) { : bar"
+[2] "[1] 23"                                                                                                           
+> evalCapture(parse(text="(function(x) {if (x==42) stop('eek! 42') else warning('bar'); return(x)})(42)")[[1]])
+[1] "Error in (function(x) { : eek! 42"
+> eval(parse(text="(function(x) {if (x==42) stop('eek! 42') else warning('bar'); return(x)})(42)")[[1]])
+Error in (function(x) { : eek! 42
+> 

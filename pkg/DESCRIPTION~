@@ -1,0 +1,16 @@
+Package: ScripTests
+Type: Package
+Title: Transcript-based tests that are easy to create and maintain
+Version: 0.1-9
+Date: 2010-05-10
+Author: Tony Plate
+Maintainer: Tony Plate <tplate@acm.org>
+Description: Support for using .Rt (transcript) tests
+  in the tests directory of a package.  Provides more
+  convenience and features than the standard .R/.Rout.save
+  tests.  Supports running tests under R CMD check and also
+  interactively.  Provides source.pkg() for quickly loading
+  code, DLLs, and data from a package for use in an
+  edit/compile/test development cycle.
+License: GPL
+Packaged: Fri Apr 13 16:11:47 2007; tplate

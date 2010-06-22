@@ -1,0 +1,10 @@
+> # What happens with bad syntax in a test? -- as long
+> # as the error message is verbatim in the .Rt file,
+> # and as long as R is set to continue after an error,
+> # the test will pass.
+> options(error=function() NULL) # continue after an error
+> bad *** syntax!
+Error: unexpected '*' in "bad ***"
+> cat("Hello!\n")
+Hello!
+> 

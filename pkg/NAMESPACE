@@ -1,0 +1,6 @@
+export(source.pkg, runtests, dumprout, runScripTests)
+export(parseTranscriptFile, compareTranscriptAndOutput)
+export(initializeTests, summarizeTests, ScripDiff)
+S3method(summary, RtTestSetResults)
+S3method(print, RtTestSetResults)
+S3method(print, RtTestSetResults.summary)

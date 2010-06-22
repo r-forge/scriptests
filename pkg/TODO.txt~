@@ -1,0 +1,60 @@
+2009-08-19:
+
+TODO:
+* make function that creates .R and .Rout.save files from .Rt to enable regular testing
+* make it possible to run own-process tests in a new copy of the test dir
+* get the interactive tests running
+  * optional copy of test directory
+      runtests(pattern="plus", "ScripTestsExample", full=T, clobber=T, debug=T)
+  * optionally run inside R
+* update documentation, esp ScripTests.design.Rd
+
+DONE:
+* use library.dynam() to load DLLs in source.pkg()
+* incorporate code from Hadley Wickham's source_package() function http://gist.github.com/180883
+* prune obselete functions
+* add file= argument to runtests
+* pass path argument from runtests to runTestsHereFast
+* pass subst arg from runtests to runPackageTests
+* add path= argument to runtests()
+* put standard entries from CONFIG as defaults (but not in .runPackageTests()
+* get a shell script version of tests running - nah, don't need that -- just run from R
+* have everything running under "R CMD check" (YAY!)
+
+
+---------------
+
+Follow plan for dealing with R-2.9.0 testing framework as outlined in man/RtTests.design.Rd
+
+source.pkg("RtTests")
+testWrapper("tmp", "tmp/tests")
+
+working in rttests.R: checkTestOutput()
+  change read.table to scan() to avoid problems with duplicate row names
+
+these commands in an R session:
+
+source.pkg("RtTests")
+setwd("tmp/tests")
+# setupTests(T)
+setwd("../..")
+checkTestOutput("allperfect.Rt", "allperfect.Rt.save", TRUE)
+checkTestOutput("plus.Rt", "plus.Rt.save", TRUE)
+
+> setwd("../..")
+> source.pkg("RtTests")
+Reading 5 .R files into env at pos 2: 'pkgcode:RtTests'
+Sourcing RtTests/R/createRfromRt.R
+Sourcing RtTests/R/interactive.R
+Sourcing RtTests/R/plus.R
+Sourcing RtTests/R/rttests.R
+Sourcing RtTests/R/testing.R
+list()
+> setwd("tmp/tests")
+> setupTests(T)
+ 
+(old)
+* Find a way of showing versions/paths of all libraries in test output
+* Make runtests() print a summary of all the tests run when multiple test files are run
+* Make runtests() remove package::: from tests when source.pkg() has been used
+* Make runtests() not execute options(error=function() NULL) (or restore options after running?)
