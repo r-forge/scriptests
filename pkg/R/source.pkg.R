@@ -6,10 +6,10 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
         assign("working.package", pkg, envir=globalenv())
     if (!missing(path))
         assign("working.package.path", path, envir=globalenv())
-    if (!file.exists(file.path(path, pkg)))
-        stop("cannot find package directory ", file.path(path, pkg), " (supply path=... ?)")
-    if (file.exists(file.path(path, pkg, "DESCRIPTION"))) {
-        desc <- read.dcf(file.path(path, pkg, "DESCRIPTION"))
+    if (!file.exists(pkg.path(path, pkg)))
+        stop("cannot find package directory ", pkg.path(path, pkg), " (supply path=... ?)")
+    if (file.exists(file.path(pkg.path(path, pkg), "DESCRIPTION"))) {
+        desc <- read.dcf(file.path(pkg.path(path, pkg), "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
     }
     problems <- list()
@@ -46,7 +46,7 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
         envir <- attach(NULL, pos=pos, name=paste("pkgcode", pkg, sep=":"))
     }
     # Work out what R files to source
-    files <- list.files(file.path(path, pkg, "R"), all=T, pattern=pattern, full=TRUE, ignore.case=TRUE)
+    files <- list.files(file.path(pkg.path(path, pkg), "R"), all=T, pattern=pattern, full=TRUE, ignore.case=TRUE)
     if (!is.null(suffix)) {
         i <- grep(suffix, files, ignore.case=TRUE)
         if (length(files) && length(i)==0)
@@ -94,8 +94,8 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
     # spectrum of possible data formats -- see R-exts for
     # details.  If more formats are added here, add them to
     # man/source.pkg.Rd too.
-    if (file.exists(file.path(path, pkg, "data"))) {
-        files <- list.files(file.path(path, pkg, "data"), all=T, pattern=".*\\.rda(ta)?$", full=TRUE, ignore.case=TRUE)
+    if (file.exists(file.path(pkg.path(path, pkg), "data"))) {
+        files <- list.files(file.path(pkg.path(path, pkg), "data"), all=T, pattern=".*\\.rda(ta)?$", full=TRUE, ignore.case=TRUE)
         names(files) <- files
         problems <- c(problems, lapply(files,
                function(file) {
@@ -111,7 +111,7 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
     # Do we need to load and DLL's or SO's?
     if (dlls=="check") {
         # Try to find object files under <pkg>.Rcheck and load them
-        dll.dir <- gsub("\\\\", "/", file.path(path, paste(pkg, ".Rcheck", sep=""), pkg, "libs"))
+        dll.dir <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg, ".Rcheck", sep="")), pkg, "libs"))
         if (!file.exists(dll.dir)) {
             cat("Looking for DLL/SO files, but directory", dll.dir, "doesn't exist\n")
         } else {

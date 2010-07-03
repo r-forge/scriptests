@@ -40,7 +40,7 @@ runtests <- function(pkg=get("working.package", envir=globalenv()),
         if (!is.null(file))
             stop("can only supply file= argument when full==FALSE")
         cwd <- getwd()
-        test.dir <- file.path(path, pkg, "tests")
+        test.dir <- file.path(pkg.path(path, pkg), "tests")
         if (!file.exists(test.dir))
             stop("test directory ", test.dir, " does not exist")
         if (file.exists(dir)) {
@@ -93,7 +93,7 @@ runTestsHereFast <- function(pattern=".*",
     #   (5) output is captured using evalCapture() instead of reading it
     #       from a transcript
     if (!is.null(file)) {
-        files <- file.path(path, pkg, "tests", file)
+        files <- file.path(pkg.path(path, pkg), "tests", file)
         if (!all(i <- file.exists(files))) {
             warning("ignoring non-existant files ", paste(files[!i], collapse=", "))
             files <- files[i]
@@ -103,7 +103,7 @@ runTestsHereFast <- function(pattern=".*",
             test.suffix <- gsub("^\\.", "\\.", test.suffix)
         if (regexpr(paste(test.suffix, "$", sep=""), pattern, ignore.case=T) < 1)
             pattern <- paste(pattern, ".*", test.suffix, "$", sep="")
-        files <- list.files(file.path(path, pkg, "tests"), pattern=pattern, full=TRUE, ignore.case=TRUE)
+        files <- list.files(file.path(pkg.path(path, pkg), "tests"), pattern=pattern, full=TRUE, ignore.case=TRUE)
         if (length(files)==0)
             stop("no files matched the pattern '", pattern, "' in ", file.path(pkg, "tests"))
     }
@@ -146,6 +146,7 @@ evalCapture <- function(expr, envir=globalenv(), enclos=envir) {
     ## when given the contents of 'text', including error messages
     ## (only the value from the last expression in text is printed)
     ## A zero-length character vector is returned when the result is invisible.
+    ## Constructed this definition of eval.with.vis() based on code in source()
     if (is.null(expr))
         return(character(0))
     withWarnings <- function(expr) {
@@ -216,5 +217,13 @@ dumprout <- function(res = .Last.value, output = ".Rout.tmp", verbose = TRUE, cl
                 on.exit()
             }
         }
+    }
+}
+
+pkg.path <- function(path, pkg) {
+    if ((i <- regexpr("$PKG", path, fixed=TRUE)) >= 1) {
+        return(gsub("$PKG", pkg, path, fixed=TRUE))
+    } else {
+        return(file.path(path, pkg))
     }
 }
