@@ -12,7 +12,7 @@
 
 }
 \usage{
-source.pkg(pkg = mget("working.package", envir = globalenv())[[1]],
+source.pkg(pkg.dir = mget("working.package.dir", envir = globalenv())[[1]],
            pattern = ".*",
            suffix = "\\\\.R$",
            dlls = c("no", "check"),
@@ -21,8 +21,9 @@ source.pkg(pkg = mget("working.package", envir = globalenv())[[1]],
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{pkg}{ The name of the package.  This is remembered and the same
-    value used as the default in subsequent invocations. }
+  \item{pkg.dir}{ The directory where the package code lives.  This is remembered and the same
+    value used as the default in subsequent invocations. This can be
+    different from the package name, which is read from \code{<pkg.dir>/DESCRIPTION}.}
   \item{pattern}{ A regular expression specifying the R files to source }
   \item{suffix}{ The suffix for the R code files.  Files are sourced
     only if they match both \code{pattern} and \code{suffix}. }
@@ -31,22 +32,22 @@ source.pkg(pkg = mget("working.package", envir = globalenv())[[1]],
     shared-objects:
     \itemize{
       \item \code{no}: don't load any DLLs
-      \item \code{check}: look in \code{<pkg>.Rcheck/<pkg>/libs}
+      \item \code{check}: look in \code{<pkg.dir>.Rcheck/<pkg.name>/libs}
       }
   }
-  
+
   \item{pos}{ Which environment on the search path to source R code into }
-  
+
   \item{path}{ The file system path to the directory in which the
     package is located.  By default, R source files are looked for as
-    \code{<path>/<pkg>/R/*.R}. This is remembered and the same
+    \code{<path>/<pkg.name>/R/*.R}. This is remembered and the same
     value used as the default in subsequent invocations.}
-  
+
 }
 \details{
 
   All the objects created by the \code{.R} files are created in a
-  special environment named \code{pkgcode:<pkg>}.  If this environment
+  special environment named \code{pkgcode:<pkg.name>}.  If this environment
   does not already exist, it will be created and attached to the search
   path in position \code{pos}.  If it does exist, no attempt is made to
   clean it before sourcing the \code{.R} files.  All functions and
@@ -64,23 +65,23 @@ source.pkg(pkg = mget("working.package", envir = globalenv())[[1]],
   This function does not attempt to replicate all the actions involved
   in creating and attaching a package.  It does the following:
   \itemize{
-    \item creates a environment named \code{pkgcode:<pkg>} where
-    \code{<pkg>} is the name of the package (if it doesn't already exist)
+    \item creates a environment named \code{pkgcode:<pkg.name>} where
+    \code{<pkg.name>} is the name of the package (if it doesn't already exist)
     \item looks for a \code{Depends} line in the \code{DESCRIPTION} file
   and loads specified packages
     \item looks for \code{.R} files in the \code{R}
     subdirectory of the package, and, as appropriate, the \code{R/windows}
     or \code{R/unix} subdirectories, and uses \code{sys.source()} to
-  read these into the \code{pkgcode:<pkg>} environment.  If there is a
+  read these into the \code{pkgcode:<pkg.name>} environment.  If there is a
   \code{Collate} field in the \code{DESCRIPTION} files, this is used to
   sort the files before sourcing them.
     \item looks for \code{.Rdata} and \code{.rda} files in the
   \code{data} subdirectory, and uses \code{load()} to
-  read these into the \code{pkgcode:<pkg>} environment
-  
+  read these into the \code{pkgcode:<pkg.name>} environment
+
   \item if \code{dlls=="check"} (not the default), \code{source.pkg()}
   looks for DLLs (SO files under Unix) in the directory left by \code{R
-  CMD check <pkg>}, i.e., in \code{<pkg>.Rcheck/<pkg>/libs}, and uses
+  CMD check <pkg.dir>}, i.e., in \code{<pkg.dir>.Rcheck/<pkg.name>/libs}, and uses
   \code{dyn.load()} to load these DLLs.  If the DLL was already loaded
   (as indicated by \code{getLoadedDLLs()}), \code{dyn.unload()} is
   called first.  Be aware that unloading and reloading a DLL is not a
@@ -111,7 +112,7 @@ source.pkg(pkg = mget("working.package", envir = globalenv())[[1]],
 
 \code{\link{runtests}} shares the global variables
 \code{working.package} and \code{working.package.path} that provide
-defaults for the \code{pkg} and \code{path} arguments.
+defaults for the \code{pkg.dir} and \code{path} arguments.
 }
 
 \examples{

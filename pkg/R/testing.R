@@ -103,11 +103,11 @@
                 warning("'Config' entry in CONFIG (\"", config["config"], "\") must be function call like 'package:::fun()'")
                 return(1)
             }
-            for (pkg in setdiff(configPkg, .packages())) {
+            for (pkg.name in setdiff(configPkg, .packages())) {
                 if (debug)
-                    message("Attemping to load package '", pkg, "'")
-                if (!library(pkg, character.only=TRUE, logical.return=TRUE)) {
-                    warning("could not load package '", pkg, "' needed for testing initialize/diff/finalize calls")
+                    message("Attemping to load package '", pkg.name, "'")
+                if (!library(pkg.name, character.only=TRUE, logical.return=TRUE)) {
+                    warning("could not load package '", pkg.name, "' needed for testing initialize/diff/finalize calls")
                     return(1)
                 }
             }
@@ -167,7 +167,7 @@
                     needPkg <- unique(c(needPkg, as.character(finalizeFun[[1]][[2]])))
                 message("   Using Finalize = ", format(finalizeFun))
             }
-                
+
         }
         if (is.element("diff", names(config))) {
             diffFun <- try(parse(text=config["diff"])[[1]])
@@ -183,11 +183,11 @@
     }
 
     if (length(needPkg)) {
-        for (pkg in setdiff(needPkg, .packages())) {
+        for (pkg.name in setdiff(needPkg, .packages())) {
             if (debug)
-                message("Attemping to load package '", pkg, "'")
-            if (!library(pkg, character.only=TRUE, logical.return=TRUE)) {
-                warning("could not load package '", pkg, "' needed for testing initialize/diff/finalize calls")
+                message("Attemping to load package '", pkg.name, "'")
+            if (!library(pkg.name, character.only=TRUE, logical.return=TRUE)) {
+                warning("could not load package '", pkg.name, "' needed for testing initialize/diff/finalize calls")
                 return(1)
             }
         }
@@ -196,15 +196,22 @@
     if (!is.null(initializeFun)) {
         # Add a pattern=<pattern> actual argument to the call to initializeFun
         # if it does have a formal argument named 'pattern'
-        if (!is.null(pattern) && is.element("pattern", names(formals(get(as.character(initializeFun[[1]])))))) {
+        init.args <- names(formals(eval(initializeFun[[1]])))
+        if (!is.null(pattern) && is.element("pattern", init.args)) {
             initializeFun[length(initializeFun)+1] <- pattern
             names(initializeFun)[length(initializeFun)] <- "pattern"
         }
         # Add a subst=<subst> actual argument to the call to initializeFun
         # if it does have a formal argument named 'subst'
-        if (!is.null(subst) && is.element("subst", names(formals(get(as.character(initializeFun[[1]])))))) {
+        if (!is.null(subst) && is.element("subst", init.args)) {
             initializeFun[length(initializeFun)+1] <- subst
             names(initializeFun)[length(initializeFun)] <- "subst"
+        }
+        # Add a debug=<debug> actual argument to the call to initializeFun
+        # if it does have a formal argument named 'debug'
+        if (!is.null(debug) && is.element("debug", init.args)) {
+            initializeFun[length(initializeFun)+1] <- debug
+            names(initializeFun)[length(initializeFun)] <- "debug"
         }
         if (debug)
             message("   Calling initialization function ", format(initializeFun))
@@ -266,7 +273,7 @@
              }
         }
     }
-    
+
     return(nfail)
 }
 

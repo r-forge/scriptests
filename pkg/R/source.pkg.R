@@ -1,17 +1,18 @@
-source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
+source.pkg <- function(pkg.dir=mget("working.package.dir", envir=globalenv())[[1]],
                        pattern=".*", suffix="\\.R$", dlls=c("no", "check"), pos=2,
                        path=mget("working.package.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
     dlls <- match.arg(dlls)
-    if (!missing(pkg))
-        assign("working.package", pkg, envir=globalenv())
+    if (!missing(pkg.dir))
+        assign("working.package.dir", pkg.dir, envir=globalenv())
     if (!missing(path))
         assign("working.package.path", path, envir=globalenv())
-    if (!file.exists(pkg.path(path, pkg)))
-        stop("cannot find package directory ", pkg.path(path, pkg), " (supply path=... ?)")
-    if (file.exists(file.path(pkg.path(path, pkg), "DESCRIPTION"))) {
-        desc <- read.dcf(file.path(pkg.path(path, pkg), "DESCRIPTION"))
+    if (!file.exists(pkg.path(path, pkg.dir)))
+        stop("cannot find package directory ", pkg.path(path, pkg.dir), " (supply path=... ?)")
+    if (file.exists(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))) {
+        desc <- read.dcf(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
     }
+    pkg.name <- read.pkg.name(path, pkg.dir)
     problems <- list()
     # Load dependencies before we attach the environment for our package code, so that required
     # libraries come after in search path -- if the dependencies come before, we won't find them.
@@ -35,18 +36,18 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
     }
 
     # Create a new environment on the search path
-    if (!missing(pkg) && missing(pos))
-        pos <- match(paste("pkgcode", pkg, sep=":"), search())
+    if (!missing(pkg.dir) && missing(pos))
+        pos <- match(paste("pkgcode", pkg.name, sep=":"), search())
     if (is.na(pos)) {
-        envir <- attach(NULL, pos=2, name=paste("pkgcode", pkg, sep=":"))
+        envir <- attach(NULL, pos=2, name=paste("pkgcode", pkg.name, sep=":"))
         pos <- 2
-    } else if (search()[pos] == paste("pkgcode", pkg, sep=":")) {
+    } else if (search()[pos] == paste("pkgcode", pkg.name, sep=":")) {
         envir <- as.environment(pos)
     } else {
-        envir <- attach(NULL, pos=pos, name=paste("pkgcode", pkg, sep=":"))
+        envir <- attach(NULL, pos=pos, name=paste("pkgcode", pkg.name, sep=":"))
     }
     # Work out what R files to source
-    files <- list.files(file.path(pkg.path(path, pkg), "R"), all=T, pattern=pattern, full=TRUE, ignore.case=TRUE)
+    files <- list.files(file.path(pkg.path(path, pkg.dir), "R"), all=T, pattern=pattern, full=TRUE, ignore.case=TRUE)
     if (!is.null(suffix)) {
         i <- grep(suffix, files, ignore.case=TRUE)
         if (length(files) && length(i)==0)
@@ -94,8 +95,8 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
     # spectrum of possible data formats -- see R-exts for
     # details.  If more formats are added here, add them to
     # man/source.pkg.Rd too.
-    if (file.exists(file.path(pkg.path(path, pkg), "data"))) {
-        files <- list.files(file.path(pkg.path(path, pkg), "data"), all=T, pattern=".*\\.rda(ta)?$", full=TRUE, ignore.case=TRUE)
+    if (file.exists(file.path(pkg.path(path, pkg.dir), "data"))) {
+        files <- list.files(file.path(pkg.path(path, pkg.dir), "data"), all=T, pattern=".*\\.rda(ta)?$", full=TRUE, ignore.case=TRUE)
         names(files) <- files
         problems <- c(problems, lapply(files,
                function(file) {
@@ -110,8 +111,8 @@ source.pkg <- function(pkg=mget("working.package", envir=globalenv())[[1]],
 
     # Do we need to load and DLL's or SO's?
     if (dlls=="check") {
-        # Try to find object files under <pkg>.Rcheck and load them
-        dll.dir <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg, ".Rcheck", sep="")), pkg, "libs"))
+        # Try to find object files under <pkg.dir>.Rcheck and load them
+        dll.dir <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg.dir, ".Rcheck", sep="")), pkg.dir, "libs"))
         if (!file.exists(dll.dir)) {
             cat("Looking for DLL/SO files, but directory", dll.dir, "doesn't exist\n")
         } else {

@@ -7,27 +7,27 @@
   Interactively run some Rt test files in a package
 }
 \usage{
-runtests(pkg = get("working.package", envir = globalenv()),
+runtests(pkg.dir = get("working.package.dir", envir = globalenv()),
          pattern = ".*",
          file = NULL,
          full = FALSE,
-         dir = paste(pkg, ".tests", sep=""),
+         dir = paste(pkg.dir, ".tests", sep=""),
          clobber = FALSE,
-         output = NULL,
+         output.suffix = NULL,
           ...,
          progress = TRUE,
          envir = globalenv(),
          enclos = envir,
          subst = NULL,
          path = mget("working.package.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
-dumprout(res,
-         output = ".Rout.tmp",
+dumprout(res = .Last.value,
+         output.suffix = ".Rout.tmp",
          verbose = TRUE,
-         clobber = identical(output, ".Rout.tmp"))
+         clobber = identical(output.suffix, ".Rout.tmp"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{pkg}{ The package in which the tests reside }
+  \item{pkg.dir}{ The directory in which the package code and tests reside.}
   \item{pattern}{ A regular expression pattern of test files to be run.
     Only one of \code{pattern} and \code{file} should be supplied.
     }
@@ -39,8 +39,8 @@ dumprout(res,
   \item{clobber}{ If the \code{dir} already exists, \code{clobber=TRUE}
     will result in replacing that directory, \code{clobber=FALSE} will
     result in stopping with an error if the directory already exists. }
-  \item{output}{ File suffix for actual output files (default NULL for \code{runtests},
-    meaning no output, if \code{output==TRUE}, uses suffix \code{.tmp} }
+  \item{output.suffix}{ File suffix for actual output files (default NULL for \code{runtests},
+    meaning no output, if \code{output.suffix==TRUE}, uses suffix \code{.tmp} }
   \item{...}{ Arguments to pass on to \code{runScripTests()} }
   \item{progress}{ Should progress indications be printed? }
   \item{envir}{ The environment in which to run the tests }
@@ -105,7 +105,7 @@ to saving them:
 \seealso{
   \code{\link{source.pkg}} shares the global variables
 \code{working.package} and \code{working.package.path} that provide
-defaults for the \code{pkg} and \code{path} arguments.
+defaults for the \code{pkg.dir} and \code{path} arguments.
 
   For running tests in under \code{R CMD check}, use the function \code{link{runScripTests()}}.
 

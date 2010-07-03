@@ -2,7 +2,7 @@
 
 TODO:
 * make reading of Description Collate depend on system
-* make function that creates .R and .Rout.save files from .Rt to enable regular testing
+* make function that creates .R and .Rout.save files from .Rt to enable use of the standard R CMD check testing without the ScripTests package
 * make it possible to run own-process tests in a new copy of the test dir
 * get the interactive tests running
   * optional copy of test directory
@@ -11,6 +11,7 @@ TODO:
 * update documentation, esp ScripTests.design.Rd
 
 DONE:
+* fix library() output to use package name, not directory name
 * use library.dynam() to load DLLs in source.pkg()
 * incorporate code from Hadley Wickham's source_package() function http://gist.github.com/180883
 * prune obselete functions
@@ -53,7 +54,7 @@ Sourcing RtTests/R/testing.R
 list()
 > setwd("tmp/tests")
 > setupTests(T)
- 
+
 (old)
 * Find a way of showing versions/paths of all libraries in test output
 * Make runtests() print a summary of all the tests run when multiple test files are run
