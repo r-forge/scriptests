@@ -32,7 +32,9 @@ to make test development and maintanance faster and more convenient:
   \item directives can specify whether a test-case output mismatch
   should be noted as an informational message, a warning, or an error
   (one or more errors results in \code{R CMD check} stopping with an
-  indication of error)
+  indication of error).  Unlike the standard tests in \code{R CMD check},
+  output mismatch detected by \code{ScripTests} results in \code{R CMD
+    check} stopping with an error.
   \item a concise summary of warnings and errors is given at the end
   \item testing can continue after errors and report multiple errors
 }
