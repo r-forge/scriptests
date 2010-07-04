@@ -1,15 +1,15 @@
-runtests <- function(pkg.dir=get("working.package.dir", envir=globalenv()),
+runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
                      pattern=".*", file=NULL,
                      full=FALSE, dir=paste(pkg.dir, ".tests", sep=""),
                      clobber=FALSE, output.suffix=NULL,
                      ...,
                      progress=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
-                     path=mget("working.package.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
+                     path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
     pkg.name <- read.pkg.name(path, pkg.dir)
     if (!missing(pkg.dir))
-        assign("working.package.dir", pkg.dir, envir=globalenv())
+        assign("ScripTests.pkg.dir", pkg.dir, envir=globalenv())
     if (!missing(path))
-        assign("working.package.path", path, envir=globalenv())
+        assign("ScripTests.pkg.path", path, envir=globalenv())
     if (!is.null(file) && pattern!=".*")
         stop("cannot supply both 'file' and 'pattern'")
     if (is.null(subst)) {

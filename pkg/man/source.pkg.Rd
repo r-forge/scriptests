@@ -12,12 +12,12 @@
 
 }
 \usage{
-source.pkg(pkg.dir = mget("working.package.dir", envir = globalenv())[[1]],
+source.pkg(pkg.dir = mget("ScripTests.pkg.dir", envir = globalenv())[[1]],
            pattern = ".*",
            suffix = "\\\\.R$",
            dlls = c("no", "check"),
            pos = 2,
-           path=mget("working.package.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
+           path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -101,16 +101,16 @@ source.pkg(pkg.dir = mget("working.package.dir", envir = globalenv())[[1]],
     collation order
   }
 }
-\author{ \email{tplate@blackmesacapital.com} }
+\author{ Tony Plate \email{tplate@acm.org} }
 \section{Side effects}{
   An environment is created and attached to the search path (or if it
   already exists, it is modified.)
-  A variable named \code{working.package} is set in the global
-  environment to the name of the package whose code was sourced.
+  A variable named \code{ScripTests.pkg.dir} is set in the global
+  environment to the directory of the package whose code was sourced.
 }
 \seealso{
 \code{\link{runtests}} shares the global variables
-\code{working.package.dir} and \code{working.package.path} that provide
+\code{ScripTests.pkg.dir} and \code{ScripTests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 }
 

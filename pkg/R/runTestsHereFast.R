@@ -1,10 +1,10 @@
 runTestsHereFast <- function(pattern=".*",
-                             pkg.dir=get("working.package.dir", envir=globalenv()),
+                             pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
                              pkg.name=NULL,
                              file=NULL,
                              progress=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
                              test.suffix=".Rt",
-                             path=mget("working.package.path", envir=globalenv(), ifnotfound=list(getwd()))) {
+                             path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))) {
     # This does the similar work as runScripTests()/.runPackageTests(),
     # with these differences:
     #

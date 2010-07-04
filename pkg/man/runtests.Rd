@@ -7,7 +7,7 @@
   Interactively run some Rt test files in a package
 }
 \usage{
-runtests(pkg.dir = get("working.package.dir", envir = globalenv()),
+runtests(pkg.dir = get("ScripTests.pkg.dir", envir = globalenv()),
          pattern = ".*",
          file = NULL,
          full = FALSE,
@@ -19,7 +19,7 @@ runtests(pkg.dir = get("working.package.dir", envir = globalenv()),
          envir = globalenv(),
          enclos = envir,
          subst = NULL,
-         path = mget("working.package.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
+         path = mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
 dumprout(res = .Last.value,
          output.suffix = ".Rout.tmp",
          verbose = TRUE,
@@ -78,7 +78,7 @@ dumprout(res = .Last.value,
   This result can be given to \code{dumprout() to write actual R output
     to temporary files for test debugging and development purposes.}.
 }
-\author{ \email{tplate@blackmesacapital.com} }
+\author{ Tony Plate \email{tplate@acm.org} }
 \note{
 
 The standard Emacs ESS functions for writing out ".Rt" files will strip
@@ -104,7 +104,7 @@ to saving them:
 }
 \seealso{
   \code{\link{source.pkg}} shares the global variables
-\code{working.package} and \code{working.package.path} that provide
+\code{ScripTests.pkg.dir} and \code{ScripTests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 
   For running tests in under \code{R CMD check}, use the function \code{link{runScripTests()}}.
