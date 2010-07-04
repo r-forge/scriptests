@@ -126,6 +126,24 @@ Diff: ScripTests:::ScripDiff()
 Finalize: ScripTests:::summarizeTests()
 }
 }
+\note{
+The standard Emacs ESS functions for writing out \code{".Rt"} files will strip
+trailing white space, which can result in many unimportant mismatches
+when using \code{ediff} to compare \code{".Rt"} and \code{".Rout"} files (e.g.,
+because an R transcript will have \code{"> "} for empty command lines).
+Put the following in your \code{.emacs} file to tell ESS not mess with
+\code{".Rt"} files prior to saving them:
+
+\kbd{
+(add-hook 'ess-transcript-mode-hook
+          ;; According to the ess docs, ess-nuke-trailing-whitespace-p
+          ;; is supposed to be nil by default (see the defvar in ess-utils.el).
+          ;; But it gets set to t somewhere else, so disable it here.
+          (lambda ()
+            (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
+            (toggle-read-only 0)
+            (setq ess-nuke-trailing-whitespace-p nil)))
+}
 \author{
   Tony Plate
 

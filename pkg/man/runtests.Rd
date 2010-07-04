@@ -79,28 +79,6 @@ dumprout(res = .Last.value,
     to temporary files for test debugging and development purposes.}.
 }
 \author{ Tony Plate \email{tplate@acm.org} }
-\note{
-
-The standard Emacs ESS functions for writing out ".Rt" files will strip
-trailing white space, which can result in many unimportant mismatches
-when using \code{ediff} to compare ".Rt" and ".Rout" files.  Put the
-following in your \code{.emacs} file to not mess with ".Rt" files prior
-to saving them:
-\kbd{
-            (add-hook 'write-file-functions
-                      ;; save the buffer without calling any hooks for .Rt files
-                      ;; want to leave tabs and whitespace as-is for these files
-                      (lambda ()
-                        (if (string-match "\\.Rt$" buffer-file-name)
-                            (progn
-                              (message "saving .Rt buffer")
-                              (basic-save-buffer-1)
-                              t
-                              )
-                          )))
-}
-
-
 }
 \seealso{
   \code{\link{source.pkg}} shares the global variables
