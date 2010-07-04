@@ -52,8 +52,10 @@ summarizeTests <- function(debug=FALSE) {
     lines <- c(lines[-length(lines)], "### Overall", lines[length(lines)])
     if (totalErrors > 0) {
         firstError <- which(testResults$nerr > 0)[1]
+        nFilesWithErrors <- length(lines) - firstError - 1
         lines <- c(lines[seq(1, len=firstError-1)],
-                   paste("### ", sum(testResults$nerr)-1, " file", (if (sum(testResults$nerr)!=2) "s")," with errors", sep=""),
+                   paste("### ", nFilesWithErrors, " file", (if (nFilesWithErrors!=1) "s"),
+                         " with ", sum(testResults$nerr)-1, " errors", sep=""),
                    lines[seq(firstError, length(lines))])
     } else {
         firstError <- length(testResults$nerr) # not really, but the right numbers will be output downstream
