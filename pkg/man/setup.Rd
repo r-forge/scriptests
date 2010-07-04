@@ -46,19 +46,12 @@ summarizeTests(debug = FALSE)
   }
 }
 \value{
-}
-\references{
+  Returns the value \code{0} on successful completion.
 }
 \author{
   Tony Plate \email{tplate@acm.org}
 }
-\note{
-}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-}
-\examples{
-}
 \keyword{ misc }

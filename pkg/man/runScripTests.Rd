@@ -41,32 +41,22 @@ runScripTests(..., initializeFun = Quote(initializeTests()), finalizeFun = Quote
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+    When \code{runScripTests()} runs, it will create a \code{.R}
+    file with the commands extracted from each \code{.Rt} file.  It will
+    then run each \code{.R} file in a separate \code{R} session, save
+    the output in a \code{.Rout} file, and compare the output with the
+    \code{.Rt} file.  \code{runScripTests} will leave a summary in the
+    file \code{test-summary.txt}.  If there are errors, the summary will
+    be duplicated in the file \code{test-summary.fail} (the presence of
+    a file ending in \code{.fail} signals an error to \code{"R CMD
+    check"}.)
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+  \code{invisible(NULL)}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+\author{ Tony Plate \email{tplate@acm.org}
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ misc }

@@ -24,7 +24,4 @@ compareTranscriptAndOutput(name, tests, results, progress = TRUE)
   are summary and print methods.
 }
 \author{ Tony Plate }
-\note{
-}
-\seealso{ }
 \keyword{ misc }

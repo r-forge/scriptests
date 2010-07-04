@@ -110,4 +110,3 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     }
     return(0)
 }
-

@@ -18,18 +18,36 @@ License: \tab GPL\cr
 }
 
 Transcript-style tests are files containing R commands and output, as
-though copied verbatim from an interactive R session.  To include
-transcript-style tests in a package so that they will be automatically
-run by "R CMD check", do the following:
+though copied verbatim from an interactive R session.  These are very
+much like the standard \code{.R/.Rout.save} tests that are run by the
+\code{R CMD check}, but with the following diferences that are intended
+to make test development and maintanance faster and more convenient:
+\itemize{
+  \item only the output file is needed -- the inputs are deduced from
+  the output file (i.e., \code{.Rt} file, which is analogous to an
+  \code{.Rout.save} file)
+  \item test output matching is more lenient in terms of white-space,
+  and more flexible in that some test output can be transformed by
+  regular expressions prior to matching, or ignored entirely
+  \item directives can specify whether a test-case output mismatch
+  should be noted as an informational message, a warning, or an error
+  (one or more errors results in \code{R CMD check} stopping with an
+  indication of error)
+  \item a concise summary of warnings and errors is given at the end
+  \item testing can continue after errors and report multiple errors
+}
+
+
+To include transcript-style tests in a package so that they will be
+automatically run by "R CMD check", do the following:
+
 \enumerate{
   \item make sure the \code{ScripTests} package is installed on your system
-  \item add the line \code{Depends: ScripTests} to DESCRIPTION file (or
-  if there is an existing "Depends:" line, just add \code{ScripTests} to it.)
   \item put a file named "runtests.R" in the "tests" directory in your
   own package with the following contents:
   \code{
           library(ScripTests)
-          ScripTests:::runPackageTests()
+          runScripTests()
     }
   \item add transcript files ending in .Rt in the "tests" directory in your own package
 }
@@ -74,24 +92,24 @@ during code development.
     after a command and before its output:
     \describe{
       \item{\#@ ignore-output}{Ignore the output of this particular
-	command -- a test with this control line will always pass
-	(unless it causes an R error, and \code{options(error=function()
-	  NULL)} was not done.)}
+        command -- a test with this control line will always pass
+        (unless it causes an R error, and \code{options(error=function()
+          NULL)} was not done.)}
       \item{\#@ gsub(pattern, replacement, WHAT)}{where \code{WHAT} is
-	\code{target}, \code{actual} or \code{both} (without quotes).
-	Make a global substitution of \code{replacement} text for
-	\code{pattern} text (a regular expression) in the desired
-	(target) output or the actual output.}
+        \code{target}, \code{actual} or \code{both} (without quotes).
+        Make a global substitution of \code{replacement} text for
+        \code{pattern} text (a regular expression) in the desired
+        (target) output or the actual output.}
       \item{\#@ warn-only: OPTIONAL-TEXT}{A mismatch is treated as an
-	"warning", not an error}
+        "warning", not an error}
       \item{\#@ info-only: OPTIONAL-TEXT}{A mismatch is treated as an
-	"info" event, not an error}
+        "info" event, not an error}
       \item{\#@ diff-msg: OPTIONAL-TEXT}{Output OPTIONAL-TEXT if the
-	desired and actual output do not match}
+        desired and actual output do not match}
       \item{\#@ keep-whitespace}{Leave the whitespace as-is in the
-	desired and actual output}
+        desired and actual output}
       \item{\#@ ignore-linebreaks}{Target and actual will compare even
-	if wrapped differently over multiple lines}
+        if wrapped differently over multiple lines}
       }
     }
 
@@ -100,6 +118,7 @@ specify the functions to call for testing.  The defaults are equivalent
 to the following lines in the CONFIG file:
 \preformatted{
 Depends: ScripTests
+Debug: FALSE
 Initialize: ScripTests:::initializeTests()
 Diff: ScripTests:::ScripDiff()
 Finalize: ScripTests:::summarizeTests()
@@ -110,10 +129,4 @@ Finalize: ScripTests:::summarizeTests()
 
 Maintainer: Tony Plate <tplate@acm.org>
 }
-\references{
-}
 \keyword{ package }
-\seealso{
-}
-\examples{
-}

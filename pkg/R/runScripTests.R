@@ -26,4 +26,5 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
     }
     if (quit)
         q("no", status = status)
+    invisible(NULL)
 }

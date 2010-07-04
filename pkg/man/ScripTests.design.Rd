@@ -8,19 +8,19 @@
   the ScripTests package.
 }
 \details{
-  
-  "R CMD check" is now an R script \code{src/scripts/check.in}, which
-  invokes R with the command \code{tools:::.runPackageTestsR($extra)} to
-  run tests.  If this R session returns non-zero, the check process
-  stops with an error, outputting 13 lines from the first .fail file
-  found (if one exists).
+
+  "R CMD check" is (as of R-2.9.0) an R script
+  \code{src/scripts/check.in}, which invokes R with the command
+  \code{tools:::.runPackageTestsR($extra)} to run tests.  If this R
+  session returns non-zero, the check process stops with an error,
+  outputting 13 lines from the first .fail file found (if one exists).
 
   \code{tools:::.runPackageTestsR($extra)} invokes \code{R CMD BATCH} to
   run each .R file.  This is where the non-overrideable redirection of
   stderr to .Rout happens.
 
-  New design for R-2.9.0 in which "R CMD check" no longer uses Makefiles
-  in tests directory.
+  New design for ScripTests to work with R-2.9.0 in which "R CMD check"
+  no longer uses Makefiles in tests directory.
 
   \itemize{
     \item All transcript files are stored in the \code{tests} directory
@@ -30,22 +30,23 @@
     should contain the following two lines:
     \preformatted{
       library(ScripTests)
-      ScripTests:::setupTests()
+      runScripTests()
     }
 
-    \item When \code{setupTests()} runs, it will create a \code{.R} file
-    with the commands extracted from each \code{.Rt} file, and a file
-    \code{zzzCheckTests.R}.
+    \item When \code{runScripTests()} runs, it will create a \code{.R}
+    file with the commands extracted from each \code{.Rt} file.  It will
+    then run each \code{.R} file in a separate \code{R} session, save
+    the output in a \code{.Rout} file, and compare the output with the
+    \code{.Rt} file.  \code{runScripTests} will leave a summary in the
+    file \code{test-summary.txt}.  If there are errors, the summary will
+    be duplicated in the file \code{test-summary.fail} (the presence of
+    a file ending in \code{.fail} signals an error to \code{"R CMD
+    check"}.)
 
-    \item \code{"R CMD check"} will execute all of \code{.R} files,
-    finishing with \code{zzzCheckTests.R}, which will compare actual output
-    with the output in the original \code{.Rt} files.  It will leave a
-    summary in the file \code{test-summary.txt}.  If there are errors,
-    the summary will be duplicated in the file \code{test-summary.fail}
-    (the presence of a file ending in \code{.fail} signals an error to
-    \code{"R CMD check"}.)
-
+    }
   }
+\section{Comparisons to previous ScripTests designs}{
+
   The functionality that this design gives up over previous designs is
   immediate checking of test output.  Instead test output is checked
   after all tests are run.  This is because of the difficulty of
@@ -60,7 +61,7 @@
   commands in one test file cannot mess up another test file.  It also
   means that the testing framework doesn't need to mess around with
   trying to capture output.
-  
+
   There are several possible methods that could be used to check output
   immediately after running each test:
   \enumerate{
@@ -81,9 +82,10 @@
   file.  Still have the problem of not getting any output to the
   console.  Can solve this by by-passing R CMD BATCH, and just invoking
   R more directly.
+}
 
-  Original design based on Makefiles.
-  
+\section{Original ScripTests design based on Makefiles}{
+
 An initial design changed the default goal by assigning .DEFAULT\_GOAL in
 tests/Makefile.  This works with GNU make version 3.81, which is
 standard in Ubuntu Linux.  However, the Rtools set of programs for
@@ -119,17 +121,16 @@ Here's the relevant section from ScripTests/inst/scripts/Makefile.sub:
 # to avoid infinite recursion.
 ifeq ($(strip $(DONEFORCE)),)
 %: force
-	@(if [ ! -f forceonce ] ; then \
-	$(MAKE) -f $(R_SHARE_DIR)/make/$(RSHAREMAKEFILE) $(makevars) -f $(MAINTESTMAKE) DONEFORCE=TRUE all-Rt ; \
-	fi )
-	@touch forceonce
+        @(if [ ! -f forceonce ] ; then \
+        $(MAKE) -f $(R_SHARE_DIR)/make/$(RSHAREMAKEFILE) $(makevars) -f $(MAINTESTMAKE) DONEFORCE=TRUE all-Rt ; \
+        fi )
+        @touch forceonce
 
 force: ;
 endif
 }
 
-The various 'make' variables used here are defined in 
-
+The various 'make' variables used here are defined in ...
 
 }
 \section{Not used: A Makefile framework that modifies Makevars to create a goal,
@@ -189,7 +190,7 @@ endif
 # 'changeRdiff' as the second dependency for all+Rt
 all+Rt: createScripts all rt-tests ScripTests.summary
 all-Rt: createScripts rt-tests ScripTests.summary
-	@echo doing all-Rt
+        @echo doing all-Rt
 
 allrt := $(wildcard *.Rt)
 # allrtwant := $(allrt:.Rt=.Rout.want)
@@ -198,16 +199,16 @@ allrtres := $(allrt:.Rt=.Rtres)
 # allrtin := $(allrt:.Rt=.R)
 
 %: force
-	@(if [ ! -f forceonce ] ; then \
-	echo Modifying Makevars for rttests ; \
-	sed -i 's/test-src-1 =/test-src-1 = all-Rt/' Makevars ; \
-	sed -i "s/makevars =/makevars = -f $(MAINTESTMAKE)/" Makevars ; \
-	fi )
-	@(if [ ! -f forceonce ] ; then echo 'allrt.R: %.R: %.Rin' ; \
-	echo '	@echo Using special rule $$@ to run all tests ... ' ; \
-	echo '	$$(MAKE) -f $$(R_SHARE_DIR)/make/tests.mk $$(makevars) all-Rt' ; \
-	echo '	@echo 1+1 > $$@' ; fi ) >> Makevars
-	@touch forceonce
+        @(if [ ! -f forceonce ] ; then \
+        echo Modifying Makevars for rttests ; \
+        sed -i 's/test-src-1 =/test-src-1 = all-Rt/' Makevars ; \
+        sed -i "s/makevars =/makevars = -f $(MAINTESTMAKE)/" Makevars ; \
+        fi )
+        @(if [ ! -f forceonce ] ; then echo 'allrt.R: %.R: %.Rin' ; \
+        echo '  @echo Using special rule $$@ to run all tests ... ' ; \
+        echo '  $$(MAKE) -f $$(R_SHARE_DIR)/make/tests.mk $$(makevars) all-Rt' ; \
+        echo '  @echo 1+1 > $$@' ; fi ) >> Makevars
+        @touch forceonce
 
 force: ;
 
@@ -216,34 +217,34 @@ force: ;
 # the commands in the .Rout.Rtres rule)
 
 changeRdiff:
-	@echo Changing Rdiff in Makevars
-	echo RDIFF = echo hehehe >> Makevars
+        @echo Changing Rdiff in Makevars
+        echo RDIFF = echo hehehe >> Makevars
 
 # Create scripts we will need (do this here to minimize the
 # number of files needed to support ScripTests in a package.)
 createScripts:
-	@( echo '## Run a script in the ScripTests/scripts (from ScripTests/inst/scripts)' ; \
-	echo '## This file does not have .R suffix because if it did, R CMD check would want to run it as a test' ; \
-	echo 'library(package="ScripTests", char=TRUE)' ; \
-	echo 'args <- commandArgs(TRUE)' ; \
-	echo 'debug <- is.element("--debug", args)' ; \
-	echo 'if (length(args)>0) {' ; \
-	echo '    script.path <- system.file(package="ScripTests", "scripts")' ; \
-	echo '    if (debug) {' ; \
-	echo '        cat("RtTestScript called with ", length(args), " args: ", paste("\"", args, "\"", collapse=", ", sep=""), "\n", sep="")' ; \
-	echo '        cat("Looking for scripts in \"", script.path, "\"\n", sep="")' ; \
-	echo '    }' ; \
-	echo '    source(file.path(script.path, args[1]))' ; \
-	echo '}' ) > RunScripTestsScript
+        @( echo '## Run a script in the ScripTests/scripts (from ScripTests/inst/scripts)' ; \
+        echo '## This file does not have .R suffix because if it did, R CMD check would want to run it as a test' ; \
+        echo 'library(package="ScripTests", char=TRUE)' ; \
+        echo 'args <- commandArgs(TRUE)' ; \
+        echo 'debug <- is.element("--debug", args)' ; \
+        echo 'if (length(args)>0) {' ; \
+        echo '    script.path <- system.file(package="ScripTests", "scripts")' ; \
+        echo '    if (debug) {' ; \
+        echo '        cat("RtTestScript called with ", length(args), " args: ", paste("\"", args, "\"", collapse=", ", sep=""), "\n", sep="")' ; \
+        echo '        cat("Looking for scripts in \"", script.path, "\"\n", sep="")' ; \
+        echo '    }' ; \
+        echo '    source(file.path(script.path, args[1]))' ; \
+        echo '}' ) > RunScripTestsScript
 
 # Don't need the following because we can run and check the tests
 # with out needing a sub-make.  If we do use a sub-make, then we
 # need to put rules used in 'Makevars'.
-#	echo .SUFFIXES: .R .Rin .Rout .Rt >> Makevars
-#	echo .Rt.R: >> Makevars
-#	echo '	echo Creating $$@ from $$<' >> Makevars
-#	echo '	sed -n "s/^[>+] //p" $$< > $$@' >> Makevars
-#	echo '	cat $$< > $$@out.save' >> Makevars
+#       echo .SUFFIXES: .R .Rin .Rout .Rt >> Makevars
+#       echo .Rt.R: >> Makevars
+#       echo '  echo Creating $$@ from $$<' >> Makevars
+#       echo '  sed -n "s/^[>+] //p" $$< > $$@' >> Makevars
+#       echo '  cat $$< > $$@out.save' >> Makevars
 
 #  This suffix list and rule for .Rt.R needs to go in Makevars
 
@@ -258,8 +259,8 @@ createScripts:
 #   .Rtres: summary of results from comparing .Rout and .Rout.want
 
 .Rt.R:
-	@echo '**' Creating $@ and $@out.want from $<
-	$(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args prepin.R $< $@ $@out.want $<.save < RunScripTestsScript
+        @echo '**' Creating $@ and $@out.want from $<
+        $(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args prepin.R $< $@ $@out.want $<.save < RunScripTestsScript
 
 # Preserve intermediate .R and .Rout files - the user might want to inspect them
 # (the .R file to see exactly what the R commands were, and the .Rout file to
@@ -269,8 +270,8 @@ createScripts:
 # Diff the output
 # Need to have R_LIBS & R round the other way for Windows
 .Rout.Rtres:
-	@echo '**' Creating $@ from $< and $<.want
-	$(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args diffout.R $< $(@:Rtres=Rt.save) $@ < RunScripTestsScript
+        @echo '**' Creating $@ from $< and $<.want
+        $(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args diffout.R $< $(@:Rtres=Rt.save) $@ < RunScripTestsScript
 
 rt-tests: $(allrtres)
 
@@ -278,19 +279,19 @@ rt-tests: $(allrtres)
 # for X.Rout: X.Rt -> X.R -> X.Rout if we put the rule .Rt.R in Makevars
 # (needs to go there because this Makefile is not read by the sub-make).
 rt-tests2:
-	echo Making target rt-tests
-	(out=`echo *.Rt | sed 's/\\.Rt\\( \\|$\\)/.Rout /g'`; \
-	  if test -n "$${out}"; then \
-	    $(MAKE) -f $(R_SHARE_DIR)/make/$(RSHAREMAKEFILE) $(makevars) $${out}; \
-	  fi)
+        echo Making target rt-tests
+        (out=`echo *.Rt | sed 's/\\.Rt\\( \\|$\\)/.Rout /g'`; \
+          if test -n "$${out}"; then \
+            $(MAKE) -f $(R_SHARE_DIR)/make/$(RSHAREMAKEFILE) $(makevars) $${out}; \
+          fi)
 
 ScripTests.summary: $(allrtres)
-	@echo '**' Creating summary of tests in $@
-	$(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args summary.R $@ $(allrtres) < RunScripTestsScript
-	@(if [ "$(ScripTestsErrorAction)" = stop -a -f ScripTests.haserrors ] ; then \
-	    echo "Stopping because tests had errors and ScripTestsErrorAction=stop in Makefile" ; \
-	    exit 1 ; \
-	fi)
+        @echo '**' Creating summary of tests in $@
+        $(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args summary.R $@ $(allrtres) < RunScripTestsScript
+        @(if [ "$(ScripTestsErrorAction)" = stop -a -f ScripTests.haserrors ] ; then \
+            echo "Stopping because tests had errors and ScripTestsErrorAction=stop in Makefile" ; \
+            exit 1 ; \
+        fi)
 }
 \bold{Makefile.win}:
 \preformatted{
@@ -362,35 +363,35 @@ allrtres := $(allrt:.Rt=.Rtres)
 # the commands in the .Rout.Rtres rule)
 
 changeRdiff:
-	@echo Changing Rdiff in Makevars
-	echo RDIFF = echo hehehe >> Makevars
+        @echo Changing Rdiff in Makevars
+        echo RDIFF = echo hehehe >> Makevars
 
 # Create scripts we will need (do this here to minimize the
 # number of files needed to support ScripTests in a package.)
 createScripts:
-	@( echo '## Run a script in the ScripTests/scripts (from ScripTests/inst/scripts)' ; \
-	echo '## This file does not have .R suffix because if it did, R CMD check would want to run it as a test' ; \
-	echo 'library(package="ScripTests", char=TRUE)' ; \
-	echo 'args <- commandArgs(TRUE)' ; \
-	echo 'debug <- is.element("--debug", args)' ; \
-	echo 'if (length(args)>0) {' ; \
-	echo '    script.path <- system.file(package="ScripTests", "scripts")' ; \
-	echo '    if (debug) {' ; \
-	echo '        cat("RtTestScript called with ", length(args), " args: ", paste("\"", args, "\"", collapse=", ", sep=""), "\n", sep="")' ; \
-	echo '        cat("Looking for scripts in \"", script.path, "\"\n", sep="")' ; \
-	echo '    }' ; \
-	echo '    source(file.path(script.path, args[1]))' ; \
-	echo '}' ) > RunScripTestsScript
+        @( echo '## Run a script in the ScripTests/scripts (from ScripTests/inst/scripts)' ; \
+        echo '## This file does not have .R suffix because if it did, R CMD check would want to run it as a test' ; \
+        echo 'library(package="ScripTests", char=TRUE)' ; \
+        echo 'args <- commandArgs(TRUE)' ; \
+        echo 'debug <- is.element("--debug", args)' ; \
+        echo 'if (length(args)>0) {' ; \
+        echo '    script.path <- system.file(package="ScripTests", "scripts")' ; \
+        echo '    if (debug) {' ; \
+        echo '        cat("RtTestScript called with ", length(args), " args: ", paste("\"", args, "\"", collapse=", ", sep=""), "\n", sep="")' ; \
+        echo '        cat("Looking for scripts in \"", script.path, "\"\n", sep="")' ; \
+        echo '    }' ; \
+        echo '    source(file.path(script.path, args[1]))' ; \
+        echo '}' ) > RunScripTestsScript
 
 
 # Don't need the following because we can run and check the tests
 # with out needing a sub-make.  If we do use a sub-make, then we
 # need to put rules used in 'Makevars'.
-#	echo .SUFFIXES: .R .Rin .Rout .Rt >> Makevars
-#	echo .Rt.R: >> Makevars
-#	echo '	echo Creating $$@ from $$<' >> Makevars
-#	echo '	sed -n "s/^[>+] //p" $$< > $$@' >> Makevars
-#	echo '	cat $$< > $$@out.save' >> Makevars
+#       echo .SUFFIXES: .R .Rin .Rout .Rt >> Makevars
+#       echo .Rt.R: >> Makevars
+#       echo '  echo Creating $$@ from $$<' >> Makevars
+#       echo '  sed -n "s/^[>+] //p" $$< > $$@' >> Makevars
+#       echo '  cat $$< > $$@out.save' >> Makevars
 
 #  This suffix list and rule for .Rt.R needs to go in Makevars
 
@@ -405,8 +406,8 @@ createScripts:
 #   .Rtres: summary of results from comparing .Rout and .Rout.want
 
 .Rt.R:
-	@echo '**' Creating $@ and $@out.want from $<
-	$(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args prepin.R $< $@ $@out.want $<.save < RunScripTestsScript
+        @echo '**' Creating $@ and $@out.want from $<
+        $(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args prepin.R $< $@ $@out.want $<.save < RunScripTestsScript
 
 # Preserve intermediate .R and .Rout files - the user might want to inspect them
 # (the .R file to see exactly what the R commands were, and the .Rout file to
@@ -416,8 +417,8 @@ createScripts:
 # Diff the output
 # Need to have R_LIBS & R round the other way for Windows
 .Rout.Rtres:
-	@echo '**' Creating $@ from $< and $<.want
-	$(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args diffout.R $< $(@:Rtres=Rt.save) $@ < RunScripTestsScript
+        @echo '**' Creating $@ from $< and $<.want
+        $(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args diffout.R $< $(@:Rtres=Rt.save) $@ < RunScripTestsScript
 
 rt-tests: $(allrtres)
 
@@ -425,19 +426,19 @@ rt-tests: $(allrtres)
 # for X.Rout: X.Rt -> X.R -> X.Rout if we put the rule .Rt.R in Makevars
 # (needs to go there because this Makefile is not read by the sub-make).
 rt-tests2:
-	echo Making target rt-tests
-	(out=`echo *.Rt | sed 's/\\.Rt\\( \\|$\\)/.Rout /g'`; \
-	  if test -n "$${out}"; then \
-	    $(MAKE) -f $(R_SHARE_DIR)/make/$(RSHAREMAKEFILE) $(makevars) $${out}; \
-	  fi)
+        echo Making target rt-tests
+        (out=`echo *.Rt | sed 's/\\.Rt\\( \\|$\\)/.Rout /g'`; \
+          if test -n "$${out}"; then \
+            $(MAKE) -f $(R_SHARE_DIR)/make/$(RSHAREMAKEFILE) $(makevars) $${out}; \
+          fi)
 
 ScripTests.summary: $(allrtres)
-	@echo '**' Creating summary of tests in $@
-	$(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args summary.R $@ $(allrtres) < RunScripTestsScript
-	@(if [ "$(ScripTestsErrorAction)" = stop -a -f ScripTests.haserrors ] ; then \
-	    echo "Stopping because tests had errors and ScripTests ErrorAction=stop in Makefile" ; \
-	    exit 1 ; \
-	fi)
+        @echo '**' Creating summary of tests in $@
+        $(R_PRE) @R_LIBS=$(R_LIBS) $(R_POST) $(R_OPTS) --vanilla --slave --args summary.R $@ $(allrtres) < RunScripTestsScript
+        @(if [ "$(ScripTestsErrorAction)" = stop -a -f ScripTests.haserrors ] ; then \
+            echo "Stopping because tests had errors and ScripTests ErrorAction=stop in Makefile" ; \
+            exit 1 ; \
+        fi)
 }
 \bold{Makefile.win}:
 \preformatted{
@@ -449,10 +450,4 @@ include Makefile
 }
 }
 
-\source{
-}
-\references{
-}
-\examples{
-}
 \keyword{misc}

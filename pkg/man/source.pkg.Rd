@@ -109,14 +109,22 @@ source.pkg(pkg.dir = mget("working.package.dir", envir = globalenv())[[1]],
   environment to the name of the package whose code was sourced.
 }
 \seealso{
-
 \code{\link{runtests}} shares the global variables
-\code{working.package} and \code{working.package.path} that provide
+\code{working.package.dir} and \code{working.package.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 }
 
 \examples{
+\dontrun{
+# sourcing the code in a package stored in <mypackage>/{DESCRIPTION/R/man/tests}:
+source.pkg("<mypackage>")
+# sourcing the code in a package stored in path/to/dir/<mypackage>/{DESCRIPTION/R/man/tests}:
+source.pkg("<mypackage>", path="path/to/dir")
+# sourcing the code in a package stored in pkg/{DESCRIPTION/R/man/tests}:
+# where "pkg" is unrelated to the name of the pacakage
+source.pkg("pkg", path="path/to/dir")
+# sourcing the code in a package stored in <mypackage>/pkg/{DESCRIPTION/R/man/tests}:
+source.pkg("<mypackage>", path="$PKG/pkg")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+}
 \keyword{ misc }
