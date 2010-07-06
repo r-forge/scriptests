@@ -140,8 +140,9 @@ Put the following in your \code{.emacs} file to tell ESS not mess with
           ;; is supposed to be nil by default (see the defvar in ess-utils.el).
           ;; But it gets set to t somewhere else, so disable it here.
           (lambda ()
-            (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
+            (local-set-key "RET" 'newline)
             (toggle-read-only 0)
+            (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
             (setq ess-nuke-trailing-whitespace-p nil)))
 }
 \author{
