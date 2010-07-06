@@ -18,6 +18,8 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
             pkg.name <- gsub(")", "", gsub("* DONE (", "", fixed=TRUE, grep("* DONE ", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE)))
             if (debug)
                 message("   Read pkg.name= '", pkg.name, "'")
+            else
+                message("   Failed to work out pkg.name from 00install.line: ", grep("DONE", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE))
         }
         if (length(pkg.name) && nchar(pkg.name)==0)
             pkg.name <- NULL
@@ -40,7 +42,7 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
             save(list="tests", file=rtSave, envir=env)
         } else {
             if (debug)
-                message(" No saved output file for tests in ", cmdIn, "; just checking that tests run without stopping with an error")
+                message(" No saved output file for tests in ", cmdIn, "; will just check that tests run without stopping with an error")
         }
     }
 
@@ -63,8 +65,8 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
         save(list="tests", file=rtSave, envir=env)
         ## add a comment to the beginning for what is printed in the file
         tests <- c(list(list(comment=paste("> # generated automatically in", getwd(), "on", Sys.time())),
-                        if (!length(pkg.name)) list(input=paste("> library('", pkg.name, "', char=TRUE)", sep=""))
-                        else list(input=paste("> # could not work out package name from getwd: '", wd, "/00install.out'", sep="")),
+                        if (length(pkg.name)) list(input=paste("> library('", pkg.name, "', char=TRUE)", sep=""))
+                        else list(input=paste("> # could not work out package name from getwd: '", dirname(wd), "/00install.out'", sep="")),
                         list(input="> searchpaths() # seeing where these came from can be useful for debugging"),
                         list(comment="> # End of RtTests preamble")),
                    tests)
