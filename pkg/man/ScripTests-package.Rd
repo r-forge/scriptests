@@ -144,10 +144,9 @@ Put the following in your \code{.emacs} file to tell ESS not mess with
             (toggle-read-only 0)
             (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
             (setq ess-nuke-trailing-whitespace-p nil)))
+          }
 }
 \author{
-  Tony Plate
-
-Maintainer: Tony Plate <tplate@acm.org>
+  Tony Plate <tplate@acm.org>
 }
 \keyword{ package }

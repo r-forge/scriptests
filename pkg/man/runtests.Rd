@@ -79,7 +79,6 @@ dumprout(res = .Last.value,
     to temporary files for test debugging and development purposes.}.
 }
 \author{ Tony Plate \email{tplate@acm.org} }
-}
 \seealso{
   \code{\link{source.pkg}} shares the global variables
 \code{ScripTests.pkg.dir} and \code{ScripTests.pkg.path} that provide
