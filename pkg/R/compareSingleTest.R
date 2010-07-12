@@ -15,10 +15,10 @@ compareSingleTest <- function(input, control, target, actual, testnum, testname,
     ignore.linebreaks <- FALSE
     diff.msg <- NULL # message to output if there are differences
     if (!is.null(control)) {
-        if (any(regexpr('^\\#@ +ignore[- ]output', control, ignore.case=TRUE)>0))
+        if (any(regexpr('^\\#@ *ignore[- ]output', control, ignore.case=TRUE)>0))
             target <- actual <- character(0)
         for (line in control) {
-            if (regexpr('^\\#@ +gsub\\(', casefold(line, upper=FALSE))>0) {
+            if (regexpr('^\\#@ *gsub\\(', casefold(line, upper=FALSE))>0) {
                 expr <- try(parse(text=gsub("^\\#@ *", "", line, perl=TRUE)), silent=TRUE)
                 v <- all.vars(expr)
                 if (is(expr, "try-error")) {
@@ -54,27 +54,27 @@ compareSingleTest <- function(input, control, target, actual, testnum, testname,
                     else
                         actual <- res
                 }
-            } else if (regexpr('^\\#@ +warn[- ]only', line, ignore.case=TRUE)>0) {
+            } else if (regexpr('^\\#@ *warn[- ]only', line, ignore.case=TRUE)>0) {
                 mismatch.status <- "warning"
-                msg <- gsub('^\\#@ +warn[- ]only:? ?', '', line, perl=TRUE)
+                msg <- gsub('^\\#@ *warn[- ]only:? ?', '', line, perl=TRUE)
                 if (msg != line && nchar(line)>0)
                     diff.msg <- msg
                 status.msg <- c(status.msg, line)
-            } else if (regexpr('^\\#@ +info[- ]only', line, ignore.case=TRUE)>0) {
+            } else if (regexpr('^\\#@ *info[- ]only', line, ignore.case=TRUE)>0) {
                 mismatch.status <- "info"
-                msg <- gsub('^\\#@ +info[- ]only:? ?', '', line, perl=TRUE)
+                msg <- gsub('^\\#@ *info[- ]only:? ?', '', line, perl=TRUE)
                 if (msg != line && nchar(line)>0)
                     diff.msg <- msg
                 status.msg <- c(status.msg, line)
-            } else if (regexpr('^\\#@ +keep[- ]whitespace', line, ignore.case=TRUE)>0) {
+            } else if (regexpr('^\\#@ *keep[- ]whitespace', line, ignore.case=TRUE)>0) {
                 ignore.whitespace <- FALSE
-            } else if (regexpr('^\\#@ +ignore[- ]linebreaks', line, ignore.case=TRUE)>0) {
+            } else if (regexpr('^\\#@ *ignore[- ]linebreaks', line, ignore.case=TRUE)>0) {
                 ignore.linebreaks <- TRUE
-            } else if (regexpr('^\\#@ +diff[- ]msg:', line, ignore.case=TRUE)>0) {
-                diff.msg <- c(diff.msg, gsub('^\\#@ +diff-msg:? ?', '', line, perl=TRUE))
-            } else if (regexpr('^\\#@ +ignore[- ]output', line, ignore.case=TRUE)>0) {
+            } else if (regexpr('^\\#@ *diff[- ]msg:', line, ignore.case=TRUE)>0) {
+                diff.msg <- c(diff.msg, gsub('^\\#@ *diff-msg:? ?', '', line, perl=TRUE))
+            } else if (regexpr('^\\#@ *ignore[- ]output', line, ignore.case=TRUE)>0) {
             } else if (regexpr('^\\#@#', line)<1) {
-                warning("cannot understood test-control line (ignoring): '", line, "'")
+                warning("cannot understand test-control line (ignoring): '", line, "'")
             }
         }
     }

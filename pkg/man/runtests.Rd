@@ -75,17 +75,16 @@ dumprout(res = .Last.value,
 \value{
   \code{runtests()} returns an invisible list of \code{RtTestSetResults} objects (each element of
   the list is the result of running and checking the test in one file.)
-  This result can be given to \code{dumprout() to write actual R output
-    to temporary files for test debugging and development purposes.}.
+  This result can be given to \code{dumprout()} to write actual R output
+    to temporary files for test debugging and development purposes.
 }
 \author{ Tony Plate \email{tplate@acm.org} }
 \seealso{
-  \code{\link{source.pkg}} shares the global variables
+  \code{\link{source.pkg}()} shares the global variables
 \code{ScripTests.pkg.dir} and \code{ScripTests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 
   For running tests in under \code{R CMD check}, use the function \code{link{runScripTests()}}.
-
 }
 \examples{
 \dontrun{

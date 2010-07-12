@@ -1,0 +1,5 @@
+> # To see what happens when a test fails, change the answer below to 3
+> cat("The date is <", date(), ">\n", sep="")
+#@gsub("<[^>]*>", "<a date>", both)
+The date is <Sat Jul 10 16:20:01 2010>
+> 
