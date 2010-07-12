@@ -20,6 +20,8 @@
             Sys.setenv(R_TESTS="startup.Rs")
         } else
             cmd <- paste("LANGUAGE=C", "R_TESTS=startup.Rs", cmd)
+        if (debug)
+            message("   Running cmd: ", cmd)
         res <- system(cmd)
         if (res) {
             message("   Failure running ", sQuote(f), ": returned code ", res)
