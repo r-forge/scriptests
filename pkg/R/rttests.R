@@ -2,8 +2,14 @@
 # setOldClass("RtTestSetResults")
 # setOldClass("RtTestSetResultsSummary")
 
+print.RtTestSetResultsList <- function(object, ..., transcript=FALSE) {
+    if (transcript) {
+        stop("can only print a transcript for one file in the list, e.g., use print(", paste(deparse(substitute(object)), collapse=" "), "[[1]], transcript=TRUE)")
+    }
+    NextMethod()
+}
+
 summary.RtTestSetResultsList <- function(object, ...) {
-    cat("+++++ Test summary +++++\n")
     smy <- do.call("rbind", lapply(object, function(x) {xs <- summary(x) ; n <- xs$n; data.frame(n, "tests with", errors=xs$counts[4], "errors,", warnings=xs$counts[3], "warnings and", messages=xs$counts[2], "messages")}))
     smy <- smy[order(smy$errors, smy$warnings, smy$messages), , drop=FALSE]
     smy <- rbind(smy, total=smy[1,,drop=F])
@@ -13,18 +19,19 @@ summary.RtTestSetResultsList <- function(object, ...) {
     smy[n,"warnings"] <- sum(smy$warnings[-n])
     smy[n,"messages"] <- sum(smy$messages[-n])
     class(smy) <- c("RtTestSetResultsList.summary", "data.frame")
+    attr(smy, "dir") <- attr(object, "dir")
+    attr(smy, "pattern") <- attr(object, "pattern")
     return(smy)
 }
 
-print.RtTestSetResultsList <- function(object, ..., transcript=FALSE) {
-    if (transcript) {
-        stop("can only print a transcript for one file in the list, e.g., use print(", paste(deparse(substitute(object)), collapse=" "), "[[1]], transcript=TRUE)")
-    }
-    NextMethod()
-}
-
 print.RtTestSetResultsList.summary <- function(x, ...) {
-    cat(apply(format(cbind(paste(rownames(x), ":", sep=""), x), justify="left"), 1, paste, collapse=" "), sep="\n")
+    cat("+++++ Test summary")
+    if (!is.null(attr(x, "dir")))
+        cat(" for tests in", attr(x, "dir"))
+    if (!is.null(attr(x, "pattern")))
+        cat("/", attr(x, "pattern"), sep="")
+    cat(" +++++\n")
+    cat(apply(format(cbind(paste(basename(rownames(x)), ":", sep=""), x), justify="left"), 1, paste, collapse=" "), sep="\n")
 }
 
 print.RtTestSetResults <- function(x, ..., transcript=FALSE) {

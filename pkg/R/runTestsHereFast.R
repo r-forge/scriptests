@@ -67,6 +67,8 @@ runTestsHereFast <- function(pattern=".*",
         allres[[file]] <- res
     }
     class(allres) <- "RtTestSetResultsList"
+    attr(allres, "dir") <- file.path(pkg.path(path, pkg.dir), "tests")
+    attr(allres, "pattern") <- pattern
     if (length(allres)>1)
         print(summary(allres))
     invisible(allres)
