@@ -1,4 +1,4 @@
-compareSingleTest <- function(input, control, target, actual, testnum, testname, progress) {
+compareSingleTest <- function(input, control, target, actual, testnum, testname, verbose) {
     ## Return a list containing the following elements:
     ##   status: one of 'ok', 'error', 'warn', 'info'
     ##   msg: character vector describing differences (for human readability)
@@ -125,7 +125,7 @@ compareSingleTest <- function(input, control, target, actual, testnum, testname,
         msg <- character(0)
         status <- "ok"
     }
-    if (progress)
+    if (verbose)
         if (status=="ok")
             cat(".")
         else

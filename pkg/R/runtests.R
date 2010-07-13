@@ -1,15 +1,13 @@
 runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
                      pattern=".*", file=NULL,
                      full=FALSE, dir=TRUE,
-                     clobber=FALSE, output.suffix=NULL,
+                     clobber=FALSE, output.suffix=NULL, console=FALSE,
                      ...,
-                     progress=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
+                     verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
                      path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
     pkg.name <- read.pkg.name(path, pkg.dir)
-    if (!missing(pkg.dir))
-        assign("ScripTests.pkg.dir", pkg.dir, envir=globalenv())
-    if (!missing(path))
-        assign("ScripTests.pkg.path", path, envir=globalenv())
+    supplied.pkg.dir <- !missing(pkg.dir)
+    supplied.path <- !missing(path)
     if (!is.null(file) && pattern!=".*")
         stop("cannot supply both 'file' and 'pattern'")
     if (is.null(subst) && !full) {
@@ -45,54 +43,75 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
         else
             dir <- NULL
     # Need this later, relative to the current path
-    check.dir <- normalizePath(paste(pkg.dir, ".Rcheck", sep=""))
     if (full) {
-        if (!file.exists(check.dir))
-            stop("expected to find installed library ", pkg.name, " in ", check.dir, " but that directory doesn't exist")
-        if (!file.exists(file.path(check.dir, pkg.name)))
-            stop("expected to find installed library in ", file.path(check.dir, pkg.name), " but that directory doesn't exist")
+        check.dirs <- paste(c(pkg.name, pkg.dir), ".Rcheck", sep="")
+        if (!any(file.exists(check.dirs)))
+            stop("expected to find installed library ", pkg.name, " in ",
+                 paste("'", check.dirs, "'", sep="", collapse=" or "),
+                 " but neither of those directories exists")
+        check.dirs <- check.dirs[file.exists(check.dirs)]
+        if (!any(file.exists(file.path(check.dirs, pkg.name))))
+            stop("expected to find installed library in ", file.path(check.dirs, pkg.name), " but that directory doesn't exist")
+        check.dirs <- check.dirs[file.exists(file.path(check.dirs, pkg.name))]
+        # if there's more than one, choose the one with the most recent modification time
+        mt <- file.info(file.path(check.dirs, pkg.name))[,"mtime"]
+        if (length(check.dirs) > 1)
+            cat("* Using package in '", file.path(check.dirs, pkg.name), "' for running tests\n", sep="")
+        check.dirs <- check.dirs[which.max(mt)]
         # This code relies on normalizePath converting to an absolute path
         r.libs.site.orig <- Sys.getenv("R_LIBS_SITE")[[1]]
-        r.libs.site <- unique(sapply(c(strsplit(r.libs.site.orig, split=";")[[1]], check.dir), normalizePath))
+        r.libs.site <- unique(sapply(c(strsplit(r.libs.site.orig, split=";")[[1]], check.dirs), normalizePath))
         Sys.setenv("R_LIBS_SITE", paste(r.libs.site, collapse=";"))
         on.exit(Sys.setenv("R_LIBS_SITE", r.libs.site.orig))
     }
     if (!is.null(dir)) {
         if (file.exists(dir)) {
             if (!clobber) {
-                stop("dir for running tests ", dir, " already exists - supply clobber=TRUE to overwrite")
+                if (dir == paste(pkg.dir, ".tests", sep=""))
+                    stop("dir for running tests '", dir, "' already exists - supply clobber=TRUE to overwrite")
+                else
+                    stop("dir for running tests '", dir, "' already exists and is non-standard - remove it manually to continue")
             } else if (dir == paste(pkg.dir, ".tests", sep="")) {
-                if (progress)
+                if (verbose)
                     cat("* Removing old tests directory ", dir, "\n", sep="")
                 unlink(dir, recursive=TRUE)
             } else {
-                stop("can only clobber test dir when it has the form of an automatically created one (",
-                     paste(pkg.dir, ".tests", sep=""), ")")
+                stop("can only clobber test dir when it has the form of an automatically created one (i.e., like '",
+                     paste(pkg.dir, ".tests", sep=""), "') - remove '", dir, "' manually to continue")
             }
         } else {
             if (!dir.create(dir, recursive=TRUE))
                 stop("failed to create directory: ", dir)
         }
-        if (progress)
+        if (verbose)
             cat("* Copying ", test.dir, " to ", dir, "\n", sep="")
         dir.create(dir)
         for (f in list.files(test.dir))
             file.copy(file.path(test.dir, f), dir, recursive=TRUE)
         existing.files <- list.files()
-        if (progress)
+        if (verbose)
             cat("* Setting working directory to ", dir, "\n", sep="")
         setwd(dir)
         on.exit(setwd(cwd))
     }
     if (!full) {
+        if (!is.null(output.suffix) && length(output.suffix)!=1)
+            stop("length(output.suffix)!=1")
         if (length(list(...)))
             warning("ignoring extra arguments when full=FALSE: ", paste(names(list(...)), collapse=", "))
-        res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, progress=progress, envir=envir, enclos=enclos, subst=subst, path=path)
-        if (!is.null(output.suffix) && !(is.logical(output.suffix) && !output.suffix)) {
-            if (length(output.suffix)!=1)
-                stop("length(output.suffix)!=1")
-            dumprout(res, output.suffix)
-        }
+    }
+
+    if (supplied.pkg.dir)
+        assign("ScripTests.pkg.dir", pkg.dir, envir=globalenv())
+    if (supplied.path)
+        assign("ScripTests.pkg.path", path, envir=globalenv())
+
+    if (!full) {
+        res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, enclos=enclos, subst=subst, path=path)
+        attr(res, "dir") <- dirname(names(res)[1])
+        names(res) <- basename(names(res))
+        if (console || (!is.null(output.suffix) && !(is.logical(output.suffix) && !output.suffix)))
+            dumprout(res, output.suffix, console=console)
         return(invisible(res))
     } else {
         status <- runScripTests(..., quit=FALSE, subst=subst)

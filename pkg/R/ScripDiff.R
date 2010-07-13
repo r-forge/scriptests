@@ -46,7 +46,7 @@ ScripDiff <- function(commandfile, outfile=gsub("\\.R$", ".Rout", commandfile, p
     if (debug)
         cat("  * Parsing actual test output from file \"", outfile, "\" ...\n", sep="", file=stderr())
     resList <- parseTranscriptFile(outfile, ignoreUpToRegExpr=ignoreUpToRegExpr, ignoreAfterRegExpr=ignoreAfterRegExpr)
-    res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", outfile), tests, resList, progress=TRUE)
+    res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", outfile), tests, resList, verbose=TRUE)
     res.summary <- summary(res)
     print(res.summary)
     sink()

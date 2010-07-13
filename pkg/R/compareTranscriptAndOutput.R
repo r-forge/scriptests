@@ -1,5 +1,5 @@
 
-compareTranscriptAndOutput <- function(name, tests, results, progress=TRUE) {
+compareTranscriptAndOutput <- function(name, tests, results, verbose=TRUE) {
     x <- list()
     # return a RtTestSetResults objects (a list of lists), each having components:
     #   status: one of "error", "warning", "info", "ok"
@@ -32,7 +32,7 @@ compareTranscriptAndOutput <- function(name, tests, results, progress=TRUE) {
             xtraTests <- list()
             results <- results[seq(along=tests)]
         }
-        if (progress)
+        if (verbose)
             cat(paste("Error in", name), msg, sep="\n")
         # need double nesting of list because of unlist( , recursive=FALSE) below
         x <- c(x, list(list(list(msg=msg, status="error"))))
@@ -46,11 +46,11 @@ compareTranscriptAndOutput <- function(name, tests, results, progress=TRUE) {
                                    "Test input:", test$input,
                                    "Transcript input:", result$input)))
         }
-        res <- c(res, list(compareSingleTest(test$input, test$control, test$output, result$output, testnum, name, progress)))
+        res <- c(res, list(compareSingleTest(test$input, test$control, test$output, result$output, testnum, name, verbose)))
         return(res)
     }, SIMPLIFY=FALSE, USE.NAMES=FALSE))
     x <- unlist(x, use.names=FALSE, recursive=FALSE)
-    if (progress)
+    if (verbose)
         cat("\n")
     class(x) <- "RtTestSetResults"
     attr(x, "testname") <- name

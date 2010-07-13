@@ -23,8 +23,9 @@ runtests(pkg.dir = get("ScripTests.pkg.dir", envir = globalenv()),
          dir = TRUE,
          clobber = FALSE,
          output.suffix = NULL,
-          ...,
-         progress = TRUE,
+         console = FALSE,
+         ...,
+         verbose = TRUE,
          envir = globalenv(),
          enclos = envir,
          subst = NULL,
@@ -32,6 +33,7 @@ runtests(pkg.dir = get("ScripTests.pkg.dir", envir = globalenv()),
 dumprout(res = .Last.value,
          output.suffix = ".Rout.tmp",
          verbose = TRUE,
+         console = TRUE,
          clobber = identical(output.suffix, ".Rout.tmp"))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -48,13 +50,16 @@ dumprout(res = .Last.value,
     default value is \code{paste(pkg.dir, ".tests", sep=""}; if \code{full=TRUE} the
     default value is \code{paste(pkg.dir, ".Rcheck/tests", sep=""}.
     Supply \code{dir=FALSE} to run tests in the current directory.}
+  \item{console}{ If \code{TRUE}, output from the test will be written
+    as output from this function.  The default is \code{FALSE} for
+    \code{runtests()} and \code{TRUE} for \code{dumprout()}.}
   \item{clobber}{ If the \code{dir} already exists, \code{clobber=TRUE}
     will result in replacing that directory, \code{clobber=FALSE} will
     result in stopping with an error if the directory already exists. }
   \item{output.suffix}{ File suffix for actual output files (default NULL for \code{runtests},
     meaning no output, if \code{output.suffix==TRUE}, uses suffix \code{.tmp} }
   \item{...}{ Arguments to pass on to \code{runScripTests()} }
-  \item{progress}{ Should progress indications be printed? }
+  \item{verbose}{ Should progress indications be printed? }
   \item{envir}{ The environment in which to run the tests }
   \item{enclos}{ The environment to use as the \code{enclos} argument
     for \code{eval()} when eval'ing each expression in the test file }
@@ -64,8 +69,6 @@ dumprout(res = .Last.value,
     when appropriate. }
   \item{path}{ The path to the package in which the tests reside }
   \item{res}{ A value returned from \code{runtests()} }
-  \item{verbose}{ Should messages about files being created be written
-    to the console? }
 }
 \details{
 
