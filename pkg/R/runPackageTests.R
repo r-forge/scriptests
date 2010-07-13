@@ -71,6 +71,10 @@
 
     file.copy(file.path(R.home("share"), "R", "tests-startup.R"), "startup.Rs")
     if (use_gct) cat("gctorture(TRUE)" , file = "startup.Rs", append = TRUE)
+    # Need to make consistent behavior between interactive and non-interactive
+    # for options(showErrorCalls), and can't get evalCapture() to capture the
+    # error calls, so turn them off for non-interactive.
+    cat("options(showErrorCalls=FALSE)\n", file = "startup.Rs", append = TRUE)
     nfail <- 0L ## allow for later running all tests even if some fail.
 
     needPkg <- character(0)

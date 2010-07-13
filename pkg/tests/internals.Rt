@@ -11,5 +11,4 @@ Warning in (function(x) { : bar
 [1] "Error in (function(x) { : eek! 42"
 > eval(parse(text="(function(x) {if (x==42) stop('eek! 42') else warning('bar'); return(x)})(42)")[[1]])
 Error in (function(x) { : eek! 42
-Calls: eval -> eval -> <Anonymous>
 >
