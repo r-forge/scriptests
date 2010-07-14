@@ -30,7 +30,14 @@
                 return(1L)
             }
         }
+        # Look for a .Rout.save file -- this can be supplied by the user
         savefile <- paste(outfile, "save", sep = "." )
+        # Look for a .Rt.save file -- this was auto-generated and we want to remove it
+        rtSave <- gsub("\\.R$", ".Rt.save", f, perl=TRUE)
+        if (file.exists(rtSave)) {
+            on.exit(unlink(rtSave))
+            message("  Will remove Rt.save file on exit: ", rtSave)
+        }
         if (is.null(diffFun)) {
             if (file.exists(savefile)) {
                 message("   Comparing ", sQuote(outfile), " to ",
@@ -56,7 +63,7 @@
                 return(1L)
             }
         }
-        0L
+        return(0L)
     }
     if (run.preexisting.R.files) {
         if (Sys.getenv("TESTS_HAVE_RUN_R_FILES")=="") {

@@ -17,19 +17,19 @@ ScripDiff <- function(commandfile, outfile=gsub("\\.R$", ".Rout", commandfile, p
         ignoreUpToRegExpr <- "Type 'q\\(\\)' to quit R"
         ignoreAfterRegExpr <- NULL
         if (!file.exists(savefile)) {
-            message("checkTestOutput: nothing to compare against for ", commandfile, "\n")
+            message("ScripDiff: nothing to compare against for ", commandfile, "\n")
             return(0L)
         }
     }
     if (!file.exists(rtSave)) {
-        msg <- paste("checkTestOutput: cannot find saved-test-object file '", rtSave, "' in '", getwd(), "'\n", sep="")
+        msg <- paste("ScripDiff: cannot find saved-test-object file '", rtSave, "' in '", getwd(), "'\n", sep="")
         cat(file=failfile, msg)
         cat(file=stderr(), msg)
         message(msg)
         return(NULL)
     }
     if (!file.exists(outfile)) {
-        msg <- paste("checkTestOutput: cannot find actual test output file '", outfile, "' in '", getwd(), "'\n", sep="")
+        msg <- paste("ScripDiff: cannot find actual test output file '", outfile, "' in '", getwd(), "'\n", sep="")
         cat(file=failfile, msg)
         cat(file=stderr(), msg)
         message(msg)
@@ -51,7 +51,7 @@ ScripDiff <- function(commandfile, outfile=gsub("\\.R$", ".Rout", commandfile, p
     print(res.summary)
     sink()
     sink(logfile)
-    print(res)
+    print(res, details=T)
     print(res.summary)
     sink()
     sink(sumfile, append=TRUE)

@@ -1,6 +1,11 @@
+2010-07-13:
+TODO:
+* clean up the self-test stuff (remove it)
+* remove function checkTestOutput()
+
 2009-08-19:
 
-TODO:
+DONE:
 * make reading of Description Collate depend on system
 * make function that creates .R and .Rout.save files from .Rt to enable use of the standard R CMD check testing without the ScripTests package
 * make it possible to run own-process tests in a new copy of the test dir
