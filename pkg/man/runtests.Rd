@@ -7,10 +7,10 @@
   Run some Rt test files in a package from within an interactive R
   session.
   There are two major modes in which \code{runtests()} can be used:
-  \enumerate{
-    \item Running tests within the current R session, which can change
+  \itemize{
+    \item \code{full=FALSE}: Running tests within the current R session, which can change
     existing R variables, and create new ones
-    \item Running tests by creating a new R session for each test file.  This is safer, but slower.
+    \item \code{full=TRUE}: Running tests by creating a new R session for each test file.  This is safer, but slower.
   }
 }
 \usage{
