@@ -6,7 +6,7 @@ print.RtTestSetResultsList <- function(object, ..., transcript=FALSE) {
     if (transcript) {
         stop("can only print a transcript for one file in the list, e.g., use print(", paste(deparse(substitute(object)), collapse=" "), "[[1]], transcript=TRUE)")
     }
-    NextMethod()
+    print(summary(object, ...))
 }
 
 summary.RtTestSetResultsList <- function(object, ...) {
@@ -34,7 +34,7 @@ print.RtTestSetResultsList.summary <- function(x, ...) {
     cat(apply(format(cbind(paste(basename(rownames(x)), ":", sep=""), x), justify="left"), 1, paste, collapse=" "), sep="\n")
 }
 
-print.RtTestSetResults <- function(x, ..., transcript=FALSE) {
+print.RtTestSetResults <- function(x, ..., transcript=FALSE, details=FALSE) {
     if (transcript) {
         cat("* Transcript of actual output from running commands in '", attr(x, "testname"), "':\n", sep="")
         lapply(x, function(res) {
@@ -43,7 +43,7 @@ print.RtTestSetResults <- function(x, ..., transcript=FALSE) {
             if (length(res$transcript))
                 cat(res$transcript, sep="\n")
         })
-    } else {
+    } else if (details) {
         lapply(x, function(res) {
             if (res$status=="ok")
                 cat(".")
@@ -51,6 +51,8 @@ print.RtTestSetResults <- function(x, ..., transcript=FALSE) {
                 cat("", paste("#@", res$msg), sep="\n")
         })
         cat("\n")
+    } else {
+        print(summary(x, ...))
     }
     invisible(x)
 }
@@ -58,7 +60,7 @@ print.RtTestSetResults <- function(x, ..., transcript=FALSE) {
 summary.RtTestSetResults <- function(object, ...) {
     y <- table(factor(sapply(object, "[[", "status"), levels=c("ok", "info", "warning", "error")))
     n <- object[[length(object)]]$i
-    structure(list(n=n, counts=y, testname=attr(object, "testname")), class="RtTestSetResults.summary")
+    structure(list(n=n, counts=y, testname=basename(attr(object, "testname"))), class="RtTestSetResults.summary")
 }
 
 print.RtTestSetResults.summary <- function(x, ...) {

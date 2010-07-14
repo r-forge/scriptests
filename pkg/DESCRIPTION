@@ -1,8 +1,8 @@
 Package: ScripTests
 Type: Package
 Title: Transcript-based unit tests that are easy to create and maintain
-Version: 0.5-0
-Date: 2010-07-10
+Version: 0.6-0
+Date: 2010-07-13
 Author: Tony Plate
 Maintainer: Tony Plate <tplate@acm.org>
 Description: Support for using .Rt (transcript) tests
