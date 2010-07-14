@@ -10,10 +10,8 @@
   \enumerate{
     \item Running tests within the current R session, which can change
     existing R variables, and create new ones
-    \item Running tests in newly created R sessions (one for each test
-    file) (with \code{full=TRUE}).  This is safer, but slower, and the
-    package must be installed in the directory \code{<pkg.dir>.Rcheck}.
-    }
+    \item Running tests by creating a new R session for each test file.  This is safer, but slower.
+  }
 }
 \usage{
 runtests(pkg.dir = get("ScripTests.pkg.dir", envir = globalenv()),
@@ -43,7 +41,8 @@ dumprout(res = .Last.value,
     Only one of \code{pattern} and \code{file} should be supplied.}
   \item{file}{ The name of the file(s) containing tests to be run.}
   \item{full}{ Run in full testing environment: create directory for
-    tests; chdir to directory; run each test file in a child process. }
+    tests; copy tests to that directory; chdir to directory; run each
+    test file in a newly created R session. }
   \item{dir}{ Directory where tests will be run.  This is important if
     the files access and/or create any files or directories.  The
     default value depends on \code{full}: if \code{full=FALSE} the
@@ -58,7 +57,8 @@ dumprout(res = .Last.value,
     result in stopping with an error if the directory already exists. }
   \item{output.suffix}{ File suffix for actual output files (default NULL for \code{runtests},
     meaning no output, if \code{output.suffix==TRUE}, uses suffix \code{.tmp} }
-  \item{...}{ Arguments to pass on to \code{runScripTests()} }
+  \item{...}{ Arguments to pass on to \code{runScripTests()}.  Ignored
+    with a warning message unless \code{full=TRUE}. }
   \item{verbose}{ Should progress indications be printed? }
   \item{envir}{ The environment in which to run the tests }
   \item{enclos}{ The environment to use as the \code{enclos} argument
@@ -75,17 +75,22 @@ dumprout(res = .Last.value,
   \code{runtests()} is intended to be easily used in the directory that
   contains the package (e.g., if the package \code{<MyPackage>} is in
   \code{/home/sam/R/packages/<MyPackage>} (so that package files and
-  directories are in \code{/home/sam/R/packages/<MyPackage>/DESCRIPTION},
-  \code{/home/sam/R/packages/<MyPackage>/R},
-  \code{/home/sam/R/packages/<MyPackage>/man}, etc.) then the working directory is intended to be
+  directories are in
+  \code{/home/sam/R/packages/<MyPackage>/\{DESCRIPTION,R,man,tests\}},
+  then the working directory is intended to be
   \code{/home/sam/R/packages}).  Test files (ending in \code{.Rt}) are
   looked for in the directory \code{<MyPackage>/tests/}.  Alternatively,
   in an R-forge-like directory structure, the package files and
   directories are in
-  \code{/home/sam/R/packages/<pkg-unix-name>/pkg/DESCRIPTION},
-  \code{/home/sam/R/packages/<pkg-unix-name>/pkg/R},
-  \code{/home/sam/R/packages/<pkg-unix-name>/pkg/man}, etc., and the
-  working directory should be \code{/home/sam/R/packages/<pkg-unix-name>}.
+  \code{/home/sam/R/packages/<pkg-unix-name>/pkg/\{DESCRIPTION,R,man,tests\}},
+  and the working directory should be
+  \code{/home/sam/R/packages/<pkg-unix-name>}.
+
+  Supplying \code{full=TRUE} will run each test file in a newly created
+  R sessions.  When run like this, package should be installed in the
+  directory \code{<pkg.dir>.Rcheck} or \code{<pkg.name>.Rcheck} (run
+  \code{R CMD check <MyPackage>} or \code{R CMD check pkg} in a shell in
+  the same directory to install a copy of the package in this location).
 
   For working with a package in a different location relative to the
   working directory of the R session, supply the path to the package

@@ -5,6 +5,15 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
                      ...,
                      verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
                      path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
+    if (!interactive() && basename(getwd())=="tests") {
+        if (nargs() != 0)
+            stop("runtests() is for interactive use - use runScripTests() in tests/runtests.R")
+        # Looks like we're being called by R CMD check (because runtests()
+        # instead of runScripTests() was put in tests/runtests.R.
+        status <- runScripTests()
+        return(status)
+    }
+
     pkg.name <- read.pkg.name(path, pkg.dir)
     supplied.pkg.dir <- !missing(pkg.dir)
     supplied.path <- !missing(path)

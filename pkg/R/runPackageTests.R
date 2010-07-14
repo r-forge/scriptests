@@ -33,10 +33,10 @@
         # Look for a .Rout.save file -- this can be supplied by the user
         savefile <- paste(outfile, "save", sep = "." )
         # Look for a .Rt.save file -- this was auto-generated and we want to remove it
+        # after we've used it.
         rtSave <- gsub("\\.R$", ".Rt.save", f, perl=TRUE)
         if (file.exists(rtSave)) {
             on.exit(unlink(rtSave))
-            message("  Will remove Rt.save file on exit: ", rtSave)
         }
         if (is.null(diffFun)) {
             if (file.exists(savefile)) {
