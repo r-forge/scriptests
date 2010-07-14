@@ -1,5 +1,5 @@
 dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = TRUE, console = TRUE, clobber = identical(output.suffix, ".Rout.tmp")) {
-    if (inherits(res, "RtTestResults")) {
+    if (inherits(res, "RtTestSetResults")) {
         # make this single test result look like a list of results
         res <- list(res)
         names(res) <- basename(attr(res[[1]], "testname"))
