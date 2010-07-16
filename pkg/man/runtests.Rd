@@ -79,7 +79,7 @@ dumprout(res = .Last.value,
 \details{
 
   \code{runtests()} is intended to be easily used in the directory that
-  contains the package (e.g., if the package \code{<MyPackage>} is in
+  contains the package.  E.g., if the package \code{<MyPackage>} is in
   \code{/home/sam/R/packages/<MyPackage>} (so that package files and
   directories are in
   \code{/home/sam/R/packages/<MyPackage>/\{DESCRIPTION,R,man,tests\}},
@@ -93,10 +93,13 @@ dumprout(res = .Last.value,
   \code{/home/sam/R/packages/<pkg-unix-name>}.
 
   Supplying \code{full=TRUE} will run each test file in a newly created
-  R sessions.  When run like this, package should be installed in the
-  directory \code{<pkg.dir>.Rcheck} or \code{<pkg.name>.Rcheck} (run
-  \code{R CMD check <MyPackage>} or \code{R CMD check pkg} in a shell in
-  the same directory to install a copy of the package in this location).
+  R sessions (the way tests are run under \code{R CMD check}).  When run
+  like this, the package the package is assumed to be installed in the
+  location \code{<pkg.dir>.Rcheck} or or \code{<pkg.name>.Rcheck},
+  relative to the working directory of the current R session.  This can
+  be accomplished by running the shell command
+  \preformatted{R CMD check --no-codoc --no-examples --no-tests --no-vignettes --no-latex <pkg.dir>}
+  in the same directory as the R session is running in.
 
   For working with a package in a different location relative to the
   working directory of the R session, supply the path to the package
@@ -106,19 +109,12 @@ dumprout(res = .Last.value,
   remembered and will be used as the default value next time
   \code{runtests()} is called.
 
-  \code{dumprout()} writes actual R output to temporary files.  It
-  creates one file for each test run.  With no arguments, it uses the
-  value of the previously run command, which allows it to be
-  meaningfully used directly after a \code{runtests()} command.
-
-  When running with \code{full=TRUE} (i.e., with each test run in a
-  separate R session), the package is assumed to be installed in the
-  location \code{<pkg.dir>.Rcheck}, relative to the working directory of
-  the current R session.  This can be accomplished by running the shell
-  command
-  \preformatted{R CMD check --no-codoc --no-examples --no-tests
-    --no-vignettes --no-latex <pkg.dir>}
-  in the current working directory of the R session.
+  \code{dumprout()} writes actual R output to the console or to files.
+  It creates one file for each test run.  Specifying \code{level=} skips
+  files that have no notification at the given level or above.  With a
+  missing first argument, \code{dumprout()} uses the value of the
+  previously run command, which allows it to be meaningfully used
+  directly after a \code{runtests()} command.
 }
 \value{
   \code{runtests()} returns an invisible list of \code{RtTestSetResults} objects (each element of
