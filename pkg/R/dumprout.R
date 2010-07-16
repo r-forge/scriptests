@@ -1,4 +1,5 @@
-dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = TRUE, console = TRUE, clobber = identical(output.suffix, ".Rout.tmp")) {
+dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = TRUE, console = TRUE, files = !console, clobber = identical(output.suffix, ".Rout.tmp"), level=c("all", "info", "warning", "error")) {
+    level <- match.arg(level)
     if (inherits(res, "RtTestSetResults")) {
         # make this single test result look like a list of results
         res <- list(res)
@@ -17,7 +18,18 @@ dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = T
     }
     for (i in seq(along=res)) {
         outfile <- basename(attr(res[[i]], "testname"))
-        if (console) {
+        if (level != "all") {
+            cc <- summary(res[[i]])$counts
+            if (   (level == "error" && cc["error"] == 0)
+                || (level == "warning" && all(cc[c("warning", "error")] == 0))
+                || (level == "info" && all(cc[c("info", "warning", "error")] == 0))) {
+                if (verbose)
+                    cat("* Skipping", outfile, ": no notifications at level '", level, "'",
+                        if (level!="error") " or above", "\n", sep="")
+                next
+            }
+        }
+        if (!files) {
             print(res[[i]], transcript=TRUE)
         } else {
             if (outfile != "") {

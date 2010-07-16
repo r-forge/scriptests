@@ -32,7 +32,9 @@ dumprout(res = .Last.value,
          output.suffix = ".Rout.tmp",
          verbose = TRUE,
          console = TRUE,
-         clobber = identical(output.suffix, ".Rout.tmp"))
+         files = !console,
+         clobber = identical(output.suffix, ".Rout.tmp"),
+         level=c("all", "info", "warning", "error"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -52,11 +54,15 @@ dumprout(res = .Last.value,
   \item{console}{ If \code{TRUE}, output from the test will be written
     as output from this function.  The default is \code{FALSE} for
     \code{runtests()} and \code{TRUE} for \code{dumprout()}.}
+  \item{files}{ Opposite of \code{console} (specify just
+    \code{console=TRUE} or \code{file=TRUE})}
   \item{clobber}{ If the \code{dir} already exists, \code{clobber=TRUE}
     will result in replacing that directory, \code{clobber=FALSE} will
     result in stopping with an error if the directory already exists. }
   \item{output.suffix}{ File suffix for actual output files (default NULL for \code{runtests},
     meaning no output, if \code{output.suffix==TRUE}, uses suffix \code{.tmp} }
+  \item{level}{ Skip files unless they have notifications at the
+    specified level or above.}
   \item{...}{ Arguments to pass on to \code{runScripTests()}.  Ignored
     with a warning message unless \code{full=TRUE}. }
   \item{verbose}{ Should progress indications be printed? }

@@ -2,11 +2,11 @@
 # setOldClass("RtTestSetResults")
 # setOldClass("RtTestSetResultsSummary")
 
-print.RtTestSetResultsList <- function(object, ..., transcript=FALSE) {
+print.RtTestSetResultsList <- function(x, ..., transcript=FALSE) {
     if (transcript) {
-        stop("can only print a transcript for one file in the list, e.g., use print(", paste(deparse(substitute(object)), collapse=" "), "[[1]], transcript=TRUE)")
+        stop("can only print a transcript for one file in the list, e.g., use print(", paste(deparse(substitute(x)), collapse=" "), "[[1]], transcript=TRUE)")
     }
-    print(summary(object, ...))
+    print(summary(x, ...))
 }
 
 summary.RtTestSetResultsList <- function(object, ...) {

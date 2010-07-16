@@ -35,8 +35,10 @@ evalCapture <- function(expr, envir=globalenv(), enclos=envir) {
     }
     res <- try(eval.with.vis(expr, envir, enclos), silent=TRUE)
     if (is(res, "try-error")) {
-        res[1] <- gsub("Error in eval.with.vis\\(expr, envir, enclos\\) :[ \n\t]*", "Error: ", res[1], perl=TRUE)
-        res <- gsub("\n$", "", res)
+        res[1] <- sub("^Error in eval.with.vis\\(expr, envir, enclos\\) :", "Error:", res[1], perl=TRUE)
+        res <- sub("\n$", "", res)
+        # Split line at embedded newlines, important for "Error: in f(...) : \n ..."
+        res <- unlist(strsplit(res, "\n"))
         return(as.character(res))
     }
     if (res$visible) {
