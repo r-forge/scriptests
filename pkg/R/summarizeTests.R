@@ -2,13 +2,14 @@ summarizeTests <- function(debug=FALSE) {
     testResultsFile <- "test-summary.txt"
     if (file.exists(testResultsFile)) {
         all.res <- readLines(testResultsFile, -1)
-        system("cp test-summary.txt test-summary.bak")
+        writeLines(all.res, paste(testResultsFile, ".bak", sep=""))
     } else {
         all.res <- character(0)
     }
     # all.res <- sapply(list.files(pattern=".*Rt\\.sum$"), readLines, 1)
-    i <- regexpr("^.*: [0-9]+ tests with [0-9]+ errors, [0-9]+ warnings and [0-9]+ messages", all.res) >= 1
+    i <- regexpr("^.*: +[0-9]+ tests with [0-9]+ errors, [0-9]+ warnings and [0-9]+ messages", all.res) >= 1
     if (!all(i)) {
+        browser()
         problem.lines <- all.res[!i]
         problem.lines <- gsub(":.*$", ": ...", problem.lines, perl=TRUE)
         problem.lines <- substring(problem.lines, 1, 40)
@@ -33,7 +34,7 @@ summarizeTests <- function(debug=FALSE) {
     testResults[[9]] <- "and"
     testResults$nmess[i] <- sum(testResults$nmess, na.rm=T)
     testResults[[11]] <- "messages"
-    i <- order(testResults$nerr, testResults$nwarn, testResults$nmess, testResults$name)
+    i <- order(testResults$name=="total:", testResults$nerr, testResults$nwarn, testResults$nmess, testResults$name)
     testResults <- lapply(testResults, function(x, i) if (length(x)>1) x[i] else x, i)
     # write out to a file "test-summary.txt"
     # rewrite the whole output sorted with columns lined up
@@ -55,7 +56,7 @@ summarizeTests <- function(debug=FALSE) {
         nFilesWithErrors <- length(lines) - firstError - 1
         lines <- c(lines[seq(1, len=firstError-1)],
                    paste("### ", nFilesWithErrors, " file", (if (nFilesWithErrors!=1) "s"),
-                         " with ", sum(testResults$nerr)-1, " errors", sep=""),
+                         " with ", totalErrors, " errors", sep=""),
                    lines[seq(firstError, length(lines))])
     } else {
         firstError <- length(testResults$nerr) # not really, but the right numbers will be output downstream
