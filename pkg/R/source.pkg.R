@@ -36,8 +36,12 @@ source.pkg <- function(pkg.dir=mget("ScripTests.pkg.dir", envir=globalenv())[[1]
     }
 
     # Create a new environment on the search path
-    if (!missing(pkg.dir) && missing(pos))
-        pos <- match(paste("pkgcode", pkg.name, sep=":"), search())
+    oldpos <- match(paste("pkgcode", pkg.name, sep=":"), search())
+    if (missing(pos)) {
+        pos <- oldpos
+    } else if (!is.na(oldpos)) {
+        detach(oldpos)
+    }
     if (is.na(pos)) {
         envir <- attach(NULL, pos=2, name=paste("pkgcode", pkg.name, sep=":"))
         pos <- 2
