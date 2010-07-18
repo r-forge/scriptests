@@ -24,6 +24,11 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
         test.transcript.file <- paste(c(rev(rev(strsplit(gsub("\\\\", "/", getwd(), perl=TRUE), "/")[[1]])[1:2]), test.transcript.file), collapse=.Platform$file.sep)
         cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=T, sep="")
     }
+    fail.files <- list.files(pattern="\\.Rout\\.fail$")
+    fail.files <- setdiff(fail.files, basename(test.transcript.file))
+    if (length(fail.files))
+        cat("Look for clues in ", if (length(fail.files)==1) "this file" else "these files",
+            " too: ", paste("'", fail.files, "'", collapse=", ", sep=""), "\n", sep="")
     if (quit)
         q("no", status = status)
     invisible(NULL)
