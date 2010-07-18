@@ -1,4 +1,4 @@
-> # plus() is defined in ScripTests, but not exported because
+> # plus() is defined in ScripTests, but not exported
 > # to avoid unneccesary name conflicts.
 > ScripTests:::plus(1, 1)
 [1] 2
