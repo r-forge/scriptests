@@ -128,7 +128,7 @@ dumprout(res = .Last.value,
 \code{ScripTests.pkg.dir} and \code{ScripTests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 
-  For running tests in under \code{R CMD check}, use the function \code{\link{runScripTests()}}.
+  For running tests in under \code{R CMD check}, use the function \code{\link{runScripTests}()}.
 }
 \examples{
 \dontrun{

@@ -48,7 +48,7 @@ print.RtTestSetResults <- function(x, ..., transcript=FALSE, details=FALSE) {
             if (res$status=="ok")
                 cat(".")
             else
-                cat("", paste("#@", res$msg), sep="\n")
+                cat("\n", res$msg, sep="")
         })
         cat("\n")
     } else {

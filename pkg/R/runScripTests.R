@@ -22,7 +22,7 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
     if (!is.na(i <- match("-f", commandArgs()))) {
         test.transcript.file <- paste(commandArgs()[i+1], "out", sep="")
         test.transcript.file <- paste(c(rev(rev(strsplit(gsub("\\\\", "/", getwd(), perl=TRUE), "/")[[1]])[1:2]), test.transcript.file), collapse=.Platform$file.sep)
-        cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=T, sep="")
+        cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=getOption("width")-2, sep="")
     }
     fail.files <- list.files(pattern="\\.Rout\\.fail$")
     fail.files <- setdiff(fail.files, basename(test.transcript.file))

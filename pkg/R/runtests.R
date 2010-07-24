@@ -116,6 +116,8 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
         assign("ScripTests.pkg.path", path, envir=globalenv())
 
     if (!full) {
+        old.options <- options(width=80, warn=1)
+        on.exit(options(old.options))
         res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, enclos=enclos, subst=subst, path=path)
         attr(res, "dir") <- dirname(names(res)[1])
         names(res) <- basename(names(res))
