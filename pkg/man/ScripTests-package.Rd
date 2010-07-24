@@ -12,10 +12,11 @@
 Transcript-style tests are files containing R commands and output, as
 though copied verbatim from an interactive R session.  The output in the
 transcript file must match the actual output from running the command
-for the test to pass.  These are very
-much like the standard \code{.R/.Rout.save} tests that are run by the
-\code{R CMD check}, but with some diferences that are intended
-to make test development and maintanance faster and more convenient:
+for the test to pass.  This testing framework is identical in concept to
+the standard \code{.R/.Rout.save} tests that are run by the
+\code{R CMD check}, but with some enhancements that are intended
+to make test development and maintanance faster, more convenient, and
+easier to automate:
 \itemize{
   \item only the output file is needed - the inputs are parsed from
   the output file (i.e., \code{.Rt} file, which is analogous to an
@@ -26,9 +27,9 @@ to make test development and maintanance faster and more convenient:
   \item directives can specify whether a test-case output mismatch
   should be noted as an informational message, a warning, or an error
   (one or more errors results in \code{R CMD check} stopping with an
-  indication of error).  Unlike the standard tests in \code{R CMD check},
-  output mismatch detected by \code{ScripTests} results in \code{R CMD
-  check} stopping with an error.
+  indication of error after running all tests).  Unlike the standard
+  tests in \code{R CMD check}, output mismatch detected by
+  \code{ScripTests} results in \code{R CMD check} stopping with an error.
   \item a concise summary of warnings and errors is given at the end
   \item testing can continue after errors and report multiple errors
 }
@@ -47,6 +48,12 @@ runScripTests() }
 [1] 3
 >   }
 }
+
+If any tests fail, the file \code{test-summary.fail} will be left in the
+\code{tests} directory -- the existence of this file can be used in a
+programmatic check for whether all tests passed.  To be entirely sure
+that the tests were run, also check for the existence of \code{test-summary.txt}.
+
 Tests can be run interactively using the function
 \code{\link{runtests}()}.  The function \code{\link{source.pkg}()} can
 be useful to quickly re-read the function definitions in a package
@@ -141,13 +148,16 @@ Put the following in your \code{.emacs} file to tell ESS not mess with
 (add-hook 'ess-transcript-mode-hook
           ;; According to the ess docs, ess-nuke-trailing-whitespace-p
           ;; is supposed to be nil by default (see the defvar in ess-utils.el).
-          ;; But it gets set to t somewhere else, so disable it here.
+          ;; But it gets set to t somewhere else, so disable it here for
+          ;; .Rt files, and also make RET behave the regular way.
           (lambda ()
-            (local-set-key "RET" 'newline)
-            (toggle-read-only 0)
-            (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
-            (setq ess-nuke-trailing-whitespace-p nil)))
-          }
+          (if (string-match ".[Rr]t$" (buffer-name))
+             (progn
+                (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
+                (define-key ess-transcript-mode-map (kbd "RET") 'newline)
+                (toggle-read-only 0)
+                (setq ess-nuke-trailing-whitespace-p nil)))) t)
+}
 }
 \author{
   Tony Plate <tplate@acm.org>
