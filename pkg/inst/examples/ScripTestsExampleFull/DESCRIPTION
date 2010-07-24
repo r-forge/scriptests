@@ -1,0 +1,12 @@
+Package: ScripTestsExampleFull
+Type: Package
+Title: Examples of using the ScripTest package
+Version: 1.0-0
+Date: 2010-07-23
+Author: Tony Plate
+Maintainer: Tony Plate <tplate@acm.org>
+Suggests: ScripTests
+Description: Examples of using the ScripTest package.
+  These examples do not all pass.
+License: GPL
+Packaged: Fri Apr 13 16:11:47 2007; tplate

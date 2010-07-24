@@ -1,0 +1,10 @@
+> 1 + 2
+[1] 3
+> 2 + 3
+#@ info-only This test is intended not to match, but to result in a "warning" and not an "error"
+[1] 5.0
+> ScripTestsExample:::privatePlus(1,1)
+[1] 2
+> exportedPlus(1,1)
+[1] 2
+>

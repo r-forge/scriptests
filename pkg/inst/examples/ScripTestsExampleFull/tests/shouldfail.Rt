@@ -1,0 +1,4 @@
+> 1 + 1
+#@ diff-msg: ## This test is intended to fail to show what happens
+[1] 3
+> 
