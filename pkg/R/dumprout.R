@@ -1,4 +1,4 @@
-dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = TRUE, console = TRUE, files = !console, clobber = identical(output.suffix, ".Rout.tmp"), level=c("all", "info", "warning", "error")) {
+dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = TRUE, console = TRUE, files = !console, clobber = identical(output.suffix, ".Rout.tmp"), level=c("error", "all", "info", "warning")) {
     level <- match.arg(level)
     if (inherits(res, "RtTestSetResults")) {
         # make this single test result look like a list of results

@@ -63,7 +63,7 @@ source.pkg <- function(pkg.dir=mget("ScripTests.pkg.dir", envir=globalenv())[[1]
     # Sort the files in the C locale
     cur.locale <- Sys.getlocale(category = "LC_COLLATE")
     Sys.setlocale(category = "LC_COLLATE", locale = "C")
-    on.exit(Sys.setlocale(category = "LC_COLLATE", locale = cur.locale))
+    on.exit(Sys.setlocale(category = "LC_COLLATE", locale = cur.locale), add=TRUE)
     # If we have 'Collate' in DESCRIPTION, use that to sort the files
     collate.string <- desc[[paste("collate", .Platform$OS.type, sep=".")]]
     if (is.null(collate.string))

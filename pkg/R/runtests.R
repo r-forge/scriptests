@@ -71,7 +71,7 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
         r.libs.site.orig <- Sys.getenv("R_LIBS_SITE")[[1]]
         r.libs.site <- unique(sapply(c(strsplit(r.libs.site.orig, split=";")[[1]], check.dirs), normalizePath))
         Sys.setenv("R_LIBS_SITE", paste(r.libs.site, collapse=";"))
-        on.exit(Sys.setenv("R_LIBS_SITE", r.libs.site.orig))
+        on.exit(Sys.setenv("R_LIBS_SITE", r.libs.site.orig), add=TRUE)
     }
     if (!is.null(dir)) {
         if (file.exists(dir)) {
@@ -101,7 +101,7 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
         if (verbose)
             cat("* Setting working directory to ", dir, "\n", sep="")
         setwd(dir)
-        on.exit(setwd(cwd))
+        on.exit(setwd(cwd), add=TRUE)
     }
     if (!full) {
         if (!is.null(output.suffix) && length(output.suffix)!=1)
@@ -117,7 +117,7 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
 
     if (!full) {
         old.options <- options(width=80, warn=1)
-        on.exit(options(old.options))
+        on.exit(options(old.options), add=TRUE)
         res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, enclos=enclos, subst=subst, path=path)
         attr(res, "dir") <- dirname(names(res)[1])
         names(res) <- basename(names(res))

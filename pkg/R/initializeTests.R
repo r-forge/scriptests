@@ -77,9 +77,9 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
             rOutSaveCon <- file(rOutSave, "w")
         # do in a local() block so we can use on.exit()
         local({
-            on.exit(close(cmdOutCon))
+            on.exit(close(cmdOutCon), add=TRUE)
             if (create.Rout.save)
-                on.exit(close(rOutSaveCon))
+                on.exit(close(rOutSaveCon), add=TRUE)
             lapply(tests, function(test) {
                 if (!is.null(test$comment)) {
                     commands <- test$comment

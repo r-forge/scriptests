@@ -79,7 +79,7 @@ if (F) {
     # was using this in an earlier incarnation
 testWrapper <- function(pkg.dir, dir=file.path(paste(pkg.dir, ".Rcheck", sep=""), "tests")) {
     cwd <- getwd()
-    on.exit(setwd(cwd))
+    on.exit(setwd(cwd), add=TRUE)
     setwd(dir)
     existing.files <- list.files()
     status <- .runPackageTests()

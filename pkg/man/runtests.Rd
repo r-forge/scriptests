@@ -34,7 +34,7 @@ dumprout(res = .Last.value,
          console = TRUE,
          files = !console,
          clobber = identical(output.suffix, ".Rout.tmp"),
-         level=c("all", "info", "warning", "error"))
+         level=c("error", "all", "info", "warning"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
