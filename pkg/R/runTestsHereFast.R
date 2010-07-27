@@ -1,10 +1,10 @@
 runTestsHereFast <- function(pattern=".*",
-                             pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
+                             pkg.dir=get("scriptests.pkg.dir", envir=globalenv()),
                              pkg.name=NULL,
                              file=NULL,
                              verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
                              test.suffix=".Rt",
-                             path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))) {
+                             path=mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))) {
     # This does the similar work as runScripTests()/.runPackageTests(),
     # with these differences:
     #
@@ -13,7 +13,7 @@ runTestsHereFast <- function(pattern=".*",
     #   (2) all test code is run in this R session (runScripTests() runs
     #       each file in a different R session)
     #   (3) doesn't read the CONFIG file
-    #   (4) use of ScripTests initialize/diff/finalize is hardwired in here
+    #   (4) use of scriptests initialize/diff/finalize is hardwired in here
     #   (5) output is captured using evalCapture() instead of reading it
     #       from a transcript
     if (is.null(pkg.name))

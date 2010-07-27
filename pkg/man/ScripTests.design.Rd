@@ -1,11 +1,11 @@
-\name{ScripTests.design}
-\alias{ScripTests.design}
+\name{scriptests.design}
+\alias{scriptests.design}
 \docType{package}
-\title{Design considerations for package ScripTests}
+\title{Design considerations for package scriptests}
 \description{
-  Design considerations for package ScripTests.  This file is a poorly
+  Design considerations for package scriptests.  This file is a poorly
   organized collection of notes regarding the design and evolution of
-  the ScripTests package.
+  the scriptests package.
 }
 \details{
 
@@ -19,7 +19,7 @@
   run each .R file.  This is where the non-overrideable redirection of
   stderr to .Rout happens.
 
-  New design for ScripTests to work with R-2.9.0 in which "R CMD check"
+  New design for scriptests to work with R-2.9.0 in which "R CMD check"
   no longer uses Makefiles in tests directory.
 
   \itemize{
@@ -29,7 +29,7 @@
     \item There should be a file called \code{runtests.Rin}, which
     should contain the following two lines:
     \preformatted{
-      library(ScripTests)
+      library(scriptests)
       runScripTests()
     }
 
@@ -45,7 +45,7 @@
 
     }
   }
-\section{Comparisons to previous ScripTests designs}{
+\section{Comparisons to previous scriptests designs}{
 
   The functionality that this design gives up over previous designs is
   immediate checking of test output.  Instead test output is checked
@@ -84,7 +84,7 @@
   R more directly.
 }
 
-\section{Original ScripTests design based on Makefiles}{
+\section{Original scriptests design based on Makefiles}{
 
 An initial design changed the default goal by assigning .DEFAULT\_GOAL in
 tests/Makefile.  This works with GNU make version 3.81, which is
@@ -108,7 +108,7 @@ target (here \code{all-Rt}).
 \url{http://www.gnu.org/software/automake/manual/make/Force-Targets.html}
 describes 'force targets'.
 
-Here's the relevant section from ScripTests/inst/scripts/Makefile.sub:
+Here's the relevant section from scriptests/inst/scripts/Makefile.sub:
 
 \preformatted{
 # Use 'force' to effectively create another target, by calling
@@ -221,15 +221,15 @@ changeRdiff:
         echo RDIFF = echo hehehe >> Makevars
 
 # Create scripts we will need (do this here to minimize the
-# number of files needed to support ScripTests in a package.)
+# number of files needed to support scriptests in a package.)
 createScripts:
-        @( echo '## Run a script in the ScripTests/scripts (from ScripTests/inst/scripts)' ; \
+        @( echo '## Run a script in the scriptests/scripts (from scriptests/inst/scripts)' ; \
         echo '## This file does not have .R suffix because if it did, R CMD check would want to run it as a test' ; \
-        echo 'library(package="ScripTests", char=TRUE)' ; \
+        echo 'library(package="scriptests", char=TRUE)' ; \
         echo 'args <- commandArgs(TRUE)' ; \
         echo 'debug <- is.element("--debug", args)' ; \
         echo 'if (length(args)>0) {' ; \
-        echo '    script.path <- system.file(package="ScripTests", "scripts")' ; \
+        echo '    script.path <- system.file(package="scriptests", "scripts")' ; \
         echo '    if (debug) {' ; \
         echo '        cat("RtTestScript called with ", length(args), " args: ", paste("\"", args, "\"", collapse=", ", sep=""), "\n", sep="")' ; \
         echo '        cat("Looking for scripts in \"", script.path, "\"\n", sep="")' ; \
@@ -367,15 +367,15 @@ changeRdiff:
         echo RDIFF = echo hehehe >> Makevars
 
 # Create scripts we will need (do this here to minimize the
-# number of files needed to support ScripTests in a package.)
+# number of files needed to support scriptests in a package.)
 createScripts:
-        @( echo '## Run a script in the ScripTests/scripts (from ScripTests/inst/scripts)' ; \
+        @( echo '## Run a script in the scriptests/scripts (from scriptests/inst/scripts)' ; \
         echo '## This file does not have .R suffix because if it did, R CMD check would want to run it as a test' ; \
-        echo 'library(package="ScripTests", char=TRUE)' ; \
+        echo 'library(package="scriptests", char=TRUE)' ; \
         echo 'args <- commandArgs(TRUE)' ; \
         echo 'debug <- is.element("--debug", args)' ; \
         echo 'if (length(args)>0) {' ; \
-        echo '    script.path <- system.file(package="ScripTests", "scripts")' ; \
+        echo '    script.path <- system.file(package="scriptests", "scripts")' ; \
         echo '    if (debug) {' ; \
         echo '        cat("RtTestScript called with ", length(args), " args: ", paste("\"", args, "\"", collapse=", ", sep=""), "\n", sep="")' ; \
         echo '        cat("Looking for scripts in \"", script.path, "\"\n", sep="")' ; \

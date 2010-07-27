@@ -3,10 +3,10 @@
 \alias{initializeTests}
 \alias{summarizeTests}
 \title{
-  Support functions for package ScripTests
+  Support functions for package scriptests
 }
 \description{
-  These are support functions for package ScripTests.  They are called
+  These are support functions for package scriptests.  They are called
   to prepare a test directory for running tests, compare the output of
   each test with target out, and summarize test results.
 }

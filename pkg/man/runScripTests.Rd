@@ -11,7 +11,7 @@
   subdirectory of a package.  The \code{runtests.R} file should contain
   these two lines:
   \preformatted{
-    library(ScripTests)
+    library(scriptests)
     runScripTests()
     }
 

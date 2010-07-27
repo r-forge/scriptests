@@ -1,8 +1,8 @@
-> # plus() is defined in ScripTests, but not exported
+> # plus() is defined in scriptests, but not exported
 > # to avoid unneccesary name conflicts.
-> ScripTests:::plus(1, 1)
+> scriptests:::plus(1, 1)
 [1] 2
-> ScripTests:::plus(2, 
+> scriptests:::plus(2, 
 + 2)
 [1] 4
 > 

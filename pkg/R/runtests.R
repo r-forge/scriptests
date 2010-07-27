@@ -1,10 +1,10 @@
-runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
+runtests <- function(pkg.dir=get("scriptests.pkg.dir", envir=globalenv()),
                      pattern=".*", file=NULL,
                      full=FALSE, dir=TRUE,
                      clobber=FALSE, output.suffix=NULL, console=FALSE,
                      ...,
                      verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
-                     path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
+                     path=mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
     if (!interactive() && basename(getwd())=="tests") {
         if (nargs() != 0)
             stop("runtests() is for interactive use - use runScripTests() in tests/runtests.R")
@@ -111,9 +111,9 @@ runtests <- function(pkg.dir=get("ScripTests.pkg.dir", envir=globalenv()),
     }
 
     if (supplied.pkg.dir)
-        assign("ScripTests.pkg.dir", pkg.dir, envir=globalenv())
+        assign("scriptests.pkg.dir", pkg.dir, envir=globalenv())
     if (supplied.path)
-        assign("ScripTests.pkg.path", path, envir=globalenv())
+        assign("scriptests.pkg.path", path, envir=globalenv())
 
     if (!full) {
         old.options <- options(width=80, warn=1)

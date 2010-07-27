@@ -1,6 +1,6 @@
-\name{ScripTests-package}
-\alias{ScripTests-package}
-\alias{ScripTests}
+\name{scriptests-package}
+\alias{scriptests-package}
+\alias{scriptests}
 \docType{package}
 \title{
   Support for running transcript-style tests
@@ -29,17 +29,17 @@ easier to automate:
   (one or more errors results in \code{R CMD check} stopping with an
   indication of error after running all tests).  Unlike the standard
   tests in \code{R CMD check}, output mismatch detected by
-  \code{ScripTests} results in \code{R CMD check} stopping with an error.
+  \code{scriptests} results in \code{R CMD check} stopping with an error.
   \item a concise summary of warnings and errors is given at the end
   \item testing can continue after errors and report multiple errors
 }
 To make it so that "R CMD check" will run transcript-style tests, do the following:
 \enumerate{
-  \item Make sure the \code{ScripTests} package is installed on your system
+  \item Make sure the \code{scriptests} package is installed on your system
   \item Put a file named "runtests.R" in the "tests" directory in your
   own package with the following contents:
   \preformatted{
-library(ScripTests)
+library(scriptests)
 runScripTests() }
   \item add transcript files ending in .Rt in the "tests" directory in
   your own package, e.g.:
@@ -47,6 +47,12 @@ runScripTests() }
 > 1 + 2
 [1] 3
 >   }
+  \item add the line \code{Suggests: scriptests} to DESCRIPTION file.
+  If there is an existing "Suggests:" line, just add \code{scriptests}
+  to it.  (It's better to use the \code{Suggests:} than the
+  \code{Depends:} fields, because packages listed in the depends field
+  are loaded when the package is loaded, which is probably unnecessary
+  is most cases -- the \code{scriptests} package will only be needed for testing.
 }
 
 If any tests fail, the file \code{test-summary.fail} will be left in the
@@ -64,12 +70,12 @@ during code development.
     \item All commands in the transcript file must be prefixed with
     command or continuation prompts, exactly as they appear in a
     transcript.
-    \item ScripTests uses simple heuristics to identify commands, comments and
+    \item scriptests uses simple heuristics to identify commands, comments and
     output.  If the transcript cannot be separated into comments,
     commands and output by these heuristics (e.g., if a command prints
     out a line starting with the command prompt "> "), things will not
     work properly.
-    \item When running tests in a package, ScripTests uses a heuristic to
+    \item When running tests in a package, scriptests uses a heuristic to
     guess the package name and automatically include an appropriate
     \code{library(package-being-tested)} command before the tests.  If
     this heuristic fails, the functions from the package being tested
@@ -89,7 +95,7 @@ during code development.
     differently over multiple lines, the tests will fail (unless
     \code{ignore-linebreaks} is used). Different output width can easily
     happen if \code{options("width")} was different in the session that
-    generated the desired output. Before trying to match, ScripTests
+    generated the desired output. Before trying to match, scriptests
     converts all white-space to single white-space, unless a control
     line specifies otherwise.
 
@@ -127,11 +133,11 @@ The \code{tests} directory can also contain a CONFIG file, which can
 specify the functions to call for testing.  The defaults are equivalent
 to the following lines in the CONFIG file:
 \preformatted{
-Depends: ScripTests
+Depends: scriptests
 Debug: FALSE
-Initialize: ScripTests:::initializeTests()
-Diff: ScripTests:::ScripDiff()
-Finalize: ScripTests:::summarizeTests() }
+Initialize: scriptests:::initializeTests()
+Diff: scriptests:::ScripDiff()
+Finalize: scriptests:::summarizeTests() }
 }
 \note{
 

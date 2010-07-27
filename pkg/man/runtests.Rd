@@ -14,7 +14,7 @@
   }
 }
 \usage{
-runtests(pkg.dir = get("ScripTests.pkg.dir", envir = globalenv()),
+runtests(pkg.dir = get("scriptests.pkg.dir", envir = globalenv()),
          pattern = ".*",
          file = NULL,
          full = FALSE,
@@ -27,7 +27,7 @@ runtests(pkg.dir = get("ScripTests.pkg.dir", envir = globalenv()),
          envir = globalenv(),
          enclos = envir,
          subst = NULL,
-         path = mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
+         path = mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
 dumprout(res = .Last.value,
          output.suffix = ".Rout.tmp",
          verbose = TRUE,
@@ -125,7 +125,7 @@ dumprout(res = .Last.value,
 \author{ Tony Plate \email{tplate@acm.org} }
 \seealso{
   \code{\link{source.pkg}()} shares the global variables
-\code{ScripTests.pkg.dir} and \code{ScripTests.pkg.path} that provide
+\code{scriptests.pkg.dir} and \code{scriptests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 
   For running tests in under \code{R CMD check}, use the function \code{\link{runScripTests}()}.
@@ -137,29 +137,29 @@ defaults for the \code{pkg.dir} and \code{path} arguments.
 > # source.pkg() reads in the functions -- could just as well
 > # load the library, but source.pkg() can be more convenient
 > # when developing a package.
-> source.pkg("ScripTests")
-Reading 5 .R files into env at pos 2: 'pkgcode:ScripTests'
-Sourcing ScripTests/R/createRfromRt.R
-Sourcing ScripTests/R/interactive.R
-Sourcing ScripTests/R/oldcode.R
-Sourcing ScripTests/R/plus.R
-Sourcing ScripTests/R/rttests.R
+> source.pkg("scriptests")
+Reading 5 .R files into env at pos 2: 'pkgcode:scriptests'
+Sourcing scriptests/R/createRfromRt.R
+Sourcing scriptests/R/interactive.R
+Sourcing scriptests/R/oldcode.R
+Sourcing scriptests/R/plus.R
+Sourcing scriptests/R/rttests.R
 list()
 > runtests("simple1")
-Running tests in ScripTests/tests/simple1.Rt (read 4 chunks)
+Running tests in scriptests/tests/simple1.Rt (read 4 chunks)
 ....
-Ran 4 tests with 0 errors and 0 warnings from ScripTests/tests/simple1.Rt
+Ran 4 tests with 0 errors and 0 warnings from scriptests/tests/simple1.Rt
 > runtests("simple2")
-Running tests in ScripTests/tests/simple2.Rt (read 5 chunks)
+Running tests in scriptests/tests/simple2.Rt (read 5 chunks)
 .....
-Ran 5 tests with 0 errors and 0 warnings from ScripTests/tests/simple2.Rt
+Ran 5 tests with 0 errors and 0 warnings from scriptests/tests/simple2.Rt
 > runtests("simple")
-Running tests in ScripTests/tests/simple1.Rt (read 4 chunks)
+Running tests in scriptests/tests/simple1.Rt (read 4 chunks)
 ....
-Ran 4 tests with 0 errors and 0 warnings from ScripTests/tests/simple1.Rt
-Running tests in ScripTests/tests/simple2.Rt (read 5 chunks)
+Ran 4 tests with 0 errors and 0 warnings from scriptests/tests/simple1.Rt
+Running tests in scriptests/tests/simple2.Rt (read 5 chunks)
 .....
-Ran 5 tests with 0 errors and 0 warnings from ScripTests/tests/simple2.Rt
+Ran 5 tests with 0 errors and 0 warnings from scriptests/tests/simple2.Rt
 >
 }
 }

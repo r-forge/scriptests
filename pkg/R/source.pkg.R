@@ -1,11 +1,11 @@
-source.pkg <- function(pkg.dir=mget("ScripTests.pkg.dir", envir=globalenv())[[1]],
+source.pkg <- function(pkg.dir=mget("scriptests.pkg.dir", envir=globalenv())[[1]],
                        pattern=".*", suffix="\\.R$", dlls=c("no", "check"), pos=2,
-                       path=mget("ScripTests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
+                       path=mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
     dlls <- match.arg(dlls)
     if (!missing(pkg.dir))
-        assign("ScripTests.pkg.dir", pkg.dir, envir=globalenv())
+        assign("scriptests.pkg.dir", pkg.dir, envir=globalenv())
     if (!missing(path))
-        assign("ScripTests.pkg.path", path, envir=globalenv())
+        assign("scriptests.pkg.path", path, envir=globalenv())
     if (!file.exists(pkg.path(path, pkg.dir)))
         stop("cannot find package directory ", pkg.path(path, pkg.dir), " (supply path=... ?)")
     if (file.exists(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))) {

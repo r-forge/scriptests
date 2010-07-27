@@ -1,6 +1,6 @@
 ## Modification of function .runPackageTests() from R-2.9.0/src/library/tools/R/testing.R
 ## used by R CMD check
-## This is a private function in ScripTests, but it is written so that
+## This is a private function in scriptests, but it is written so that
 ## it could be a drop in replacement for .runPackageTests() in .../src/library/tools/R/testing.R
 
 .runPackageTests <- function(use_gct = FALSE, run.preexisting.R.files=TRUE,
