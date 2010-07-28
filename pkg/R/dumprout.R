@@ -24,7 +24,7 @@ dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = T
                 || (level == "warning" && all(cc[c("warning", "error")] == 0))
                 || (level == "info" && all(cc[c("info", "warning", "error")] == 0))) {
                 if (verbose)
-                    cat("* Skipping", outfile, ": no notifications at level '", level, "'",
+                    cat("* Skipping ", outfile, ": no notifications at level '", level, "'",
                         if (level!="error") " or above", "\n", sep="")
                 next
             }
