@@ -8,6 +8,7 @@ source.pkg <- function(pkg.dir=mget("scriptests.pkg.dir", envir=globalenv())[[1]
         assign("scriptests.pkg.path", path, envir=globalenv())
     if (!file.exists(pkg.path(path, pkg.dir)))
         stop("cannot find package directory ", pkg.path(path, pkg.dir), " (supply path=... ?)")
+    desc <- NULL
     if (file.exists(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))) {
         desc <- read.dcf(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
@@ -25,7 +26,7 @@ source.pkg <- function(pkg.dir=mget("scriptests.pkg.dir", envir=globalenv())[[1]
         } else {
             for (dep in setdiff(sapply(depends[[1]][-1], as.character), "R")) {
                 if (any(is.element(paste(c("pkgcode", "package"), dep, sep=":"), search()))) {
-                    cat("  Depends element ", dep, " is already loaded\n", sep="")
+                    cat("  Depends element '", dep, "' is already loaded\n", sep="")
                 } else {
                     cat("Doing require(", dep, ") to satisfy Depends in DESCRIPTION\n", sep="")
                     if (!require(dep, character.only=TRUE, quietly=TRUE, warn.conflicts=FALSE, save=FALSE))
