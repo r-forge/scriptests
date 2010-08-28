@@ -7,7 +7,7 @@ runtests <- function(pkg.dir=get("scriptests.pkg.dir", envir=globalenv()),
                      path=mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
     if (!interactive() && basename(getwd())=="tests") {
         if (nargs() != 0)
-            stop("runtests() is for interactive use - use runScripTests() in tests/runtests.R")
+            warning("runtests() is for interactive use - use runScripTests() in tests/runtests.R - calling runScripTests() and ignoring all arguments supplied to runtests()")
         # Looks like we're being called by R CMD check (because runtests()
         # instead of runScripTests() was put in tests/runtests.R.
         status <- runScripTests()
@@ -17,6 +17,9 @@ runtests <- function(pkg.dir=get("scriptests.pkg.dir", envir=globalenv()),
     pkg.name <- read.pkg.name(path, pkg.dir)
     supplied.pkg.dir <- !missing(pkg.dir)
     supplied.path <- !missing(path)
+    orig.path <- path
+    # convert to absolute path because this function changes working directories,
+    path <- normalizePath(path)
     if (!is.null(file) && pattern!=".*")
         stop("cannot supply both 'file' and 'pattern'")
     if (is.null(subst) && !full) {
@@ -104,8 +107,13 @@ runtests <- function(pkg.dir=get("scriptests.pkg.dir", envir=globalenv()),
         on.exit(setwd(cwd), add=TRUE)
     }
     if (!full) {
-        if (!is.null(output.suffix) && length(output.suffix)!=1)
+        if (!is.null(output.suffix) && length(output.suffix)!=1) {
+            ## Functions installed in on.exit() do not always seem to reliably
+            ## run after an error in a called function, so make habit of calling
+            ## them manually before an error.
+            eval(sys.on.exit())
             stop("length(output.suffix)!=1")
+        }
         if (length(list(...)))
             warning("ignoring extra arguments when full=FALSE: ", paste(names(list(...)), collapse=", "))
     }
@@ -113,7 +121,7 @@ runtests <- function(pkg.dir=get("scriptests.pkg.dir", envir=globalenv()),
     if (supplied.pkg.dir)
         assign("scriptests.pkg.dir", pkg.dir, envir=globalenv())
     if (supplied.path)
-        assign("scriptests.pkg.path", path, envir=globalenv())
+        assign("scriptests.pkg.path", orig.path, envir=globalenv())
 
     if (!full) {
         old.options <- options(width=80, warn=1)
