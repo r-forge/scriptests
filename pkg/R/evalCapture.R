@@ -14,6 +14,8 @@ evalCapture <- function(expr, envir=globalenv(), enclos=envir) {
         ## The standard warnings handling code is in
         ##   static void vwarningcall_dflt(SEXP call, const char *format, va_list ap)
         ## in src/main/errors.c
+        ## TODO: make this code handle truncation of long warnings correctly
+        ## (cf options("warning.length"))
         wHandler <- function(w) {
             ## Try to format the message in the same way as is done
             ## for standard warning messages. (see vwarningcall_dflt() in src/main/errors.c)

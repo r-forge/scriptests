@@ -1,11 +1,12 @@
-source.pkg <- function(pkg.dir=mget("scriptests.pkg.dir", envir=globalenv())[[1]],
-                       pattern=".*", suffix="\\.R$", dlls=c("no", "check"), pos=2,
-                       path=mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]]) {
+source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
+                       pattern=".*", suffix="\\.R$", dlls=c("no", "check"),
+                       pos=NA, all=FALSE,
+                       path=getOption("scriptests.pkg.path", default=getwd())) {
     dlls <- match.arg(dlls)
     if (!missing(pkg.dir))
-        assign("scriptests.pkg.dir", pkg.dir, envir=globalenv())
+        options("scriptests.pkg.dir"=pkg.dir)
     if (!missing(path))
-        assign("scriptests.pkg.path", path, envir=globalenv())
+        options("scriptests.pkg.path"=path)
     if (!file.exists(pkg.path(path, pkg.dir)))
         stop("cannot find package directory ", pkg.path(path, pkg.dir), " (supply path=... ?)")
     desc <- NULL
@@ -36,28 +37,46 @@ source.pkg <- function(pkg.dir=mget("scriptests.pkg.dir", envir=globalenv())[[1]
         }
     }
 
-    # Create a new environment on the search path
+    # See if we need to create a new environment on the search path
     oldpos <- match(paste("pkgcode", pkg.name, sep=":"), search())
-    if (missing(pos)) {
-        pos <- oldpos
-    } else if (!is.na(oldpos)) {
-        detach(oldpos)
-    }
-    if (is.na(pos)) {
-        envir <- attach(NULL, pos=2, name=paste("pkgcode", pkg.name, sep=":"))
-        pos <- 2
-    } else if (search()[pos] == paste("pkgcode", pkg.name, sep=":")) {
-        envir <- as.environment(pos)
-    } else {
+    if (is.na(oldpos)) {
+        # we do need to create a new one
+        if (is.na(pos))
+            pos <- 2
         envir <- attach(NULL, pos=pos, name=paste("pkgcode", pkg.name, sep=":"))
+    } else {
+        # we have an old one, make sure it is in the right spot
+        envir <- as.environment(oldpos)
+        if (is.na(pos)) {
+            pos <- oldpos
+        } else {
+            if (pos!=oldpos) {
+                detach(oldpos)
+                attach(envir, pos=pos, name=paste("pkgcode", pkg.name, sep=":"))
+            }
+        }
     }
-    # Work out what R files to source
+    # Work out which R files to source
     files <- list.files(file.path(pkg.path(path, pkg.dir), "R"), all=T, pattern=pattern, full=TRUE, ignore.case=TRUE)
     if (!is.null(suffix)) {
         i <- grep(suffix, files, ignore.case=TRUE)
         if (length(files) && length(i)==0)
             warning("no files found that matched pattern \"", pattern, "\" and suffix pattern \"", suffix, "\"")
         files <- files[i]
+    }
+    file.times <- file.info(files)
+    if (!all) {
+        if (exists(".file.times.old", envir=envir, inherits=FALSE)) {
+            file.times.old <- get(".file.times.old", envir=envir, inherits=FALSE)
+            # rely on data.frame indexing returning NA for files not in file.times.old
+            touched <- file.times[files, "mtime"] > file.times.old[files, "mtime"]
+            touched <- is.na(touched) | touched
+            if (sum(touched))
+                cat("Only reading", sum(touched), "changed .R files;", sum(!touched), "are unchanged\n")
+            else
+                cat("No .R files have changed;", sum(!touched), "are unchanged\n")
+            files <- files[touched]
+        }
     }
     # Omit files starting with ".#" -- these can be temporary (editor save) files
     files <- grep("^\\.#", files, invert=TRUE, value=TRUE)
@@ -88,12 +107,16 @@ source.pkg <- function(pkg.dir=mget("scriptests.pkg.dir", envir=globalenv())[[1]
     }
     cat("Reading ", length(files), " .R files into env at pos ", pos, ": '", search()[pos], "'\n", sep="")
     names(files) <- files
-    problems <- c(problems, lapply(files,
-           function(file) {
-               cat("Sourcing ", file, "\n", sep="")
-               try(sys.source(file, envir=envir))
-               }
-           ))
+    problems <- list()
+    if (length(files))
+        problems <- c(problems, lapply(files,
+                                       function(file) {
+                                           cat("Sourcing ", file, "\n", sep="")
+                                           try(sys.source(file, envir=envir))
+                                       }
+                                       ))
+    if (all(sapply(problems, is.null)))
+        assign(".file.times.old", envir=envir, value=file.times)
 
     # Work out what data files to load (look for .rdata,
     # .rda, case insensitive) This does NOT cover the full

@@ -14,7 +14,7 @@
   }
 }
 \usage{
-runtests(pkg.dir = get("scriptests.pkg.dir", envir = globalenv()),
+runtests(pkg.dir = getOption("scriptests.pkg.dir"),
          pattern = ".*",
          file = NULL,
          full = FALSE,
@@ -27,7 +27,7 @@ runtests(pkg.dir = get("scriptests.pkg.dir", envir = globalenv()),
          envir = globalenv(),
          enclos = envir,
          subst = NULL,
-         path = mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
+         path = getOption("scriptests.pkg.path", default=getwd()))
 dumprout(res = .Last.value,
          output.suffix = ".Rout.tmp",
          verbose = TRUE,

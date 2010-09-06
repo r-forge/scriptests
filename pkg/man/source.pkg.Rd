@@ -12,12 +12,12 @@
 
 }
 \usage{
-source.pkg(pkg.dir = mget("scriptests.pkg.dir", envir = globalenv())[[1]],
+source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
            pattern = ".*",
            suffix = "\\\\.R$",
            dlls = c("no", "check"),
-           pos = 2,
-           path=mget("scriptests.pkg.path", envir=globalenv(), ifnotfound=list(getwd()))[[1]])
+           pos = NA, all = FALSE,
+           path=getOption("scriptests.pkg.path", default=getwd()))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -37,6 +37,10 @@ source.pkg(pkg.dir = mget("scriptests.pkg.dir", envir = globalenv())[[1]],
   }
 
   \item{pos}{ Which environment on the search path to source R code into }
+
+  \item{all}{ If \code{TRUE}, all files matching the pattern and suffix
+  are sourced, if \code{FALSE}, only files that have changed since last
+  sourced are sourced again. }
 
   \item{path}{ The file system path to the directory in which the
     package is located.  By default, R source files are looked for as

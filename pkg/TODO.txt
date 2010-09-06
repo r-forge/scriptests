@@ -1,7 +1,11 @@
+2010-09-05:
+TODO:
+* make evalCapture code handle truncation of long warnings correctly (cf options("warning.length"))
+
 2010-07-13:
 TODO:
-* clean up the self-test stuff (remove it)
-* remove function checkTestOutput()
+* think about cleaning up/removing the self-check stuff (this is the stuff that adds calls to the end of tests that go back and see if the tests ran correctly)
+* remove function checkTestOutput() -- this is used by the self-check stuff, but nowhere else
 
 2009-08-19:
 
