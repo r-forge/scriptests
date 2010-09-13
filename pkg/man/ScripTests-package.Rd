@@ -63,7 +63,8 @@ that the tests were run, also check for the existence of \code{test-summary.txt}
 Tests can be run interactively using the function
 \code{\link{runtests}()}.  The function \code{\link{source.pkg}()} can
 be useful to quickly re-read the function definitions in a package
-during code development.
+during code development.  See the section "Running tests" in the
+documentation for \code{\link{runtests}()} for further details.
 
   Notes:
   \itemize{
@@ -145,9 +146,9 @@ The standard Emacs ESS functions for writing out \code{".Rt"} files will strip
 trailing white space, which can result in many unimportant mismatches
 when using \code{ediff} to compare \code{".Rt"} and \code{".Rout"} files (e.g.,
 because an R transcript will have \code{"> "} for empty command lines).
-Also, \code{".Rt"} files are read-only by default, and RET tries to send
-the current line to an R interpreter.  It is more convenient if all
-these special behaviors are turned off.
+Also, \code{".Rt"} files are read-only by default, and the return key is
+bound to a command to send the current line to an R interpreter.  It is more
+convenient if all these special behaviors are turned off.
 Put the following in your \code{.emacs} file to tell ESS not mess with
 \code{".Rt"} files prior to saving them:
 \preformatted{
