@@ -113,21 +113,21 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
   environment to the directory of the package whose code was sourced.
 }
 \seealso{
-\code{\link{runtests}} shares the global variables
+\code{\link{runtests}()} shares the \code{options()} variables
 \code{scriptests.pkg.dir} and \code{scriptests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
 }
 
 \examples{
 \dontrun{
-# sourcing the code in a package stored in <mypackage>/{DESCRIPTION/R/man/tests}:
+# sourcing the code in a package stored in <mypackage>/{DESCRIPTION,R,man,tests}:
 source.pkg("<mypackage>")
-# sourcing the code in a package stored in path/to/dir/<mypackage>/{DESCRIPTION/R/man/tests}:
+# sourcing the code in a package stored in path/to/dir/<mypackage>/{DESCRIPTION,R,man,tests}:
 source.pkg("<mypackage>", path="path/to/dir")
-# sourcing the code in a package stored in pkg/{DESCRIPTION/R/man/tests}:
+# sourcing the code in a package stored in pkg/{DESCRIPTION,R,man,tests}:
 # where "pkg" is unrelated to the name of the pacakage
 source.pkg("pkg", path="path/to/dir")
-# sourcing the code in a package stored in <mypackage>/pkg/{DESCRIPTION/R/man/tests}:
+# sourcing the code in a package stored in <mypackage>/pkg/{DESCRIPTION,R,man,tests}:
 source.pkg("<mypackage>", path="$PKG/pkg")
 }
 }
