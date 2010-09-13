@@ -130,7 +130,7 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         attr(res, "dir") <- dirname(names(res)[1])
         names(res) <- basename(names(res))
         if (console || (!is.null(output.suffix) && !(is.logical(output.suffix) && !output.suffix)))
-            dumprout(res, output.suffix, console=console)
+            dumprout(res, output.suffix=output.suffix, console=console, clobber=clobber)
         return(invisible(res))
     } else {
         status <- runScripTests(..., quit=FALSE, subst=subst)
