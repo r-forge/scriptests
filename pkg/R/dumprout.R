@@ -48,5 +48,5 @@ dumprout <- function(res = .Last.value, output.suffix = ".Rout.tmp", verbose = T
             }
         }
     }
-    invisible(NULL)
+    invisible(res)
 }
