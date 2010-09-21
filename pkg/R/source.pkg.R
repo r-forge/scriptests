@@ -139,11 +139,26 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
 
     # Do we need to load and DLL's or SO's?
     if (dlls=="check") {
-        # Try to find object files under <pkg.dir>.Rcheck and load them
-        dll.dir <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg.dir, ".Rcheck", sep="")), pkg.dir, "libs"))
-        if (!file.exists(dll.dir)) {
-            cat("Looking for DLL/SO files, but directory", dll.dir, "doesn't exist\n")
+        # Try to find object files under <pkg.dir>.Rcheck/<pkg.name> OR <pkg.name>.Rcheck/<pkg.name> and load them
+        dll.dir <- NULL
+        dll.dir1 <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg.dir, ".Rcheck", sep="")), pkg.name, "libs"))
+        dll.dir2 <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg.name, ".Rcheck", sep="")), pkg.name, "libs"))
+        if (file.exists(dll.dir1)) {
+            if (file.exists(dll.dir2)) {
+                # both exist, use the more recently modified one
+                if (diff(file.info(c(dll.dir1, dll.dir2))$mtime) > 0)
+                    dll.dir <- dll.dir2
+                else
+                    dll.dir <- dll.dir1
+            } else {
+                dll.dir <- dll.dir1
+            }
+        } else if (file.exists(dll.dir2)) {
+            dll.dir <- dll.dir2
         } else {
+            cat("Looking for DLL/SO files, but directories", dll.dir1, "and", dll.dir2, "don't exist", fill=TRUE)
+        }
+        if (!is.null(dll.dir)) {
             objfiles <- list.files(dll.dir, pattern=paste("*", .Platform$dynlib.ext, sep=""), ignore.case=TRUE)
             if (length(objfiles)==0) {
                 cat("Looking for DLL/SO files, but did not find any", .Platform$dynlib.ext, "files in ", dll.dir, "\n", fill=TRUE)
