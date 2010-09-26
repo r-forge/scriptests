@@ -9,14 +9,15 @@
   Support for running transcript-style tests
 }
 \details{
+
 Transcript-style tests are files containing R commands and output, as
 though copied verbatim from an interactive R session.  The output in the
 transcript file must match the actual output from running the command
-for the test to pass.  This testing framework is identical in concept to
-the standard \code{.R/.Rout.save} tests that are run by the
-\code{R CMD check}, but with some enhancements that are intended
-to make test development and maintanance faster, more convenient, and
-easier to automate:
+for the test to pass (with some exceptions - see "Control over matching"
+below).  This testing framework is identical in concept to the standard
+\code{.R/.Rout.save} tests that are run by the \code{R CMD check}, but
+with some enhancements that are intended to make test development and
+maintanance faster, more convenient, and easier to automate:
 \itemize{
   \item only the output file is needed - the inputs are parsed from
   the output file (i.e., \code{.Rt} file, which is analogous to an
@@ -90,8 +91,11 @@ documentation for \code{\link{runtests}()} for further details.
     session that runs the commands in the scripts to continue after an
     error, instead of stopping, which is the default behavior for
     non-interactive R.
+  }
 
-    \item Actual output is matched to desired output extracted from the
+  \emph{Control over matching}
+
+    Actual output is matched to desired output extracted from the
     transcript file in a line-by-line fashion.  If text is wrapped
     differently over multiple lines, the tests will fail (unless
     \code{ignore-linebreaks} is used). Different output width can easily
@@ -100,7 +104,7 @@ documentation for \code{\link{runtests}()} for further details.
     converts all white-space to single white-space, unless a control
     line specifies otherwise.
 
-    \item The following control lines can be present in the transcript
+    The following control lines can be present in the transcript
     after a command and before its output:
     \describe{
       \item{#@ignore-output}{Ignore the output of this particular
@@ -128,7 +132,6 @@ The date is <Sat Jul 10 16:20:01 2010>
       \item{#@ignore-linebreaks}{Target and actual will match even
         if wrapped differently over multiple lines}
       }
-    }
 
 The \code{tests} directory can also contain a CONFIG file, which can
 specify the functions to call for testing.  The defaults are equivalent

@@ -246,16 +246,18 @@ To conveniently source R code and run tests in this directory organization, do t
 }
 \author{ Tony Plate \email{tplate@acm.org} }
 \seealso{
+
   \code{\link{source.pkg}()} shares the options
-\code{scriptests.pkg.dir} and \code{scriptests.pkg.path} that provide
-defaults for the \code{pkg.dir} and \code{path} arguments.
+  \code{scriptests.pkg.dir} and \code{scriptests.pkg.path} that provide
+  defaults for the \code{pkg.dir} and \code{path} arguments.
 
   For running tests in under \code{R CMD check}, use the function
   \code{\link{runScripTests}()} in the file \code{tests/runtests.R} in
   the package.
 
-  For more details of how tests are run, inlcuding how to use directives
-  to string substitutions in test output, see \link{scriptests}.
+  For an overview and for more details of how tests are run, inlcuding
+  how to make test output matching more flexible, see \link{scriptests}.
+
 }
 \examples{
 \dontrun{
