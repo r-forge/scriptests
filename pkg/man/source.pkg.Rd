@@ -32,7 +32,8 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
     shared-objects:
     \itemize{
       \item \code{no}: don't load any DLLs
-      \item \code{check}: look in \code{<pkg.dir>.Rcheck/<pkg.name>/libs}
+      \item \code{check}: look in
+    \code{<pkg.dir>.Rcheck/<pkg.name>/libs} and  \code{<pkg.name>.Rcheck/<pkg.name>/libs}
       }
   }
 
@@ -43,12 +44,22 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
   sourced are sourced again. }
 
   \item{path}{ The file system path to the directory in which the
-    package is located.  By default, R source files are looked for as
-    \code{<path>/<pkg.name>/R/*.R}. This is remembered and the same
-    value used as the default in subsequent invocations.}
+    package is located.  The initial default for \code{path} is the
+    current directory.  By default, R source files are looked for in the
+    directory found by appending \code{pkg.dir} to \code{path}, i.e.
+    \code{<path>/<pkg.dir>/R/*.R}. If \code{path} contains the string
+    \code{$PKG}, \code{pkg.dir} is substituted for \code{$PKG} instead
+    of being appended to \code{path}.  \code{path} is remembered and the
+    same value used as the default in subsequent invocations.
+
+  }
 
 }
 \details{
+
+  The package directory (\code{pkg.dir}) does not need to be the same as
+  the package name.  The package name (refered to here as
+  \code{pkg.name}) is found by reading the \code{DESCRIPTION} file.
 
   All the objects created by the \code{.R} files are created in a
   special environment named \code{pkgcode:<pkg.name>}.  If this environment
@@ -85,7 +96,8 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
 
   \item if \code{dlls=="check"} (not the default), \code{source.pkg()}
   looks for DLLs (SO files under Unix) in the directory left by \code{R
-  CMD check <pkg.dir>}, i.e., in \code{<pkg.dir>.Rcheck/<pkg.name>/libs}, and uses
+  CMD check <pkg.dir>}, i.e., in \code{<pkg.dir>.Rcheck/<pkg.name>/libs}
+  or \code{<pkg.name>.Rcheck/<pkg.name>/libs}, and uses
   \code{dyn.load()} to load these DLLs.  If the DLL was already loaded
   (as indicated by \code{getLoadedDLLs()}), \code{dyn.unload()} is
   called first.  Be aware that unloading and reloading a DLL is not a
@@ -116,6 +128,8 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
 \code{\link{runtests}()} shares the \code{options()} variables
 \code{scriptests.pkg.dir} and \code{scriptests.pkg.path} that provide
 defaults for the \code{pkg.dir} and \code{path} arguments.
+
+\link{scriptests-package} gives and overview of the package.
 }
 
 \examples{
