@@ -1,6 +1,6 @@
 source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
                        pattern=".*", suffix="\\.R$", dlls=c("no", "check"),
-                       pos=NA, all=FALSE,
+                       pos=NA, all=FALSE, reset.function.envirs=TRUE,
                        path=getOption("scriptests.pkg.path", default=getwd())) {
     dlls <- match.arg(dlls)
     if (!missing(pkg.dir))
@@ -8,7 +8,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     if (!missing(path))
         options("scriptests.pkg.path"=path)
     if (!file.exists(pkg.path(path, pkg.dir)))
-        stop("cannot find package directory ", pkg.path(path, pkg.dir), " (supply path=... ?)")
+        stop("cannot find package directory ", pkg.path(path, pkg.dir), " using path='", path, "'")
     desc <- NULL
     if (file.exists(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))) {
         desc <- read.dcf(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))
@@ -108,15 +108,26 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     cat("Reading ", length(files), " .R files into env at pos ", pos, ": '", search()[pos], "'\n", sep="")
     names(files) <- files
     problems <- list()
-    if (length(files))
+    if (length(files)) {
         problems <- c(problems, lapply(files,
                                        function(file) {
                                            cat("Sourcing ", file, "\n", sep="")
                                            try(sys.source(file, envir=envir))
                                        }
                                        ))
+    }
     if (all(sapply(problems, is.null)))
         assign(".file.times.old", envir=envir, value=file.times)
+    if (length(files) && reset.function.envirs) {
+        # Reset the environments on all functions in envir to be the global env
+        for (fn in ls(envir=envir, all=TRUE)) {
+            f <- get(fn, envir=envir, inherits=FALSE)
+            if (is.function(f) & !identical(environment(f), globalenv())) {
+                environment(f) <- globalenv()
+                assign(fn, f, envir=envir)
+            }
+        }
+    }
 
     # Work out what data files to load (look for .rdata,
     # .rda, case insensitive) This does NOT cover the full

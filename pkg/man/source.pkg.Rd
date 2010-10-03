@@ -17,6 +17,7 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
            suffix = "\\\\.R$",
            dlls = c("no", "check"),
            pos = NA, all = FALSE,
+           reset.function.envirs=TRUE,
            path=getOption("scriptests.pkg.path", default=getwd()))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -42,6 +43,10 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
   \item{all}{ If \code{TRUE}, all files matching the pattern and suffix
   are sourced, if \code{FALSE}, only files that have changed since last
   sourced are sourced again. }
+
+  \item{reset.function.envirs}{ If \code{TRUE} the environments on all
+  functions sourced are set to the global environment.  See NOTE below
+  for explanation.}
 
   \item{path}{ The file system path to the directory in which the
     package is located.  The initial default for \code{path} is the
@@ -104,10 +109,20 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
   reliable operation under many OS's, and even when the call completes
   without apparent error, the R session can be corrupted.
 
-    }
+  }
 }
 \value{
   A list of the problems encountered when sourcing the files.
+}
+\note{
+  If \code{reset.function.envirs=FALSE} is supplied, the environments on
+  the functions sourced will be the environment where they live on the
+  search path.  Functions with their environment set like this will not
+  be able to see objects in the global environment or in any environment
+  earlier on the search path.  The default behavior of setting their
+  environment to be the global environment produces behavior that is
+  more similar to when the functions are sourced directly into the
+  global environment.
 }
 \references{ \itemize{
     \item Similar ideas in an R-devel post by Barry Rowlingson:
