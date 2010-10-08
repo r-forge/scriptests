@@ -8,9 +8,6 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
                             diffFun = Quote(ScripDiff()), subst=NULL,
                             quit=TRUE)
 {
-    cat("\n");
-    status <- .runPackageTests(..., initializeFun=initializeFun, finalizeFun=finalizeFun,
-                               diffFun=diffFun, run.preexisting.R.files=FALSE, subst=subst)
     # When run by "R CMD check", no output directly from the tests will appear on the
     # console.  The only output the user sees will be the last 13 lines from the first
     # .fail file that "R CMD check" files after getting a non-zero status result from
@@ -19,11 +16,18 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
     # so that we can make the name of the file with the transcript of detailed comparisons
     # appear at the end of the .fail file so that it will be displayed to the user.
     test.transcript.file <- NULL
+    run.from <- NULL
     if (!is.na(i <- match("-f", commandArgs()))) {
+        run.from <- commandArgs()[i+1]
         test.transcript.file <- paste(commandArgs()[i+1], "out", sep="")
         test.transcript.file <- paste(c(rev(rev(strsplit(gsub("\\\\", "/", getwd(), perl=TRUE), "/")[[1]])[1:2]), test.transcript.file), collapse=.Platform$file.sep)
-        cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=getOption("width")-2, sep="")
     }
+    cat("\n");
+    status <- .runPackageTests(..., initializeFun=initializeFun, finalizeFun=finalizeFun,
+                               diffFun=diffFun, run.preexisting.R.files=FALSE, subst=subst,
+                               run.from=basename(run.from))
+    if (!is.null(test.transcript.file))
+        cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=getOption("width")-2, sep="")
     fail.files <- list.files(pattern="\\.Rout\\.fail$")
     fail.files <- setdiff(fail.files, basename(test.transcript.file))
     if (length(fail.files))

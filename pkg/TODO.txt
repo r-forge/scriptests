@@ -1,3 +1,7 @@
+2010-10-07:
+TODO:
+* make sure that parse errors for .Rt files result in meaningful output -- try putting <TESTONLY> on a line
+
 2010-09-05:
 TODO:
 * make evalCapture code handle truncation of long warnings correctly (cf options("warning.length"))

@@ -2,10 +2,13 @@
 ## used by R CMD check
 ## This is a private function in scriptests, but it is written so that
 ## it could be a drop in replacement for .runPackageTests() in .../src/library/tools/R/testing.R
+## run.from is the name of the file from which the tests were called -- don't
+## want to run it again because that way lies infinite recursion!
 
 .runPackageTests <- function(use_gct = FALSE, run.preexisting.R.files=TRUE,
                              initializeFun=NULL, finalizeFun=NULL, diffFun=NULL,
-                             debug=FALSE, stopOnError=TRUE, pattern=NULL, subst=NULL)
+                             debug=FALSE, stopOnError=TRUE, pattern=NULL, subst=NULL,
+                             run.from=NULL)
 {
 
     runone <- function(f, diffFun=NULL, stopOnError=TRUE, debug=TRUE)
@@ -75,6 +78,7 @@
     }
     preexisting.Rin.files <- dir(".", pattern="\\.Rin$")
     preexisting.R.files <- dir(".", pattern="\\.R$")
+    preexisting.R.files <- setdiff(preexisting.R.files, run.from)
 
     file.copy(file.path(R.home("share"), "R", "tests-startup.R"), "startup.Rs")
     if (use_gct) cat("gctorture(TRUE)" , file = "startup.Rs", append = TRUE)
@@ -243,6 +247,7 @@
 
     Rinfiles <- dir(".", pattern="\\.Rin$")
     if (!run.preexisting.R.files) {
+        ## message("ignoring run.from=", run.from)
         if (debug && length(preexisting.Rin.files))
             message("   Not running these pre-existing .Rin files: ", paste(preexisting.Rin.files, collapse=" "))
         Rinfiles <- setdiff(Rinfiles, preexisting.Rin.files)
@@ -259,6 +264,7 @@
     }
 
     Rfiles <- dir(".", pattern="\\.R$")
+    Rfiles <- setdiff(Rfiles, run.from)
     if (!run.preexisting.R.files) {
         Rfiles <- setdiff(Rfiles, preexisting.R.files)
         if (debug && length(preexisting.R.files))

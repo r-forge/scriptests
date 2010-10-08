@@ -9,16 +9,24 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     message("   initializeTests: debug=", debug)
     if (regexpr("\\.Rcheck$", test.dir) > 0) {
         # Can't rely on "*" being the package name in "*.Rcheck", e.g.,
-        # in r-forge directory structure, packages are in mypackage/pkg/{DESCRIPTION,R,man} etc
-        # and tests go into mypackage/pkg.Rcheck.  So get the package name
-        # from the log messages in <pkg>.Rcheck/00install.out
+        # in r-forge directory structure, packages are structured like this:
+        # mypackage/pkg/{DESCRIPTION,R,man} etc.
+        # Depending on how tests are run, tests go into mypackage/pkg.Rcheck
+        # or into mypackage/mypackage.Rcheck.
+        # So get the package name from the log messages in <pkg>.Rcheck/00install.out
         if (debug)
             message("   Looking for ", file.path(dirname(wd), "00install.out"))
         if (file.exists(file.path(dirname(wd), "00install.out"))) {
             pkg.name <- gsub(")", "", gsub("* DONE (", "", fixed=TRUE, grep("* DONE ", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE)))
+            if (length(pkg.name)>1)
+                pkg.name < pkg.name[nchar(pkg.name)>0]
+            if (length(pkg.name)>1) {
+                warning("found several lines matching '* DONE (...)' in ", file.path(dirname(wd), "00install.out"))
+                pkg.name <- pkg.name[1]
+            }
             if (debug)
                 message("   Read pkg.name= '", pkg.name, "'")
-            else
+            if (length(pkg.name)<1)
                 message("   Failed to work out pkg.name from 00install.line: ", grep("DONE", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE))
         }
         if (length(pkg.name) && nchar(pkg.name)==0)
