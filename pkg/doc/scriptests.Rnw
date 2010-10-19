@@ -1,0 +1,47 @@
+\documentclass{article}
+\title{The simplest example for scriptests}
+\author{Tony Plate}
+\begin{document}
+\maketitle
+Create a complete R package named \texttt{testpkg} containing 4 files:
+\begin{itemize}
+  \item testpkg/DESCRIPTION
+  \item testpkg/R/plus.R
+  \item testpkg/tests/runtests.R
+  \item testpkg/tests/plus.Rt
+\end{itemize}
+\SweaveOpts{keep.source=TRUE}
+<<>>=
+dir.create("testpkg")
+cat(                                 file="testpkg/DESCRIPTION", '
+Package: testpkg
+Version: 1.0-0
+License: GPL-3
+Description: A simple example of using scriptests for unit tests
+Title: Unit tests with scriptests
+Author: Joe Blow <joeblo@foobar.org>
+Maintainer: Joe Blow <joeblo@foobar.org>
+')
+dir.create("testpkg/R")
+
+cat(                                 file="testpkg/R/plus.R", '
+plus <- function(x, y) x + y
+')
+dir.create("testpkg/tests")
+
+cat(                                 file="testpkg/tests/runtests.R", '
+library(scriptests)
+runScripTests()}
+')
+
+cat(                                 file="testpkg/tests/plus.Rt", '
+> plus(3, 4)
+[1] 7
+')
+@
+
+<<>>=
+source.pkg(pkg="testpkg")
+runtests(pkg="testpkg", pattern="plus", clobber=T)
+@
+\end{document}
