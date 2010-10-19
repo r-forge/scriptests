@@ -18,8 +18,6 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     supplied.pkg.dir <- !missing(pkg.dir)
     supplied.path <- !missing(path)
     orig.path <- path
-    # convert to absolute path because this function changes working directories,
-    path <- normalizePath(path)
     if (!is.null(file) && pattern!=".*")
         stop("cannot supply both 'file' and 'pattern'")
     if (is.null(subst) && !full) {
@@ -41,9 +39,11 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         if (!is.null(file))
             stop("can only supply file= argument when full==FALSE")
     }
-    # Change directory if needed
+    # Prepare to change directory if needed
     cwd <- getwd()
     test.dir <- file.path(pkg.path(path, pkg.dir), "tests")
+    # convert to absolute path because this function changes working directories,
+    test.dir <- normalizePath(test.dir)
     if (!file.exists(test.dir))
         stop("test source directory ", test.dir, " does not exist")
     if (is.logical(dir))
