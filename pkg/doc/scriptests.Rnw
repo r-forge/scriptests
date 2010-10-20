@@ -1,8 +1,13 @@
 \documentclass{article}
-\title{The simplest example for scriptests}
+\title{Creating a simple R package and unit tests with the scriptests package}
 \author{Tony Plate}
 \begin{document}
 \maketitle
+
+\section{Introduction}
+
+\section{Creating a simple package}
+
 Create a complete R package named \texttt{testpkg} containing 4 files:
 \begin{itemize}
   \item testpkg/DESCRIPTION
@@ -11,6 +16,9 @@ Create a complete R package named \texttt{testpkg} containing 4 files:
   \item testpkg/tests/plus.Rt
 \end{itemize}
 \SweaveOpts{keep.source=TRUE}
+<<echo=FALSE>>=
+Sys.setenv("R_NOUSERPROFILE"=1)
+@
 <<>>=
 dir.create("testpkg")
 cat(                                 file="testpkg/DESCRIPTION", '
@@ -21,17 +29,36 @@ Description: A simple example of using scriptests for unit tests
 Title: Unit tests with scriptests
 Author: Joe Blow <joeblo@foobar.org>
 Maintainer: Joe Blow <joeblo@foobar.org>
+Suggests: scriptests
 ')
-dir.create("testpkg/R")
 
+dir.create("testpkg/R")
 cat(                                 file="testpkg/R/plus.R", '
 plus <- function(x, y) x + y
 ')
-dir.create("testpkg/tests")
 
+dir.create("testpkg/man")
+cat(                                 file="testpkg/man/plus.Rd", '
+\\name{plus}
+\\alias{plus}
+\\title{Add two numbers together}
+\\description{Add two numbers together}
+\\usage{plus(x, y)}
+\\arguments{
+  \\item{x}{A number}
+  \\item{y}{A number}
+}
+\\value{A number}
+')
+@
+
+\section{Adding some tests to the package}
+
+<<>>=
+dir.create("testpkg/tests")
 cat(                                 file="testpkg/tests/runtests.R", '
 library(scriptests)
-runScripTests()}
+runScripTests()
 ')
 
 cat(                                 file="testpkg/tests/plus.Rt", '
@@ -40,8 +67,21 @@ cat(                                 file="testpkg/tests/plus.Rt", '
 ')
 @
 
+\section{Running the tests interactively}
+
 <<>>=
 source.pkg(pkg="testpkg")
 runtests(pkg="testpkg", pattern="plus", clobber=T)
 @
+
+\section{Running the tests as part of ``R CMD check''}
+
+<<<>>=
+system2 <- function(cmd) cat(system(cmd, intern=TRUE), sep="\n")
+system2("R CMD build testpkg")
+system2("R CMD check testpkg_1.0-0.tar.gz")
+cat(readLines("testpkg.Rcheck/tests/plus.Rt.log"), sep="\n")
+cat(readLines("testpkg.Rcheck/tests/test-summary.txt"), sep="\n")
+@
+
 \end{document}

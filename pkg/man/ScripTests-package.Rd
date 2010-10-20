@@ -19,10 +19,10 @@ below).  This testing framework is identical in concept to the standard
 with some enhancements that are intended to make test development and
 maintanance faster, more convenient, and easier to automate:
 \itemize{
-  \item only the output file is needed - the inputs are parsed from
+  \item Only the output file is needed - the inputs are parsed from
   the output file (i.e., \code{.Rt} file, which is analogous to an
   \code{.Rout.save} file)
-  \item test output matching is more lenient on white space differences,
+  \item Test output matching is more lenient on white space differences,
   and more flexible in that some test output can be transformed by
   regular expressions prior to matching, or ignored entirely
   \item directives can specify whether a test-case output mismatch
@@ -31,8 +31,9 @@ maintanance faster, more convenient, and easier to automate:
   indication of error after running all tests).  Unlike the standard
   tests in \code{R CMD check}, output mismatch detected by
   \code{scriptests} results in \code{R CMD check} stopping with an error.
-  \item a concise summary of warnings and errors is given at the end
-  \item testing can continue after errors and report multiple errors
+  \item A concise summary of warnings and errors is given at the end
+  \item Testing can continue after errors and can report multiple errors
+  at the end, rather than stopping at the first error.
 }
 To make it so that "R CMD check" will run transcript-style tests, do the following:
 \enumerate{
@@ -52,14 +53,19 @@ runScripTests() }
   If there is an existing "Suggests:" line, just add \code{scriptests}
   to it.  (It's better to use the \code{Suggests:} than the
   \code{Depends:} fields, because packages listed in the depends field
-  are loaded when the package is loaded, which is probably unnecessary
-  is most cases -- the \code{scriptests} package will only be needed for testing.
+  are loaded when the package is loaded for normal use, and the
+  \code{scriptests} package is usually not needed for normal use of a package --
+  the \code{scriptests} package will only be needed for testing.
 }
 
-If any tests fail, the file \code{test-summary.fail} will be left in the
-\code{tests} directory -- the existence of this file can be used in a
-programmatic check for whether all tests passed.  To be entirely sure
-that the tests were run, also check for the existence of \code{test-summary.txt}.
+At the end of testing, the file \code{test-summary.txt} will be left in
+the \code{tests} directory.  To be entirely sure that the tests were
+run, also check for the existence of \code{test-summary.txt}.
+
+If any tests fail, the file \code{test-summary.fail} (a copy of
+\code{test-summary.txt}) will also be left in the \code{tests} directory
+-- the existence of this file can be used in a programmatic check for
+whether all tests passed.
 
 Tests can be run interactively using the function
 \code{\link{runtests}()}.  The function \code{\link{source.pkg}()} can
