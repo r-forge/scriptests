@@ -10,7 +10,7 @@
 }
 \details{
 
-Transcript-style tests are files containing R commands and output, as
+Transcript-style tests are text files containing R commands and output, as
 though copied verbatim from an interactive R session.  The output in the
 transcript file must match the actual output from running the command
 for the test to pass (with some exceptions - see "Control over matching"
