@@ -91,13 +91,11 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
                 stop("can only clobber test dir when it has the form of an automatically created one (i.e., like '",
                      paste(pkg.dir, ".tests", sep=""), "') - remove '", dir, "' manually to continue")
             }
-        } else {
-            if (!dir.create(dir, recursive=TRUE))
-                stop("failed to create directory: ", dir)
         }
+        if (!dir.create(dir, recursive=TRUE))
+            stop("failed to create directory: ", dir)
         if (verbose)
             cat("* Copying ", test.dir, " to ", dir, "\n", sep="")
-        dir.create(dir)
         for (f in list.files(test.dir))
             file.copy(file.path(test.dir, f), dir, recursive=TRUE)
         existing.files <- list.files()
