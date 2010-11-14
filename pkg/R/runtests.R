@@ -46,14 +46,18 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     test.dir <- normalizePath(test.dir)
     if (!file.exists(test.dir))
         stop("test source directory ", test.dir, " does not exist")
-    if (is.logical(dir))
-        if (dir)
+    dir.isStandard <- FALSE
+    if (is.logical(dir)) {
+        if (dir) {
             if (full)
-                dir <- paste(pkg.dir, ".Rcheck/tests", sep="")
+                dir <- paste(pkg.name, ".Rcheck/tests", sep="")
             else
                 dir <- paste(pkg.dir, ".tests", sep="")
-        else
+            dir.isStandard <- TRUE
+        } else {
             dir <- NULL
+        }
+    }
     # Need this later, relative to the current path
     if (full) {
         check.dirs <- paste(c(pkg.name, pkg.dir), ".Rcheck", sep="")
@@ -68,29 +72,21 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         # if there's more than one, choose the one with the most recent modification time
         mt <- file.info(file.path(check.dirs, pkg.name))[,"mtime"]
         if (length(check.dirs) > 1)
-            cat("* Using package in '", file.path(check.dirs, pkg.name), "' for running tests\n", sep="")
-        check.dirs <- check.dirs[which.max(mt)]
+            check.dirs <- check.dirs[which.max(mt)]
+        cat("* Using package in '", file.path(check.dirs, pkg.name), "' for running tests\n", sep="")
         # This code relies on normalizePath converting to an absolute path
         r.libs.site.orig <- Sys.getenv("R_LIBS_SITE")[[1]]
         r.libs.site <- unique(sapply(c(strsplit(r.libs.site.orig, split=";")[[1]], check.dirs), normalizePath))
-        Sys.setenv("R_LIBS_SITE", paste(r.libs.site, collapse=";"))
-        on.exit(Sys.setenv("R_LIBS_SITE", r.libs.site.orig), add=TRUE)
+        Sys.setenv("R_LIBS_SITE"=paste(r.libs.site, collapse=";"))
+        on.exit(Sys.setenv("R_LIBS_SITE"=r.libs.site.orig), add=TRUE)
     }
     if (!is.null(dir)) {
         if (file.exists(dir)) {
-            if (!clobber) {
-                if (dir == paste(pkg.dir, ".tests", sep=""))
-                    stop("dir for running tests '", dir, "' already exists - supply clobber=TRUE to overwrite")
-                else
-                    stop("dir for running tests '", dir, "' already exists and is non-standard - remove it manually to continue")
-            } else if (dir == paste(pkg.dir, ".tests", sep="")) {
-                if (verbose)
-                    cat("* Removing old tests directory ", dir, "\n", sep="")
-                unlink(dir, recursive=TRUE)
-            } else {
-                stop("can only clobber test dir when it has the form of an automatically created one (i.e., like '",
-                     paste(pkg.dir, ".tests", sep=""), "') - remove '", dir, "' manually to continue")
-            }
+            if (!clobber && !dir.isStandard)
+                stop("dir for running tests '", dir, "' already exists and is non-standard - supply clobber=TRUE to overwrite")
+            if (verbose)
+                cat("* Removing old tests directory ", dir, "\n", sep="")
+            unlink(dir, recursive=TRUE)
         }
         if (!dir.create(dir, recursive=TRUE))
             stop("failed to create directory: ", dir)
