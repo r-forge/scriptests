@@ -15,24 +15,25 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
     # Try to work out whether we were called from a .R file, and if so what was its name,
     # so that we can make the name of the file with the transcript of detailed comparisons
     # appear at the end of the .fail file so that it will be displayed to the user.
-    test.transcript.file <- NULL
-    run.from <- NULL
+    test.transcript.file <- character(0)
+    run.from <- character(0)
     if (!is.na(i <- match("-f", commandArgs()))) {
-        run.from <- commandArgs()[i+1]
+        run.from <- basename(commandArgs()[i+1])
         test.transcript.file <- paste(commandArgs()[i+1], "out", sep="")
         test.transcript.file <- paste(c(rev(rev(strsplit(gsub("\\\\", "/", getwd(), perl=TRUE), "/")[[1]])[1:2]), test.transcript.file), collapse=.Platform$file.sep)
     }
     cat("\n");
     status <- .runPackageTests(..., initializeFun=initializeFun, finalizeFun=finalizeFun,
                                diffFun=diffFun, run.preexisting.R.files=FALSE, subst=subst,
-                               run.from=basename(run.from))
-    if (!is.null(test.transcript.file))
+                               run.from=run.from)
+    if (length(test.transcript.file))
         cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=getOption("width")-2, sep="")
     fail.files <- list.files(pattern="\\.Rout\\.fail$")
     fail.files <- setdiff(fail.files, basename(test.transcript.file))
     if (length(fail.files))
         cat("Look for clues in ", if (length(fail.files)==1) "this file" else "these files",
-            " too: ", paste("'", fail.files, "'", collapse=", ", sep=""), "\n", sep="")
+            if (length(test.transcript.file)) " too: ",
+            paste("'", fail.files, "'", collapse=", ", sep=""), "\n", sep="")
     if (quit)
         q("no", status = status)
     invisible(NULL)
