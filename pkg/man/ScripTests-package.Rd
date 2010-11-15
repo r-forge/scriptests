@@ -145,6 +145,7 @@ to the following lines in the CONFIG file:
 \preformatted{
 Depends: scriptests
 Debug: FALSE
+StopOnError: FALSE
 Initialize: scriptests:::initializeTests()
 Diff: scriptests:::ScripDiff()
 Finalize: scriptests:::summarizeTests() }
