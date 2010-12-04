@@ -46,6 +46,7 @@ Create a complete R package named \texttt{testpkg} containing 4 files:
 Sys.setenv("R_NOUSERPROFILE"=1)
 @
 <<>>=
+# This R code creates a simple package containing 4 files
 dir.create("testpkg")
 cat(                                 file="testpkg/DESCRIPTION", '
 Package: testpkg
@@ -95,10 +96,21 @@ cat(                                 file="testpkg/tests/plus.Rt", '
 
 \section{Running the tests interactively}
 
+This is often a good way of running tests while developing
+code.  Tests are run in the current R session and can
+create, modify or delete variables in the R session.  This
+is convenient and fast, partly because it doesn't fully
+build the pacakge -- it just loads the R source files from
+the package into the R session.  (Actually,
+\texttt{source.pkg()} can do a bit more than that, but it
+doesn't understand namespaces, so if the package being
+loaded depends on namespaces, it won't work.)
+
 <<>>=
 source.pkg(pkg="testpkg")
 runtests(pkg="testpkg", pattern="plus", clobber=T)
 @
+
 
 \section{Running the tests as part of ``R CMD check''}
 
