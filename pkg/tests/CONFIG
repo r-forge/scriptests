@@ -1,6 +1,6 @@
-Comment: This file contains the defaults and is not necessary (unless you want different defaults)
+Comment: This file contains the defaults and is not necessary
 Depends: scriptests
 Initialize: scriptests:::initializeTests()
 Diff: scriptests:::ScripDiff()
 Finalize: scriptests:::summarizeTests()
-Debug: TRUE
+Debug: FALSE
