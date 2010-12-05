@@ -46,7 +46,7 @@ compareTranscriptAndOutput <- function(name, tests, results, verbose=TRUE) {
                                    "Test input:", test$input,
                                    "Transcript input:", result$input)))
         }
-        res <- c(res, list(compareSingleTest(test$input, test$control, test$output, result$output, testnum, name, verbose)))
+        res <- c(res, list(compareSingleTest(test$input, test$control, test$output, test$comment, test$garbage, result$output, testnum, name, verbose)))
         return(res)
     }, SIMPLIFY=FALSE, USE.NAMES=FALSE))
     x <- unlist(x, use.names=FALSE, recursive=FALSE)

@@ -9,7 +9,6 @@ summarizeTests <- function(debug=FALSE) {
     # all.res <- sapply(list.files(pattern=".*Rt\\.sum$"), readLines, 1)
     i <- regexpr("^.*: +[0-9]+ tests with [0-9]+ errors, [0-9]+ warnings and [0-9]+ messages", all.res) >= 1
     if (!all(i)) {
-        browser()
         problem.lines <- all.res[!i]
         problem.lines <- gsub(":.*$", ": ...", problem.lines, perl=TRUE)
         problem.lines <- substring(problem.lines, 1, 40)

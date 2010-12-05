@@ -17,39 +17,39 @@ ScripDiff <- function(commandfile, outfile=gsub("\\.R$", ".Rout", commandfile, p
         ignoreUpToRegExpr <- "Type 'q\\(\\)' to quit R"
         ignoreAfterRegExpr <- NULL
         if (!file.exists(savefile)) {
-            message("ScripDiff: nothing to compare against for ", commandfile, "\n")
+            cat("ScripDiff: nothing to compare against for ", commandfile, "\n")
             return(0L)
         }
     }
     if (!file.exists(rtSave)) {
         msg <- paste("ScripDiff: cannot find saved-test-object file '", rtSave, "' in '", getwd(), "'\n", sep="")
         cat(file=failfile, msg)
-        cat(file=stderr(), msg)
-        message(msg)
+        cat(file=stdout(), msg)
+        # cat(msg, "\n")
         return(NULL)
     }
     if (!file.exists(outfile)) {
         msg <- paste("ScripDiff: cannot find actual test output file '", outfile, "' in '", getwd(), "'\n", sep="")
         cat(file=failfile, msg)
-        cat(file=stderr(), msg)
-        message(msg)
+        cat(file=stdout(), msg)
+        # cat(msg, "\n")
         return(NULL)
     }
-    sink(stderr())
+    # sink(file=stdout())
     if (debug) {
-        cat("  * Loading saved transcript object from file \"", rtSave, "\" ...\n", sep="", file=stderr())
+        cat("  * Loading saved transcript object from file \"", rtSave, "\" ...\n", sep="", file=stdout())
     }
 
     testObjName <- load(file=rtSave, envir=as.environment(-1))
     if (testObjName[1] != "tests")
         tests <- get(testObjName[1])
     if (debug)
-        cat("  * Parsing actual test output from file \"", outfile, "\" ...\n", sep="", file=stderr())
+        cat("  * Parsing actual test output from file \"", outfile, "\" ...\n", sep="", file=stdout())
     resList <- parseTranscriptFile(outfile, ignoreUpToRegExpr=ignoreUpToRegExpr, ignoreAfterRegExpr=ignoreAfterRegExpr)
     res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", outfile), tests, resList, verbose=TRUE)
     res.summary <- summary(res)
     print(res.summary)
-    sink()
+    # sink()
     sink(logfile)
     print(res, details=T)
     print(res.summary)

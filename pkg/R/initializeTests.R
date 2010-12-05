@@ -2,11 +2,12 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     # Create .R and .Rout.save files for each .Rt file
     wd <- getwd()
     if (debug)
-        message("   initializeTests: wd=", wd)
+        cat("   initializeTests: wd=", wd, "\n")
     # Expect that we are running in .../<pkg.dir>.Rcheck/tests
     test.dir <- basename(dirname(wd)) # should get something like mypackage.Rcheck
     pkg.name <- NULL
-    message("   initializeTests: debug=", debug)
+    if (debug)
+        cat("   initializeTests: debug=", debug, "\n")
     if (regexpr("\\.Rcheck$", test.dir) > 0) {
         # Can't rely on "*" being the package name in "*.Rcheck", e.g.,
         # in r-forge directory structure, packages are structured like this:
@@ -15,7 +16,7 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
         # or into mypackage/mypackage.Rcheck.
         # So get the package name from the log messages in <pkg>.Rcheck/00install.out
         if (debug)
-            message("   Looking for ", file.path(dirname(wd), "00install.out"))
+            cat("   Looking for ", file.path(dirname(wd), "00install.out"), "\n")
         if (file.exists(file.path(dirname(wd), "00install.out"))) {
             pkg.name <- gsub(")", "", gsub("* DONE (", "", fixed=TRUE, grep("* DONE ", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE)))
             if (length(pkg.name)>1)
@@ -25,9 +26,9 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
                 pkg.name <- pkg.name[1]
             }
             if (debug)
-                message("   Read pkg.name= '", pkg.name, "'")
+                cat("   Read pkg.name= '", pkg.name, "'\n")
             if (length(pkg.name)<1)
-                message("   Failed to work out pkg.name from 00install.line: ", grep("DONE", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE))
+                cat("   Failed to work out pkg.name from 00install.line: ", grep("DONE", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE), "\n")
         }
         if (length(pkg.name) && nchar(pkg.name)==0)
             pkg.name <- NULL
@@ -37,20 +38,20 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     for (cmdIn in list.files(pattern=".*\\.[Rr]$")) {
         if (!is.null(pattern) && !length(grep(pattern, cmdIn))) {
             if (debug)
-                message(" Skipping file ", cmdIn)
+                cat(" Skipping file ", cmdIn, "\n")
             next
         }
         rOutSave <- gsub("\\.R$", ".Rout.save", cmdIn, perl=TRUE)
         if (file.exists(rOutSave)) {
             rtSave <- gsub("\\.R$", ".Rt.save", cmdIn, perl=TRUE)
             if (debug)
-                message(" Pre-processing tests in ", cmdIn, "/", rOutSave, " to generate ", rtSave)
+                cat(" Pre-processing tests in ", cmdIn, "/", rOutSave, " to generate ", rtSave, "\n")
             tests <- parseTranscriptFile(rOutSave)
             env <- new.env()
             save(list="tests", file=rtSave, envir=env)
         } else {
             if (debug)
-                message(" No saved output file for tests in ", cmdIn, "; will just check that tests run without stopping with an error")
+                cat(" No saved output file for tests in ", cmdIn, "; will just check that tests run without stopping with an error\n")
         }
     }
 
@@ -58,14 +59,14 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     for (rtIn in list.files(pattern=".*\\.[Rr]t$")) {
         if (!is.null(pattern) && !length(grep(pattern, rtIn))) {
             if (debug)
-                message(" Skipping file ", rtIn)
+                cat(" Skipping file ", rtIn, "\n")
             next
         }
         rOutSave <- gsub("\\.Rt$", ".Rout.save", rtIn, perl=TRUE)
         rtSave <- gsub("\\.Rt$", ".Rt.save", rtIn, perl=TRUE)
         cmdOut <- gsub("\\.Rt$", ".R", rtIn, perl=TRUE)
         if (debug)
-            message(" Pre-processing tests in ", rtIn, " to generate ", cmdOut, if (create.Rout.save) paste(",", rOutSave), ", and ", rtSave)
+            cat(" Pre-processing tests in ", rtIn, " to generate ", cmdOut, if (create.Rout.save) paste(",", rOutSave), ", and ", rtSave, "\n")
         tests <- parseTranscriptFile(rtIn, subst=subst)
         env <- new.env()
         test.obj.name <- paste(gsub("\\.Rt$", "", rtIn), ".tests", sep="", perl=TRUE)
@@ -91,14 +92,21 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
             lapply(tests, function(test) {
                 if (!is.null(test$comment)) {
                     commands <- test$comment
+                    commandsIn <- gsub("^[>+] ?", "", grep("^[>+]", commands, value=TRUE, perl=TRUE), perl=TRUE)
                     output <- NULL
                 } else if (!is.null(test$input)) {
                     commands <- test$input
                     output <- test$output
+                    commandsIn <- gsub("^[>+] ?", "", grep("^[>+]", commands, value=TRUE, perl=TRUE), perl=TRUE)
+                } else if (!is.null(test$garbage)) {
+                    commands <- test$garbage
+                    commandsIn <- character(0)
+                    output <- NULL
+                    return(NULL)
                 } else {
-                    stop("illegal test structure: no 'comment' or 'input' component")
+                    ## stop("invalid test structure: no 'comment', 'input', or 'garbage' component")
+                    return(NULL)
                 }
-                commandsIn <- gsub("^[>+] ?", "", grep("^[>+]", commands, value=TRUE, perl=TRUE), perl=TRUE)
                 cat(file=cmdOutCon, paste(commandsIn, "\n", sep=""), sep="")
                 if (create.Rout.save)
                     cat(file=rOutSaveCon, paste(commands, "\n", sep=""), sep="")

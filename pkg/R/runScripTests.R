@@ -6,7 +6,7 @@
 runScripTests <- function(..., initializeFun = Quote(initializeTests()),
                             finalizeFun = Quote(summarizeTests()),
                             diffFun = Quote(ScripDiff()), subst=NULL,
-                            quit=TRUE)
+                            pattern=NULL, quit=TRUE)
 {
     # When run by "R CMD check", no output directly from the tests will appear on the
     # console.  The only output the user sees will be the last 13 lines from the first
@@ -25,7 +25,7 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
     cat("\n");
     status <- .runPackageTests(..., initializeFun=initializeFun, finalizeFun=finalizeFun,
                                diffFun=diffFun, run.preexisting.R.files=FALSE, subst=subst,
-                               run.from=run.from)
+                               pattern=pattern, run.from=run.from)
     if (length(test.transcript.file))
         cat("\nSee ", test.transcript.file, (if (status) ".fail"), " for", " a", " transcript", " of", " test", " comparisons", fill=getOption("width")-2, sep="")
     fail.files <- list.files(pattern="\\.Rout\\.fail$")
@@ -34,7 +34,7 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
         cat("Look for clues in ", if (length(fail.files)==1) "this file" else "these files",
             if (length(test.transcript.file)) " too: ",
             paste("'", fail.files, "'", collapse=", ", sep=""), "\n", sep="")
-    if (quit)
+    if (quit && !interactive())
         q("no", status = status)
     invisible(NULL)
 }

@@ -5,34 +5,34 @@ checkTestOutput <- function(rtIn, rtSave=paste(rtIn, ".save", sep=""), debug=TRU
     if (!file.exists(rtIn)) {
         msg <- paste("checkTestOutput: cannot find original test file '", rtIn, "' in '", getwd(), "'\n", sep="")
         cat(file=rtFail, msg)
-        cat(file=stderr(), msg)
+        cat(file=stdout(), msg)
         return(NULL)
     }
     if (!file.exists(rtSave)) {
         msg <- paste("checkTestOutput: cannot find saved-test-object file '", rtSave, "' in '", getwd(), "'\n", sep="")
         cat(file=rtFail, msg)
-        cat(file=stderr(), msg)
+        cat(file=stdout(), msg)
         return(NULL)
     }
     if (!file.exists(rtOut)) {
         msg <- paste("checkTestOutput: cannot actual test output file '", rtOut, "' in '", getwd(), "'\n", sep="")
         cat(file=rtFail, msg)
-        cat(file=stderr(), msg)
+        cat(file=stdout(), msg)
         return(NULL)
     }
-    sink(stderr())
+    # sink(file=stdout())
     if (debug)
-        cat("  * Loading saved transcript object from file \"", rtSave, "\" ...\n", sep="", file=stderr())
+        cat("  * Loading saved transcript object from file \"", rtSave, "\" ...\n", sep="", file=stdout())
 
     testObjName <- load(file=rtSave, envir=as.environment(-1))
     if (testObjName[1] != "tests")
         tests <- get(testObjName[1])
-    cat("  * Parsing actual test output from file \"", rtOut, "\" ...\n", sep="", file=stderr())
+    cat("  * Parsing actual test output from file \"", rtOut, "\" ...\n", sep="", file=stdout())
     resList <- parseTranscriptFile(rtOut, ignoreUpToRegExpr="> # End of RtTests preamble", ignoreAfterRegExpr="> # End of RtTests output")
     res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", rtOut), tests, resList, verbose=TRUE)
     res.summary <- summary(res)
     print(res.summary)
-    sink()
+    # sink()
     sink(rtLog)
     print(res)
     print(res.summary)

@@ -17,27 +17,31 @@
 
 }
 \usage{
-runScripTests(..., initializeFun = Quote(initializeTests()), finalizeFun = Quote(summarizeTests()), diffFun = Quote(ScripDiff()), subst = NULL, quit = TRUE)
+runScripTests(..., initializeFun = Quote(initializeTests()),
+              finalizeFun = Quote(summarizeTests()),
+              diffFun = Quote(ScripDiff()),
+              subst = NULL, pattern = NULL, quit = TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
 }
-  \item{initializeFun}{
-%%     ~~Describe \code{initializeFun} here~~
+\item{initializeFun}{
+  Function for initializing tests.
 }
   \item{finalizeFun}{
-%%     ~~Describe \code{finalizeFun} here~~
+  Function for finalizing tests -- should compute a summary of test results.
 }
-  \item{diffFun}{
-%%     ~~Describe \code{diffFun} here~~
+\item{diffFun}{
+  Function for checking differences between target output and actual
+  test output.
 }
   \item{subst}{
-%%     ~~Describe \code{subst} here~~
 }
-  \item{quit}{
-%%     ~~Describe \code{quit} here~~
+\item{pattern}{
+  Only run tests whose filename matches this regular expression pattern.
+}
+\item{quit}{
+  Call \code{q("no")} at the end?  Ignored in interactive sessions.
 }
 }
 \details{

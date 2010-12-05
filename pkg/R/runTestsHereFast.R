@@ -51,7 +51,7 @@ runTestsHereFast <- function(pattern=".*",
                 actual <- as.character(test$expr)
             else
                 actual <- evalCapture(test$expr, envir, enclos)
-            res <- compareSingleTest(test$input, test$control, test$output, actual,
+            res <- compareSingleTest(test$input, test$control, test$output, test$comment, test$garbage, actual,
                                      i, file, verbose=verbose)
             res$comment <- test$comment
             res$transcript <- c(test$input, test$control, actual)

@@ -6,14 +6,26 @@
 
 \section{Introduction}
 
-Scriptests uses text files containing R commands and output, as
-though copied verbatim from an interactive R session.  The output in the
-transcript file must match the actual output from running the command
-for the test to pass (with some exceptions - see "Control over matching"
-below).  This is the same concept as the standard
-\texttt{.R/.Rout.save} tests that are run by the \texttt{R CMD check}, but
-with some enhancements that are intended to make test development and
-maintanance faster, more convenient, and easier to automate:
+Scriptests uses text files containing R commands and output,
+as though copied verbatim from an interactive R session.
+Here's an example test file from the simple package
+created in the next section:
+
+\begin{verbatim}
+> plus(3, 4)
+[1] 7
+>
+\end{verbatim}
+
+The output in the transcript file must match the actual
+output from running the command for the test to pass (with
+some exceptions - see "Control over matching" below).  This
+is the same concept as the standard \texttt{.R/.Rout.save}
+tests that are run by the \texttt{R CMD check}, but with
+some enhancements that are intended to make test development
+and maintanance faster, more convenient, and easier to
+automate:
+
 \begin{itemize}
   \item Only the output file is needed - the inputs are parsed from
   the output file (i.e., \texttt{.Rt} file, which is analogous to an
@@ -34,19 +46,29 @@ maintanance faster, more convenient, and easier to automate:
 
 \section{Creating a simple package}
 
-Create a complete R package named \texttt{testpkg} containing 4 files:
+In this vignette, we'll create a complete R package named
+\texttt{testpkg} containing 5 files:
 \begin{itemize}
   \item testpkg/DESCRIPTION
   \item testpkg/R/plus.R
   \item testpkg/tests/runtests.R
   \item testpkg/tests/plus.Rt
+  \item testpkg/man/plus.Rd
 \end{itemize}
+
+Initially, we'll start off with just the 2 files that the
+\texttt{runtests()} function in \texttt{scriptests} needs:
+\texttt{DESCRIPTION} and \texttt{plus.R}.
+
 \SweaveOpts{keep.source=TRUE}
 <<echo=FALSE>>=
-Sys.setenv("R_NOUSERPROFILE"=1)
+options(scriptests.pkg.path.saved=getOption("scriptests.pkg.path"))
+options(scriptests.pkg.path=NULL)
+Sys.setenv("R_NOUSERPROFILE"=1) # Inhibit personal .Rprofile
+if (file.exists("testpkg")) unlink("testpkg", recursive=TRUE)
 @
 <<>>=
-# This R code creates a simple package containing 4 files
+# This block of R code creates a simple package containing 2 files
 dir.create("testpkg")
 cat(                                 file="testpkg/DESCRIPTION", '
 Package: testpkg
@@ -63,25 +85,12 @@ dir.create("testpkg/R")
 cat(                                 file="testpkg/R/plus.R", '
 plus <- function(x, y) x + y
 ')
-
-dir.create("testpkg/man")
-cat(                                 file="testpkg/man/plus.Rd", '
-\\name{plus}
-\\alias{plus}
-\\title{Add two numbers together}
-\\description{Add two numbers together}
-\\usage{plus(x, y)}
-\\arguments{
-  \\item{x}{A number}
-  \\item{y}{A number}
-}
-\\value{A number}
-')
 @
 
-\section{Adding some tests to the package}
+\subsection{Adding some tests to the package}
 
 <<>>=
+# This block of R code adds 'runtests.R' and one test file to the package
 dir.create("testpkg/tests")
 cat(                                 file="testpkg/tests/runtests.R", '
 library(scriptests)
@@ -91,6 +100,7 @@ runScripTests()
 cat(                                 file="testpkg/tests/plus.Rt", '
 > plus(3, 4)
 [1] 7
+>
 ')
 @
 
@@ -108,66 +118,225 @@ loaded depends on namespaces, it won't work.)
 
 <<>>=
 source.pkg(pkg="testpkg")
-runtests(pkg="testpkg", pattern="plus", clobber=T)
+# use pattern= to only run test files that match the pattern
+runtests(pkg="testpkg", pattern="plus")
 @
 
+\subsection{When tests fail}
 
+Let's create a test that says 2+2 = 3 (the second in the file):
+<<>>=
+cat(                                 file="testpkg/tests/willfail.Rt", '
+> plus(1, 1)
+[1] 2
+> plus(2, 2)
+[1] 3
+> plus(3, 3)
+[1] 6
+> ')
+(res <- runtests(pkg="testpkg", pattern="fail"))
+# Uh-oh, one of the tests failed!
+# Look at the transcript of the tests
+dumprout(res, console=TRUE)
+# To write the transcript to a file, don't supply console=TRUE to dumprout()
+dumprout(res)
+@
+See what is in the transcript file:
+<<>>=
+cat(paste("....   ", readLines("willfail.Rout.tmp")), sep="\n")
+@
+
+Now the original (failing) tests are in
+\texttt{testpkg/tests/willfail.Rt} and the transcript of the
+actual output is in \texttt{willfail.Rout.tmp}.  You can use
+your favorite editor or diff tool to fix the original tests.
+In Emacs, the \texttt{ediff} function works very well for
+this purpose.  To use \texttt{ediff}, visit both
+\texttt{testpkg/tests/willfail.Rt} and
+\texttt{willfail.Rout.tmp} in separate buffers, then do
+\texttt{M-x ediff-buffers} to start it up.  Ediff shows a
+color-coded diff.  Use the 'n' and 'p' keys to
+go forward and back in the differences, and the 'a' and 'b'
+keys to accept the current difference in the A or B buffer
+and transfer it to the other buffer.  Other diff tools have
+similar functionality, making it quick and easy to update
+tests if a function changed to produce new output.
+
+In the above chunk of code, \texttt{res} was used to save
+the result of \texttt{runtests()} and supply it to
+\texttt{dumprout()}.  In ordinary interactive usage,
+\texttt{res} can be left out when \texttt{dumprout()} is run
+immediately after \texttt{runtests()}: \texttt{dumprout()}
+uses \texttt{.Last.value} by default.  However, that
+couldn't be done here, because \texttt{.Last.value} doesn't
+work in vignettes.
+
+<<echo=FALSE>>=
+@
 \section{Running the tests as part of ``R CMD check''}
 
+Before running \texttt{R CMD check}, let's add an Rd file
+for \texttt{plus} so that \texttt{R CMD check} doesn't get
+upset about missing documentation:
+
 <<>>=
-system2 <- function(cmd) cat(system(cmd, intern=TRUE), sep="\n")
-system2("R CMD build testpkg")
-system2("R CMD check testpkg_1.0-0.tar.gz")
-cat(readLines("testpkg.Rcheck/tests/plus.Rt.log"), sep="\n")
-cat(readLines("testpkg.Rcheck/tests/test-summary.txt"), sep="\n")
+dir.create("testpkg/man")
+cat(                                 file="testpkg/man/plus.Rd", '
+\\name{plus}
+\\alias{plus}
+\\title{Add two numbers together}
+\\description{Add two numbers together}
+\\usage{plus(x, y)}
+\\arguments{
+  \\item{x}{A number}
+  \\item{y}{A number}
+}
+\\value{A number}
+')
 @
 
-\section{Stuff to rearrange}
+Also, let's rename the failing test file so that it doesn't get run
+<<>>=
+file.rename("testpkg/tests/willfail.Rt", "testpkg/tests/willfail.Rnorun")
+@
 
-add the line \texttt{Suggests: scriptests} to DESCRIPTION file.
-  If there is an existing "Suggests:" line, just add \texttt{scriptests}
-  to it.  (It's better to use the \texttt{Suggests:} than the
-  \texttt{Depends:} fields, because packages listed in the depends field
-  are loaded when the package is loaded for normal use, and the
-  \texttt{scriptests} package is usually not needed for normal use of a package --
-  the \texttt{scriptests} package will only be needed for testing.
+Normally, you'd type the following at a command line prompt -- either in a unix shell or windows command line processor:
+\begin{verbatim}
+$ R CMD build testpkg
+$ R CMD check testpkg_1.0-0.tar.gz
+\end{verbatim}
+But in this vignette we'll run those commands from R:
+<<>>=
+mysystem <- function(cmd) cat(system(cmd, intern=TRUE), sep="\n")
+mysystem("R CMD build testpkg")
+mysystem("R CMD check testpkg_1.0-0.tar.gz")
+@
 
-  At the end of testing, the file \texttt{test-summary.txt} will be left in
-the \texttt{tests} directory.  To be entirely sure that the tests were
-run, also check for the existence of \texttt{test-summary.txt}.
+When tests run without any errors, no output appears other than these three lines:
+\begin{verbatim}
+* checking tests ...
+  Running 'runtests.R'
+ OK
+\end{verbatim}
+
+We can look at the test output left in the \texttt{testpkg.Rcheck/tests} directory:
+<<>>=
+cat(readLines("testpkg.Rcheck/tests/test-summary.txt"), sep="\n")
+cat(readLines("testpkg.Rcheck/tests/plus.Rt.log"), sep="\n")
+@
+
+Note that \texttt{R CMD check} is applied here to the built
+package (i.e., to \texttt{testpkg\_1.0-0.tar.gz}). So if any
+tests or code are updated in the package, be sure to rerun
+\texttt{R CMD build} before rerunning \texttt{R CMD check}.
+
+\subsection{Running the tests as part of ``R CMD check'' -- when tests fail}
+
+Rename the failing test file back so that it does get run
+<<>>=
+file.rename("testpkg/tests/willfail.Rnorun", "testpkg/tests/willfail.Rt")
+@
+
+<<>>=
+mysystem <- function(cmd) cat(system(cmd, intern=TRUE), sep="\n")
+mysystem("R CMD build testpkg")
+mysystem("R CMD check testpkg_1.0-0.tar.gz")
+cat(readLines("testpkg.Rcheck/tests/test-summary.txt"), sep="\n")
+cat(readLines("testpkg.Rcheck/tests/plus.Rt.log"), sep="\n")
+cat(readLines("testpkg.Rcheck/tests/willfail.Rt.log"), sep="\n")
+@
+
+A transcript of the failed test is in the file
+\texttt{testpkg.Rcheck/tests/willfail.Rout} -- this file can
+be compared again the original test file
+\texttt{testpkg/tests/willfail.Rt} to fix the code or the
+test output.
+
+\section{Interactive tests, using an installed package}
+
+We've looked at how to run tests in the current R session,
+and how to run them using \texttt{R CMD CHECK}.  The
+advantage of running in the current R session are that it is
+quick to update code and tests, and it's easy to run
+particular tests.  The disadvantage is that the R code is
+not loaded as a proper R pacakge, so anything that depends
+on namespaces or the package loading machinery won't work
+properly.  Using \texttt{R CMD check} is the most solid way
+to run tests, but it's slower and all tests are run.
+
+The middle way is to run tests from an interactive R session
+the same way that \texttt{R CMD check} does: by firing off a
+separate R session for each test file.  This can be done by
+invoking \texttt{runtests()} with the \texttt{full=TRUE}
+argument.  Doing this gets tests and the installed package from two different places:
+
+\begin{itemize}
+  \item the installed package comes from \texttt{testpkg.Rcheck/testpkg} (left behind by the most recent invocation of \texttt{R CMD check})
+  \item the tests come from \texttt{testpkg/tests}
+\end{itemize}
+
+Using \texttt{runtests()} this way makes it quick to update
+test files: any change to the source code of tests is
+immediately picked up by the next invocation of
+\texttt{runtests()}.  However, if R code or some other
+aspect of the package is changed, the package must be
+reinstalled by invoking \texttt{R CMD build} and
+\texttt{R CMD check} again.
+
+<<>>=
+runtests(full=TRUE)
+@
+\section{Programming scripts to check whether tests passed or failed}
+
+At the end of running \texttt{R CMD check}, the file
+\texttt{test-summary.txt} will be left in the
+\texttt{<package>.Rcheck/tests} directory.  To be entirely
+sure that the tests were run, a script should check for the
+existence of \texttt{test-summary.txt}.
 
 If any tests fail, the file \texttt{test-summary.fail} (a copy of
 \texttt{test-summary.txt}) will also be left in the \texttt{tests} directory
 -- the existence of this file can be used in a programmatic check for
 whether all tests passed.
 
-  Notes:
-\begin{itemize}
-    \item All commands in the transcript file must be prefixed with
-    command or continuation prompts, exactly as they appear in a
-    transcript.
-    \item scriptests uses simple heuristics to identify commands, comments and
-    output.  If the transcript cannot be separated into comments,
-    commands and output by these heuristics (e.g., if a command prints
-    out a line starting with the command prompt "> "), things will not
-    work properly.
-    \item When running tests in a package, scriptests uses a heuristic to
-    guess the package name and automatically include an appropriate
-    \texttt{library(package-being-tested)} command before the tests.  If
-    this heuristic fails, the functions from the package being tested
-    may not be accessible.  If this problem occurs, it can be worked
-    around by explicitly including a
-    \texttt{library(package-being-tested)} command at the beginning of
-    each \texttt{.Rt} file.
-    \item To have tests continue to run after encountering an error, put
+\section{Package dependencies}
+
+It's generally not a good idea to list \texttt{scriptests}
+in the \texttt{Depends:} field of a package
+\texttt{DESCRIPTION} file, because that would cause
+\texttt{scriptests} to be loaded whenever the package is
+loaded.  Instead, add the line \texttt{Suggests: scriptests}
+to DESCRIPTION file.  If there is an existing \texttt{Suggests:}
+line, just add \texttt{scriptests} to it.  If the
+\texttt{scriptests} package is not available when \texttt{R
+  CMD check} is run on the package, the tests will fail
+(because it won't find \texttt{runScripTests()}).
+
+\section{Rt format}
+
+All commands in the transcript file must be prefixed with
+command or continuation prompts, exactly as they appear in a
+transcript.  Any uninterpretable lines will be ignored with
+warnings.
+
+\texttt{scriptests} uses simple heuristics to identify
+commands, comments and output.  If the transcript cannot be
+separated into comments, commands and output by these
+heuristics (e.g., if a command prints out a line starting
+with the command prompt "> "), things will not work
+properly.
+
+\section{Controlling testing and test-output matching}
+\subsection{Continuing tests after an error}
+
+    To have tests continue to run after encountering an error, put
     the command \texttt{options(error=function() NULL)} at the beginning
     of the transcript file.  This will cause the non-interactive R
     session that runs the commands in the scripts to continue after an
     error, instead of stopping, which is the default behavior for
     non-interactive R.
-\end{itemize}
 
-  \emph{Control over matching}
+  \subsection{Control over matching}
 
     Actual output is matched to desired output extracted from the
     transcript file in a line-by-line fashion.  If text is wrapped
@@ -181,35 +350,40 @@ whether all tests passed.
     The following control lines can be present in the transcript
     after a command and before its output:
     \begin{description}
-      \item{#@ignore-output}{Ignore the output of this particular
+      \item{\#@ignore-output}: Ignore the output of this particular
         command -- a test with this control line will always pass
         (unless it causes an R error, and \texttt{options(error=function()
-          NULL)} was not set.)}
-      \item{#@gsub(pattern, replacement, WHAT)}{where \texttt{WHAT} is
+          NULL)} was not set earlier in the file.)
+      \item{\#@gsub(pattern, replacement, WHAT)}: where \texttt{WHAT} is
         \texttt{target}, \texttt{actual} or \texttt{both} (without quotes).
         Make a global substitution of \texttt{replacement} text for
         \texttt{pattern} text (a regular expression) in the desired
-        (target) output or the actual output.}  E.g.,
-      \preformatted{
+        (target) output or the actual output.  E.g.,
+      \begin{verbatim}
 > cat("The date is <", date(), ">\n", sep="")
 #@gsub("<[^>]*>", "<a date>", both)
 The date is <Sat Jul 10 16:20:01 2010>
-> }
-      \item{#@warn-only: OPTIONAL-TEXT}{A mismatch is treated as an
-        "warning", not an error}
-      \item{#@info-only: OPTIONAL-TEXT}{A mismatch is treated as an
-        "info" event, not an error}
-      \item{#@diff-msg: OPTIONAL-TEXT}{Output OPTIONAL-TEXT if the
-        desired and actual output do not match}
-      \item{#@keep-whitespace}{Leave the whitespace as-is in the
-        desired and actual output}
-      \item{#@ignore-linebreaks}{Target and actual will match even
-        if wrapped differently over multiple lines}
+>
+\end{verbatim}
+      \item{\#@warn-only: OPTIONAL-TEXT}: A mismatch is treated as an
+        "warning", not an error
+      \item{\#@info-only: OPTIONAL-TEXT}: A mismatch is treated as an
+        "info" event, not an error
+      \item{\#@diff-msg: OPTIONAL-TEXT}: Output OPTIONAL-TEXT if the
+        desired and actual output do not match
+      \item{\#@keep-whitespace}: Leave the whitespace as-is in the
+        desired and actual output
+      \item{\#@ignore-linebreaks}: Target and actual will match even
+        if wrapped differently over multiple lines
     \end{description}
 
-The \texttt{tests} directory can also contain a CONFIG file, which can
-specify the functions to call for testing.  The defaults are equivalent
-to the following lines in the CONFIG file:
+\subsection{CONFIG file}
+
+The \texttt{tests} directory can also contain an optional
+CONFIG file, which can specify the functions to call for
+testing.  The defaults are equivalent to the following lines
+in the CONFIG file:
+
 \begin{verbatim}
 Depends: scriptests
 Debug: FALSE
@@ -217,6 +391,8 @@ Initialize: scriptests:::initializeTests()
 Diff: scriptests:::ScripDiff()
 Finalize: scriptests:::summarizeTests() }
 \end{verbatim}
+
+\section{Scriptests and Emacs and ESS}
 
 The standard Emacs ESS functions for writing out \texttt{".Rt"} files will strip
 trailing white space, which can result in many unimportant mismatches
@@ -241,5 +417,8 @@ Put the following in your \texttt{.emacs} file to tell ESS not mess with
                 (toggle-read-only 0)
                 (setq ess-nuke-trailing-whitespace-p nil)))) t)
 \end{verbatim}
+<<echo=FALSE>>=
+options(scriptests.pkg.path=getOption("scriptests.pkg.path.saved"))
+@
 
 \end{document}

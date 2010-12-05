@@ -2,12 +2,12 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
 {
     ## This function reads a transcript a file, separates commands and output,
     ## parses the commands, and returns a list with each element containing
-    ## a list with the following elements:
+    ## a list with some of the following elements:
     ##   input/comment: the exact text that contained the commands (including prompts)
     ##   expr: the parsed expression (can be NULL if source is a comment)
     ##   control: control text
     ##   output: the output that apparently came from the command (can be character(0))
-    ##
+    ##   garbage: lines that couldn't be understood
     ## file : [character] the name of the file to read
     ##
     lines <- readLines(file, -1, warn=FALSE)
@@ -47,13 +47,15 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
     ##   2: continuation
     ##   3: comment or empty command
     ##   4: control
-    lineType <- c("output", "command", "continuation", "comment/empty", "control")
+    ##   5: garbage: not understood
+    lineType <- c("output", "command", "continuation", "comment/empty", "control", "garbage")
     code <- ifelse(regexpr("^> ?(#|[:space:]*$)", lines)>0, 3,
                    ifelse(regexpr("^> ", lines)>0, 1,
                           ifelse(regexpr("^\\+ ", lines)>0, 2,
                                  ifelse(regexpr("^#@", lines)>0, 4, 0))))
-    ## Identify blocks of contiguous comments, command+continuation, & output
-    ## Insert a separators that between adjust lines starting with ">"
+    ## Identify blocks of contiguous command+continuation, & control-output.
+    ## Comments go in their own block.
+    ## Insert separators between lines starting with ">"
     ## because these must be separate commands (the first having no output)
     ## Convert command+continuation to all command + separator (-1)
     code2 <- as.vector(rbind(code, ifelse(code==1 & c(code[-1],0)==1, -1, -2)))
@@ -64,24 +66,41 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
     runs$values <- runs$values[i]
     runs$lengths <- runs$lengths[i]
     nblocks <- sum(is.element(runs$values, c(1, 3)))
+    if (! runs$values[length(runs$values)] %in% c(1,3))
+        nblocks <- nblocks + 1
     i <- 1 # counter in lines
     j <- 1 # counter in runs
     blocks <- lapply(seq(len=nblocks), function(k) {
-        if (runs$values[j]==3) {
-            res <- list(comment=lines[seq(i,len=runs$lengths[j])])
+        res <- list()
+        while (j <= length(runs$values) && !is.element(runs$values[j], c(1,3))) {
+            ## warning("not expecting lines of type '", lineType[runs$values[j]+1], "' at line ", i,
+            ##         " (", paste("\"", lines[seq(i, len=min(runs$lengths[j], 3))], "\"", collapse=", ", sep=""), ")")
+            res$garbage <- c(res$garbage, lines[seq(i,len=runs$lengths[j])])
             i <<- i + runs$lengths[j]
             j <<- j + 1
-        } else if (runs$values[j]==1) {
-            res <- list(input=lines[seq(i,len=runs$lengths[j])])
+        }
+        if (j <= length(runs$values) && runs$values[j]==3) {
+            res$comment <- lines[seq(i,len=runs$lengths[j])]
             i <<- i + runs$lengths[j]
             j <<- j + 1
-            while (is.element(runs$values[j], c(0,4))) {
+        } else if (j <= length(runs$values) && runs$values[j]==1) {
+            res$input <- lines[seq(i,len=runs$lengths[j])]
+            i <<- i + runs$lengths[j]
+            j <<- j + 1
+            # output and control lines can be mixed up, separate them out
+            while (j <= length(runs$values) && !is.element(runs$values[j], c(1,3))) {
                 if (runs$values[j]==0) {
                     res$output <- c(res$output, lines[seq(i,len=runs$lengths[j])])
                     i <<- i + runs$lengths[j]
                     j <<- j + 1
-                } else {
+                } else if (runs$values[j]==4) {
                     res$control <- c(res$control, lines[seq(i,len=runs$lengths[j])])
+                    i <<- i + runs$lengths[j]
+                    j <<- j + 1
+                } else {
+                    warning("not expecting lines of type '", lineType[runs$values[j]+1], "' at line ", i,
+                            " (", paste("\"", lines[seq(i, len=min(runs$lengths[j], 3))], "\"", collapse=", ", sep=""), ")")
+                    res$garbage <- c(res$garbage, lines[seq(i,len=runs$lengths[j])])
                     i <<- i + runs$lengths[j]
                     j <<- j + 1
                 }
@@ -91,11 +110,13 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
             ## try to make a syntax error message look like it does at the prompt
             if (is(res$expr, "try-error"))
                 res$expr[1] <- gsub("Error in parse\\(text = text, srcfile = NULL\\) :[ \n\t]+", "Error: ", res$expr[1], perl=TRUE)
-        } else if (runs$values[j]==4) {
-            warning("ignoring orphaned control lines at line ", i, "(\"", lines[i], "\")")
-        } else {
-            stop("not expecting line of type '", lineType[runs$values[j]+1], "' at line ", i,
-                 " (", paste("\"", lines[seq(i, len=min(runs$lengths[j], 3))], "\"", collapse=", ", sep=""), ")")
+        }
+        while (j <= length(runs$values) && !is.element(runs$values[j], c(1,3))) {
+            ## warning("not expecting lines of type '", lineType[runs$values[j]+1], "' at line ", i,
+            ##         " (", paste("\"", lines[seq(i, len=min(runs$lengths[j], 3))], "\"", collapse=", ", sep=""), ")")
+            res$garbage <- c(res$garbage, lines[seq(i,len=runs$lengths[j])])
+            i <<- i + runs$lengths[j]
+            j <<- j + 1
         }
         return(res)
     })

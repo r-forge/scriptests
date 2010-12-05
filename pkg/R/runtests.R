@@ -127,7 +127,7 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
             dumprout(res, output.suffix=output.suffix, console=console, clobber=clobber)
         return(invisible(res))
     } else {
-        status <- runScripTests(..., quit=FALSE, subst=subst)
+        status <- runScripTests(..., quit=FALSE, subst=subst, pattern=pattern)
         new.files <- setdiff(list.files(), existing.files)
         if (FALSE && length(new.files)) {
             cat("* Removing ", length(new.files), " new files: ", paste(new.files, collapse=", "), "\n", sep="")

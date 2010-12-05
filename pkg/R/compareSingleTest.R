@@ -1,4 +1,4 @@
-compareSingleTest <- function(input, control, target, actual, testnum, testname, verbose) {
+compareSingleTest <- function(input, control, target, comment, garbage, actual, testnum, testname, verbose) {
     ## Return a list containing the following elements:
     ##   status: one of 'ok', 'error', 'warn', 'info'
     ##   msg: character vector describing differences (for human readability)
@@ -124,6 +124,22 @@ compareSingleTest <- function(input, control, target, actual, testnum, testname,
     } else {
         msg <- character(0)
         status <- "ok"
+    }
+    if (length(garbage)) {
+        if (is.null(input)) {
+            msg <- c(msg, paste("* Warning:", length(garbage), "uninterpretable line(s) around comment",
+                                testnum, "in", testname, ":"), comment,
+                     "* Uninterpretable lines are:", garbage)
+        } else {
+            if (status=="ok")
+                msg <- c(msg, paste("* Warning:", length(garbage), "uninterpretable line(s) around test number",
+                                    testnum, "in", testname, ":"), input,
+                         "* Uninterpretable lines are:", garbage)
+            else
+                msg <- c(msg, paste("* Warning:", length(garbage), "uninterpretable line(s) around the above test case:"), garbage)
+        }
+        if (status=="ok" || status=="info")
+            status <- "warning"
     }
     if (verbose)
         if (status=="ok")

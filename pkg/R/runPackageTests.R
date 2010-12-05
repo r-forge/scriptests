@@ -1,7 +1,8 @@
 ## Modification of function .runPackageTests() from R-2.9.0/src/library/tools/R/testing.R
 ## used by R CMD check
-## This is a private function in scriptests, but it is written so that
+## This is a private function in scriptests, but it was originally written so that
 ## it could be a drop in replacement for .runPackageTests() in .../src/library/tools/R/testing.R
+##
 ## run.from is the name of the file from which the tests were called -- don't
 ## want to run it again because that way lies infinite recursion!
 
@@ -13,7 +14,7 @@
 
     runone <- function(f, diffFun=NULL, stopOnError=TRUE, debug=TRUE)
     {
-        message("** Running ", sQuote(f), " in ", getwd())
+        cat("** Running", sQuote(f), " in ", getwd(), "\n")
         outfile <- paste(f, "out", sep = "")
         cmd <- paste(shQuote(file.path(R.home(), "bin", "R")),
                      "CMD BATCH --vanilla --no-timing",
@@ -24,10 +25,10 @@
         } else
             cmd <- paste("LANGUAGE=C", "R_TESTS=startup.Rs", cmd)
         if (debug)
-            message("   Running cmd: ", cmd)
+            cat("   Running cmd:", cmd, "\n")
         res <- system(cmd)
         if (res) {
-            message("   Failure running ", sQuote(f), ": returned code ", res)
+            cat("   Failure running ", sQuote(f), ": returned code ", res, "\n")
             if (stopOnError) {
                 file.rename(outfile, paste(outfile, "fail", sep="."))
                 return(1L)
@@ -43,10 +44,9 @@
         }
         if (is.null(diffFun)) {
             if (file.exists(savefile)) {
-                message("   Comparing ", sQuote(outfile), " to ",
-                        sQuote(savefile), " ...", appendLF = FALSE)
+                cat("   Comparing ", sQuote(outfile), " to ", sQuote(savefile), " ...")
                 res <- Rdiff(outfile, savefile, TRUE)
-                if (!res) message(" OK")
+                if (!res) cat(" OK\n")
             }
         } else {
             args <- list(commandfile=f, outfile=outfile)
@@ -56,13 +56,13 @@
                  diffFun[i+length(args)] <- diffFun[i]
             diffFun[seq(2,len=length(args))] <- args
             names(diffFun)[seq(2,len=length(args))] <- names(args)
-            message("   Calling ", format(diffFun))
+            cat("   Calling ", format(diffFun), "\n")
             res <- try(eval(diffFun))
             if (inherits(res, "try-error")) {
-                message("   Error evaluting ", format(diffFun), ": ", as.character(res))
+                cat("   Error evaluting ", format(diffFun), ": ", as.character(res), "\n")
                 return(1L)
             } else if (!is.numeric(res)) {
-                message("   Error: ", format(diffFun), " returned non-numeric result:", as.character(res))
+                cat("   Error: ", format(diffFun), " returned non-numeric result:", as.character(res), "\n")
                 return(1L)
             }
         }
@@ -104,7 +104,7 @@
                 debug <- TRUE
             }
             if (debug)
-                message("   Setting debug=TRUE")
+                cat("   Setting debug=TRUE\n")
         }
 
         # a line like "Config: x:::y" in the CONFIG file will call x:::y to get config info
@@ -122,15 +122,15 @@
             }
             for (pkg.name in setdiff(configPkg, .packages())) {
                 if (debug)
-                    message("Attemping to load package '", pkg.name, "'")
+                    cat("Attemping to load package '", pkg.name, "'\n")
                 if (!library(pkg.name, character.only=TRUE, logical.return=TRUE)) {
                     warning("could not load package '", pkg.name, "' needed for testing initialize/diff/finalize calls")
                     return(1)
                 }
             }
-            message("   Using Config = ", format(configFun))
+            cat("   Using Config =", format(configFun), "\n")
             if (debug)
-                message("   Calling config function ", format(configFun))
+                cat("   Calling config function ", format(configFun), "\n")
             res <- try(eval(configFun), silent=TRUE)
             if (inherits(res, "try-error")) {
                 warning("failed to run config function call ", format(configFun), ": ", paste(as.character(res), collapse=" "))
@@ -156,7 +156,7 @@
                 warning("could not interpret 'StopOnError' entry in CONFIG (\"", config["stoponerror"], "\") did not evaluate to a single TRUE/FALSE value")
                 stopOnError <- FALSE
             } else {
-                message("   Setting stopOnError=", stopOnError)
+                cat("   Setting stopOnError=", stopOnError, "\n")
             }
         }
 
@@ -171,7 +171,7 @@
             } else {
                 if (!is.name(initializeFun[[1]]) && as.character(initializeFun[[1]][[1]]) == ":::")
                     needPkg <- unique(c(needPkg, as.character(initializeFun[[1]][[2]])))
-                message("   Using Initialize = ", format(initializeFun))
+                cat("   Using Initialize =", format(initializeFun), "\n")
             }
         }
         if (is.element("finalize", names(config))) {
@@ -182,7 +182,7 @@
             } else {
                 if (!is.name(finalizeFun[[1]]) && as.character(finalizeFun[[1]][[1]]) == ":::")
                     needPkg <- unique(c(needPkg, as.character(finalizeFun[[1]][[2]])))
-                message("   Using Finalize = ", format(finalizeFun))
+                cat("   Using Finalize =", format(finalizeFun), "\n")
             }
 
         }
@@ -194,7 +194,7 @@
             } else {
                 if (!is.name(diffFun[[1]]) && as.character(diffFun[[1]][[1]]) == ":::")
                     needPkg <- unique(c(needPkg, as.character(diffFun[[1]][[2]])))
-                message("   Using Diff = ", format(diffFun))
+                cat("   Using Diff =", format(diffFun), "\n")
             }
         }
     }
@@ -202,7 +202,7 @@
     if (length(needPkg)) {
         for (pkg.name in setdiff(needPkg, .packages())) {
             if (debug)
-                message("Attemping to load package '", pkg.name, "'")
+                cat("Attemping to load package '", pkg.name, "'", "\n")
             if (!library(pkg.name, character.only=TRUE, logical.return=TRUE)) {
                 warning("could not load package '", pkg.name, "' needed for testing initialize/diff/finalize calls")
                 return(1)
@@ -231,7 +231,7 @@
             names(initializeFun)[length(initializeFun)] <- "debug"
         }
         if (debug)
-            message("   Calling initialization function ", format(initializeFun))
+            cat("   Calling initialization function ", format(initializeFun), "\n")
         res <- try(eval(initializeFun), silent=TRUE)
         if (inherits(res, "try-error")) {
             warning("failed to run initialize function call ", format(initializeFun), ": ", paste(as.character(res), collapse=" "))
@@ -249,12 +249,12 @@
     if (!run.preexisting.R.files) {
         ## message("ignoring run.from=", run.from)
         if (debug && length(preexisting.Rin.files))
-            message("   Not running these pre-existing .Rin files: ", paste(preexisting.Rin.files, collapse=" "))
+            cat("   Not running these pre-existing .Rin files: ", paste(preexisting.Rin.files, collapse=" "), "\n")
         Rinfiles <- setdiff(Rinfiles, preexisting.Rin.files)
     }
     for(f in Rinfiles) {
         Rfile <- sub("\\.Rin$", ".R", f)
-        message("   Creating ", sQuote(Rfile), " from ", f)
+        cat("   Creating ", sQuote(Rfile), " from ", f, "\n")
         cmd <- paste(shQuote(file.path(R.home(), "bin", "R")),
                      "CMD BATCH --no-timing --vanilla --slave", f)
         if (system(cmd))
@@ -268,7 +268,7 @@
     if (!run.preexisting.R.files) {
         Rfiles <- setdiff(Rfiles, preexisting.R.files)
         if (debug && length(preexisting.R.files))
-            message("   Not running these pre-existing .R files: ", paste(preexisting.R.files, collapse=" "))
+            cat("   Not running these pre-existing .R files: ", paste(preexisting.R.files, collapse=" "), "\n")
     }
     for(f in Rfiles) {
         nfail <- nfail + runone(f, diffFun, stopOnError=stopOnError, debug=debug)
@@ -277,7 +277,7 @@
 
     if (!is.null(finalizeFun)) {
         if (debug)
-            message("   Calling finalization function ", format(finalizeFun))
+            cat("   Calling finalization function ", format(finalizeFun), "\n")
         res <- try(eval(finalizeFun), silent=TRUE)
         if (inherits(res, "try-error")) {
             warning("failed to run finalize function call ", format(finalizeFun), ": ", paste(as.character(res), collapse=" "))
