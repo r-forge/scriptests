@@ -14,6 +14,7 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
     ignore.whitespace <- TRUE
     ignore.linebreaks <- FALSE
     diff.msg <- NULL # message to output if there are differences
+    did.gsub <- c(FALSE, FALSE)
     if (!is.null(control)) {
         if (any(regexpr('^\\#@ *ignore[- ]output', control, ignore.case=TRUE)>0))
             target <- actual <- character(0)
@@ -36,12 +37,14 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         target <- res
+                    did.gsub[1] <- TRUE
                 } else if (v=="actual") {
                     res <- try(eval(do.call("substitute", list(expr[[1]], list(actual=actual)))), silent=TRUE)
                     if (is(res, "try-error"))
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         actual <- res
+                    did.gsub[2] <- TRUE
                 } else if (v=="both") {
                     res <- try(eval(do.call("substitute", list(expr[[1]], list(both=target)))), silent=TRUE)
                     if (is(res, "try-error"))
@@ -53,6 +56,7 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         actual <- res
+                    did.gsub[1:2] <- TRUE
                 }
             } else if (regexpr('^\\#@ *warn[- ]only', line, ignore.case=TRUE)>0) {
                 mismatch.status <- "warning"
@@ -113,12 +117,14 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
             msg <- c(msg, paste("* No actual output, but target output", if (length(target)>3) "began with:" else "is:"),
                      target[seq(len=min(3, length(target)))])
         } else if (actual.len+target.len <= 10) {
-            msg <- c(msg, "* Target output:", paste("", target[seq(target.len)], sep=""),
-                     "* Actual output:", paste("", actual[seq(actual.len)], sep=""))
+            msg <- c(msg, (if (did.gsub[1]) "* Target output (after gsub):" else "* Target output:"),
+                     paste("", target[seq(target.len)], sep=""),
+                     (if (did.gsub[2]) "* Actual output (after gsub):" else "* Actual output:"),
+                     paste("", actual[seq(actual.len)], sep=""))
         } else {
             msg <- c(msg, paste("* Output differs first at line ", which(!i)[1], ":"),
-                     paste("  target:", target[which(!i)[1]]),
-                     paste("  actual:", actual[which(!i)[1]]))
+                     paste((if (did.gsub[1]) "  target (after gsub):" else "  target:"), target[which(!i)[1]]),
+                     paste((if (did.gsub[2]) "  actual (after gsub):" else "  actual:"), actual[which(!i)[1]]))
         }
         status <- mismatch.status
     } else {
