@@ -1,3 +1,5 @@
+                CHANGES in scriptests version 1.0-1 (2011-01-11)
+    o	Moved vignette to the right place (inst/doc)
                 CHANGES in scriptests version 1.0-0 (2010-12-04)
 INITIAL RELEASE
     o   Added Vignette
