@@ -1,3 +1,6 @@
+SCRIPTESTS NEWS
+                CHANGES in scriptests version 1.0-2 (2011-01-20)
+    o	Used full instead of abbreviated argument names in internal code at prompting of R CMD check
                 CHANGES in scriptests version 1.0-1 (2011-01-11)
     o	Moved vignette to the right place (inst/doc)
                 CHANGES in scriptests version 1.0-0 (2010-12-04)

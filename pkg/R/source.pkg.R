@@ -3,18 +3,23 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
                        pos=NA, all=FALSE, reset.function.envirs=TRUE,
                        path=getOption("scriptests.pkg.path", default=getwd())) {
     dlls <- match.arg(dlls)
+    if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0)
+        pkg.dir.path <- pkg.dir
+    else
+        pkg.dir.path <- pkg.path(path, pkg.dir)
+    if (!file.exists(pkg.dir.path))
+        stop("cannot find package directory ", pkg.dir.path, " using path='", path, "'")
     if (!missing(pkg.dir))
         options("scriptests.pkg.dir"=pkg.dir)
     if (!missing(path))
         options("scriptests.pkg.path"=path)
-    if (!file.exists(pkg.path(path, pkg.dir)))
-        stop("cannot find package directory ", pkg.path(path, pkg.dir), " using path='", path, "'")
     desc <- NULL
-    if (file.exists(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))) {
-        desc <- read.dcf(file.path(pkg.path(path, pkg.dir), "DESCRIPTION"))
+    if (file.exists(file.path(pkg.dir.path, "DESCRIPTION"))) {
+        desc <- read.dcf(file.path(pkg.dir.path, "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
     }
-    pkg.name <- read.pkg.name(path, pkg.dir)
+    if (is.null(pkg.name))
+        pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     problems <- list()
     # Load dependencies before we attach the environment for our package code, so that required
     # libraries come after in search path -- if the dependencies come before, we won't find them.
@@ -57,7 +62,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         }
     }
     # Work out which R files to source
-    files <- list.files(file.path(pkg.path(path, pkg.dir), "R"), all=T, pattern=pattern, full=TRUE, ignore.case=TRUE)
+    files <- list.files(file.path(pkg.dir.path, "R"), all.files=T, pattern=pattern, full.names=TRUE, ignore.case=TRUE)
     if (!is.null(suffix)) {
         i <- grep(suffix, files, ignore.case=TRUE)
         if (length(files) && length(i)==0)
@@ -134,8 +139,8 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     # spectrum of possible data formats -- see R-exts for
     # details.  If more formats are added here, add them to
     # man/source.pkg.Rd too.
-    if (file.exists(file.path(pkg.path(path, pkg.dir), "data"))) {
-        files <- list.files(file.path(pkg.path(path, pkg.dir), "data"), all=T, pattern=".*\\.rda(ta)?$", full=TRUE, ignore.case=TRUE)
+    if (file.exists(file.path(pkg.dir.path, "data"))) {
+        files <- list.files(file.path(pkg.dir.path, "data"), all.files=T, pattern=".*\\.rda(ta)?$", full.names=TRUE, ignore.case=TRUE)
         names(files) <- files
         problems <- c(problems, lapply(files,
                function(file) {
@@ -210,18 +215,25 @@ pkg.path <- function(path, pkg.dir) {
     }
 }
 
-read.pkg.name <- function(path, pkg.dir) {
-    desc.path <- file.path(pkg.path(path, pkg.dir), "DESCRIPTION")
+read.pkg.name <- function(pkg.dir.path, path, pkg.dir) {
+    desc.path <- file.path(pkg.dir.path, "DESCRIPTION")
+    default.pkg.name <- basename(pkg.dir.path)
+    if (default.pkg.name == "pkg") {
+        default.pkg.name <- dirname(basename(pkg.dir.path))
+        # if we didn't get a plausible pkg name this way, go back to "pkg"
+        if ((default.pkg.name %in% c(".", "", "/", "\\")) || regexpr("^[a-zA-Z]:", default.pkg.name)>0)
+            default.pkg.name <- basename(pkg.dir.path)
+    }
     # cat("  Reading", desc.path, "\n")
     if (file.exists(desc.path)) {
         pkg.name <- as.character(drop(read.dcf(desc.path, "Package")))
         if (is.na(pkg.name)) {
-            warning("No 'Package' field in ", desc.path, "; using package name='", pkg.dir, "'")
-            pkg.name <- pkg.dir
+            warning("No 'Package' field in ", desc.path, "; using package name='", default.pkg.name, "'")
+            pkg.name <- default.pkg.name
         }
     } else {
-        warning("File ", desc.path, " doesn't exist; using package name='", pkg.dir, "'")
-        pkg.name <- pkg.dir
+        warning("File ", desc.path, " doesn't exist; using package name='", default.pkg.name, "'")
+        pkg.name <- default.pkg.name
     }
     return(pkg.name)
 }

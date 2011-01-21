@@ -4,6 +4,9 @@ evalCapture <- function(expr, envir=globalenv(), enclos=envir) {
     ## (only the value from the last expression in text is printed)
     ## A zero-length character vector is returned when the result is invisible.
     ## Constructed this definition of eval.with.vis() based on code in source()
+    ##
+    ## See also https://github.com/hadley/evaluate which does similar things, esp
+    ## if there are changes in R that make this code stop working.
     if (is.null(expr))
         return(character(0))
     withWarnings <- function(expr) {

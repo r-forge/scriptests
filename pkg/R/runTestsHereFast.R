@@ -34,7 +34,7 @@ runTestsHereFast <- function(pattern=".*",
                 pattern <- paste(pattern, "$", sep="")
 
         }
-        files <- list.files(file.path(pkg.path(path, pkg.dir), "tests"), pattern=pattern, full=TRUE, ignore.case=TRUE)
+        files <- list.files(file.path(pkg.path(path, pkg.dir), "tests"), pattern=pattern, full.names=TRUE, ignore.case=TRUE)
         if (length(files)==0)
             stop("no files matched the pattern '", pattern, "' in ", file.path(pkg.dir, "tests"))
     }
