@@ -43,7 +43,7 @@ summarizeTests(debug = FALSE)
   Substitutions to make when parsing the transcript file.
 }
 \item{R.suf}{
-  The suffix (not including a dot) to use for files containing R commands.
+  The suffix (not including a dot) to use for auto-generated files containing R commands.
 }
 }
 \details{
