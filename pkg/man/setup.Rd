@@ -11,38 +11,49 @@
   each test with target out, and summarize test results.
 }
 \usage{
-ScripDiff(commandfile, outfile = gsub("\\\\.R$", ".Rout", commandfile, perl = TRUE), savefile = paste(outfile, ".save", sep = ""), debug = FALSE)
-initializeTests(debug = FALSE, create.Rout.save = FALSE, addSelfCheck = FALSE, pattern = NULL, subst = NULL)
+ScripDiff(commandfile, outfile = NULL, savefile = NULL, debug = FALSE, R.suf = "R")
+initializeTests(debug = FALSE, create.Rout.save = FALSE, addSelfCheck = FALSE, pattern = NULL, subst = NULL, R.suf = "R")
 summarizeTests(debug = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{commandfile}{
-%%     ~~Describe \code{commandfile} here~~
+    The name of the file containing R commands.
 }
   \item{outfile}{
-%%     ~~Describe \code{outfile} here~~
+    The name of the file containing R output.
 }
-  \item{savefile}{
-%%     ~~Describe \code{savefile} here~~
+\item{savefile}{
+  The name of the file containing pre-existing R output to compare against.
 }
-  \item{debug}{
-%%     ~~Describe \code{debug} here~~
+\item{debug}{
+  Debugging flag.
 }
-  \item{create.Rout.save}{
+\item{create.Rout.save}{
+  Should a \code{.Rout.save} file be created.  Default is \code{FALSE}.
 }
   \item{addSelfCheck}{
+  Controls an unused an obselete feature of adding extra code to the end
+  of the R commands that will check the output created.
 }
-  \item{pattern}{
+\item{pattern}{
+  Only process test files whose name matches \code{pattern}
 }
-  \item{subst}{
+\item{subst}{
+  Substitutions to make when parsing the transcript file.
+}
+\item{R.suf}{
+  The suffix (not including a dot) to use for files containing R commands.
 }
 }
 \details{
   \describe{
-    \item{\code{initializeTests}}{ }
-    \item{\code{ScripDiff}}{ }
-    \item{\code{summarizeTests}}{ }
+    \item{\code{initializeTests}}{Pre-process tests, writing commands
+      to a file, and creating a file with a saved R object containing
+      information to analyze the results of the test.}
+    \item{\code{ScripDiff}}{Compare test output against desired output
+      and summarize the differences.}
+    \item{\code{summarizeTests}}{Summarize the results of all tests.}
   }
 }
 \value{
@@ -51,7 +62,4 @@ summarizeTests(debug = FALSE)
 \author{
   Tony Plate \email{tplate@acm.org}
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \keyword{ misc }
