@@ -1,4 +1,5 @@
-initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FALSE, pattern=NULL, subst=NULL) {
+initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FALSE, pattern=NULL, subst=NULL, R.suf="R") {
+    R.suf.regexp <- paste("\\.", R.suf, "$", sep="")
     # Create .R and .Rout.save files for each .Rt file
     wd <- getwd()
     if (debug)
@@ -16,7 +17,7 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
         # or into mypackage/mypackage.Rcheck.
         # So get the package name from the log messages in <pkg>.Rcheck/00install.out
         if (debug)
-            cat("   Looking for ", file.path(dirname(wd), "00install.out"), "\n")
+            cat("   Looking for ", file.path(dirname(wd), "00install.out"), "\n", sep="")
         if (file.exists(file.path(dirname(wd), "00install.out"))) {
             pkg.name <- gsub(")", "", gsub("* DONE (", "", fixed=TRUE, grep("* DONE ", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE)))
             if (length(pkg.name)>1)
@@ -26,7 +27,7 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
                 pkg.name <- pkg.name[1]
             }
             if (debug)
-                cat("   Read pkg.name= '", pkg.name, "'\n")
+                cat("   Read pkg.name= '", pkg.name, "'\n", sep="")
             if (length(pkg.name)<1)
                 cat("   Failed to work out pkg.name from 00install.line: ", grep("DONE", readLines(file.path(dirname(wd), "00install.out")), fixed=TRUE, value=TRUE), "\n")
         }
@@ -35,17 +36,17 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     }
 
     # process all .R files - if a .Rout.save file exists, generate a .Rt.save file
-    for (cmdIn in list.files(pattern=".*\\.[Rr]$")) {
+    for (cmdIn in list.files(pattern=R.suf.regexp, ignore.case=TRUE)) {
         if (!is.null(pattern) && !length(grep(pattern, cmdIn))) {
             if (debug)
                 cat(" Skipping file ", cmdIn, "\n")
             next
         }
-        rOutSave <- gsub("\\.R$", ".Rout.save", cmdIn, perl=TRUE)
+        rOutSave <- gsub(R.suf.regexp, ".Rout.save", cmdIn, perl=TRUE)
         if (file.exists(rOutSave)) {
-            rtSave <- gsub("\\.R$", ".Rt.save", cmdIn, perl=TRUE)
+            rtSave <- gsub(R.suf.regexp, ".Rt.save", cmdIn, perl=TRUE)
             if (debug)
-                cat(" Pre-processing tests in ", cmdIn, "/", rOutSave, " to generate ", rtSave, "\n")
+                cat(" Pre-processing tests in ", cmdIn, "/", rOutSave, " to generate ", rtSave, "\n", sep="")
             tests <- parseTranscriptFile(rOutSave)
             env <- new.env()
             save(list="tests", file=rtSave, envir=env)
@@ -56,7 +57,7 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
     }
 
     # process all .Rt files (generate a .R and .Rt.save and optionally .Rout.save)
-    for (rtIn in list.files(pattern=".*\\.[Rr]t$")) {
+    for (rtIn in list.files(pattern=".*\\.Rt$", ignore.case=TRUE)) {
         if (!is.null(pattern) && !length(grep(pattern, rtIn))) {
             if (debug)
                 cat(" Skipping file ", rtIn, "\n")
@@ -64,9 +65,9 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
         }
         rOutSave <- gsub("\\.Rt$", ".Rout.save", rtIn, perl=TRUE)
         rtSave <- gsub("\\.Rt$", ".Rt.save", rtIn, perl=TRUE)
-        cmdOut <- gsub("\\.Rt$", ".R", rtIn, perl=TRUE)
+        cmdOut <- gsub("\\.Rt$", paste(".", R.suf, sep=""), rtIn, perl=TRUE)
         if (debug)
-            cat(" Pre-processing tests in ", rtIn, " to generate ", cmdOut, if (create.Rout.save) paste(",", rOutSave), ", and ", rtSave, "\n")
+            cat(" Pre-processing tests in ", rtIn, " to generate ", cmdOut, if (create.Rout.save) paste(",", rOutSave), ", and ", rtSave, "\n", sep="")
         tests <- parseTranscriptFile(rtIn, subst=subst)
         env <- new.env()
         test.obj.name <- paste(gsub("\\.Rt$", "", rtIn), ".tests", sep="", perl=TRUE)

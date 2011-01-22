@@ -1,6 +1,7 @@
-Comment: This file contains the defaults and is not necessary
+Comment: The values in file are the same as the defaults.  It is not necessary to have this file.
 Depends: scriptests
 Initialize: scriptests:::initializeTests()
 Diff: scriptests:::ScripDiff()
 Finalize: scriptests:::summarizeTests()
 Debug: FALSE
+Rsuffix: R

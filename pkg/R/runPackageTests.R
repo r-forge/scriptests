@@ -11,21 +11,22 @@
                              debug=FALSE, stopOnError=TRUE, pattern=NULL, subst=NULL,
                              run.from=NULL)
 {
-
-    runone <- function(f, diffFun=NULL, stopOnError=TRUE, debug=TRUE)
+    runone <- function(f, diffFun=NULL, stopOnError=TRUE, debug=TRUE, R.suf="Rs")
     {
-        cat("** Running", sQuote(f), " in ", getwd(), "\n")
-        outfile <- paste(f, "out", sep = "")
+        cat("** Running ", sQuote(f), " in ", getwd(), "\n", sep="")
+        R.suf.regexp <- paste("\\.", R.suf, "$", sep="")
+        outfile <- gsub(R.suf.regexp, ".Rout", f)
         cmd <- paste(shQuote(file.path(R.home(), "bin", "R")),
                      "CMD BATCH --vanilla --no-timing",
                      shQuote(f), shQuote(outfile))
         if (.Platform$OS.type == "windows") {
             Sys.setenv(LANGUAGE="C")
             Sys.setenv(R_TESTS="startup.Rs")
-        } else
+        } else {
             cmd <- paste("LANGUAGE=C", "R_TESTS=startup.Rs", cmd)
+        }
         if (debug)
-            cat("   Running cmd:", cmd, "\n")
+            cat("   Running cmd: ", cmd, "\n", sep="")
         res <- system(cmd)
         if (res) {
             cat("   Failure running ", sQuote(f), ": returned code ", res, "\n")
@@ -38,7 +39,7 @@
         savefile <- paste(outfile, "save", sep = "." )
         # Look for a .Rt.save file -- this was auto-generated and we want to remove it
         # after we've used it.
-        rtSave <- gsub("\\.R$", ".Rt.save", f, perl=TRUE)
+        rtSave <- gsub(R.suf.regexp, ".Rt.save", f, perl=TRUE)
         if (file.exists(rtSave)) {
             on.exit(unlink(rtSave))
         }
@@ -52,17 +53,19 @@
             args <- list(commandfile=f, outfile=outfile)
             if (file.exists(savefile))
                 args <- c(args, list(savefile=savefile))
-            for (i in seq(to=2, by=-1, len=max(0, length(diffFun)-1)))
-                 diffFun[i+length(args)] <- diffFun[i]
+            for (i in seq(to=2, by=-1, len=max(0, length(diffFun)-1))) {
+                diffFun[i+length(args)] <- diffFun[i]
+                names(diffFun)[i+length(args)] <- names(diffFun[i])
+            }
             diffFun[seq(2,len=length(args))] <- args
             names(diffFun)[seq(2,len=length(args))] <- names(args)
-            cat("   Calling ", format(diffFun), "\n")
+            cat("   Calling ", format(diffFun), "\n", sep="")
             res <- try(eval(diffFun))
             if (inherits(res, "try-error")) {
-                cat("   Error evaluting ", format(diffFun), ": ", as.character(res), "\n")
+                cat("   Error evaluting ", format(diffFun), ": ", as.character(res), "\n", sep="")
                 return(1L)
             } else if (!is.numeric(res)) {
-                cat("   Error: ", format(diffFun), " returned non-numeric result:", as.character(res), "\n")
+                cat("   Error: ", format(diffFun), " returned non-numeric result:", as.character(res), "\n", sep="")
                 return(1L)
             }
         }
@@ -76,8 +79,14 @@
             run.preexisting.R.files <- FALSE
         }
     }
-    preexisting.Rin.files <- dir(".", pattern="\\.Rin$")
-    preexisting.R.files <- dir(".", pattern="\\.R$")
+    # Can change the default R command file suffix here -- a reason to change
+    # it would be that if the creation of .R files in the tests directory is
+    # confusing other aspects of the testing.  Setting R.suf to a different
+    # value will make scriptests use that value as the suffix for R command files.
+    # R.suf should NOT begin with a dot.
+    R.suf <- "R"
+    preexisting.Rin.files <- dir(".", pattern="\\.Rin$", ignore.case=TRUE)
+    preexisting.R.files <- dir(".", pattern="\\.R$", ignore.case=TRUE)
     preexisting.R.files <- setdiff(preexisting.R.files, run.from)
 
     file.copy(file.path(R.home("share"), "R", "tests-startup.R"), "startup.Rs")
@@ -85,7 +94,7 @@
     # Need to make consistent behavior between interactive and non-interactive
     # for options(showErrorCalls), and can't get evalCapture() to capture the
     # error calls, so turn them off for non-interactive.
-    cat("options(showErrorCalls=FALSE)\n", file = "startup.Rs", append = TRUE)
+    cat("options(showErrorCalls = FALSE)\n", file = "startup.Rs", append = TRUE)
     nfail <- 0L ## allow for later running all tests even if some fail.
 
     needPkg <- character(0)
@@ -130,7 +139,7 @@
             }
             cat("   Using Config =", format(configFun), "\n")
             if (debug)
-                cat("   Calling config function ", format(configFun), "\n")
+                cat("   Calling config function ", format(configFun), "\n", sep="")
             res <- try(eval(configFun), silent=TRUE)
             if (inherits(res, "try-error")) {
                 warning("failed to run config function call ", format(configFun), ": ", paste(as.character(res), collapse=" "))
@@ -197,6 +206,18 @@
                 cat("   Using Diff =", format(diffFun), "\n")
             }
         }
+        if (is.element("rsuffix", names(config))) {
+            R.suf <- config["rsuffix"]
+            if (inherits(R.suf, "try-error")) {
+                warning("could not interpret 'Rsuffix' entry in CONFIG (\"", config["rsuffix"], "\") as a logical value")
+                R.suf <- "Rs"
+            } else if (length(R.suf)!=1 || is.na(R.suf)) {
+                warning("could not interpret 'Rsuffix' entry in CONFIG (\"", config["rsuffix"], "\") did not evaluate to a single character value")
+                R.suf <- "Rs"
+            }
+            if (debug)
+                cat("   Setting Rsuffix=", R.suf, "\n")
+        }
     }
 
     if (length(needPkg)) {
@@ -210,6 +231,7 @@
         }
     }
 
+    cat("### Show output from here ###\n")
     if (!is.null(initializeFun)) {
         # Add a pattern=<pattern> actual argument to the call to initializeFun
         # if it does have a formal argument named 'pattern'
@@ -226,12 +248,18 @@
         }
         # Add a debug=<debug> actual argument to the call to initializeFun
         # if it does have a formal argument named 'debug'
-        if (!is.null(debug) && is.element("debug", init.args)) {
+        if (!is.null(debug) && !identical(debug, FALSE) && is.element("debug", init.args) && !is.element("debug", names(initializeFun))) {
             initializeFun[length(initializeFun)+1] <- debug
             names(initializeFun)[length(initializeFun)] <- "debug"
         }
+        # Add a R.suf=<R.suf> actual argument to the call to initializeFun
+        # if it does have a formal argument named 'R.suf'
+        if (!is.null(R.suf) && is.element("R.suf", init.args)) {
+            initializeFun[length(initializeFun)+1] <- R.suf
+            names(initializeFun)[length(initializeFun)] <- "R.suf"
+        }
         if (debug)
-            cat("   Calling initialization function ", format(initializeFun), "\n")
+            cat("   Calling initialization function ", format(initializeFun), "\n", sep="")
         res <- try(eval(initializeFun), silent=TRUE)
         if (inherits(res, "try-error")) {
             warning("failed to run initialize function call ", format(initializeFun), ": ", paste(as.character(res), collapse=" "))
@@ -244,8 +272,24 @@
             return(1)
         }
     }
+    if (!is.null(diffFun)) {
+        # Add a R.suf=<R.suf> actual argument to the call to diffFun
+        # if it does have a formal argument named 'R.suf'
+        if (!is.null(R.suf) && is.element("R.suf", init.args)) {
+            diffFun[length(diffFun)+1] <- R.suf
+            names(diffFun)[length(diffFun)] <- "R.suf"
+        }
+        # Add a debug=<debug> actual argument to the call to diffFun
+        # if it does have a formal argument named 'debug'
+        if (!is.null(debug) && !identical(debug, FALSE) && is.element("debug", init.args) && !is.element("debug", names(diffFun))) {
+            diffFun[length(diffFun)+1] <- debug
+            names(diffFun)[length(diffFun)] <- "debug"
+        }
+    }
 
-    Rinfiles <- dir(".", pattern="\\.Rin$")
+    R.suf.regexp <- paste("\\.", R.suf, "$", sep="")
+
+    Rinfiles <- dir(".", pattern="\\.Rin$", ignore.case=TRUE)
     if (!run.preexisting.R.files) {
         ## message("ignoring run.from=", run.from)
         if (debug && length(preexisting.Rin.files))
@@ -253,31 +297,37 @@
         Rinfiles <- setdiff(Rinfiles, preexisting.Rin.files)
     }
     for(f in Rinfiles) {
-        Rfile <- sub("\\.Rin$", ".R", f)
+        Rfile <- sub("\\.Rin$", paste(".", R.suf, sep=""), f)
         cat("   Creating ", sQuote(Rfile), " from ", f, "\n")
         cmd <- paste(shQuote(file.path(R.home(), "bin", "R")),
                      "CMD BATCH --no-timing --vanilla --slave", f)
         if (system(cmd))
             warning("creation of ", sQuote(Rfile), " failed")
-        else if (file.exists(Rfile)) nfail <- nfail + runone(Rfile, stopOnError=stopOnError, debug=debug)
+        else if (file.exists(Rfile)) nfail <- nfail + runone(Rfile, stopOnError=stopOnError, debug=debug, R.suf=R.suf)
         if (nfail > 0) return(nfail)
     }
 
-    Rfiles <- dir(".", pattern="\\.R$")
-    Rfiles <- setdiff(Rfiles, run.from)
+    Rfiles <- dir(".", pattern=R.suf.regexp, ignore.case=TRUE)
+    Rfiles <- setdiff(Rfiles, c(run.from, "startup.Rs"))
     if (!run.preexisting.R.files) {
         Rfiles <- setdiff(Rfiles, preexisting.R.files)
         if (debug && length(preexisting.R.files))
             cat("   Not running these pre-existing .R files: ", paste(preexisting.R.files, collapse=" "), "\n")
     }
     for(f in Rfiles) {
-        nfail <- nfail + runone(f, diffFun, stopOnError=stopOnError, debug=debug)
+        nfail <- nfail + runone(f, diffFun, stopOnError=stopOnError, debug=debug, R.suf=R.suf)
         if (nfail > 0) return(nfail)
     }
 
     if (!is.null(finalizeFun)) {
+        # Add a debug=<debug> actual argument to the call to finalizeFun
+        # if it does have a formal argument named 'debug'
+        if (!is.null(debug) && !identical(debug, FALSE) && is.element("debug", init.args) && !is.element("debug", names(finalizeFun))) {
+            finalizeFun[length(finalizeFun)+1] <- debug
+            names(finalizeFun)[length(finalizeFun)] <- "debug"
+        }
         if (debug)
-            cat("   Calling finalization function ", format(finalizeFun), "\n")
+            cat("   Calling finalization function ", format(finalizeFun), "\n", sep="")
         res <- try(eval(finalizeFun), silent=TRUE)
         if (inherits(res, "try-error")) {
             warning("failed to run finalize function call ", format(finalizeFun), ": ", paste(as.character(res), collapse=" "))

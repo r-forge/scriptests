@@ -1,7 +1,13 @@
-ScripDiff <- function(commandfile, outfile=gsub("\\.R$", ".Rout", commandfile, perl=TRUE), savefile=paste(outfile, ".save", sep=""), debug=FALSE) {
-    rtIn <- gsub("\\.R$", ".Rt", commandfile, perl=TRUE)
-    rtSave <- gsub("\\.R$", ".Rt.save", commandfile, perl=TRUE)
+ScripDiff <- function(commandfile, outfile=NULL, savefile=NULL, debug=FALSE, R.suf="R") {
+    R.suf.regexp <- paste("\\.", R.suf, "$", sep="")
+    if (is.null(outfile))
+        outfile <- gsub(R.suf.regexp, ".Rout", commandfile, perl=TRUE)
+    if (is.null(savefile))
+        savefile <- paste(outfile, ".save", sep="")
+    rtIn <- gsub(R.suf.regexp, ".Rt", commandfile, perl=TRUE)
+    rtSave <- gsub(R.suf.regexp, ".Rt.save", commandfile, perl=TRUE)
     sumfile <- "test-summary.txt"
+    if (debug) cat("ScripDiff: looking for rtIn: '", rtIn, "'\n", sep="")
     if (file.exists(rtIn)) {
         # tests were generated from a .Rt file
         failfile <- paste(rtIn, ".fail", sep="")
@@ -16,8 +22,9 @@ ScripDiff <- function(commandfile, outfile=gsub("\\.R$", ".Rout", commandfile, p
         logfile <- paste(commandfile, ".log", sep="")
         ignoreUpToRegExpr <- "Type 'q\\(\\)' to quit R"
         ignoreAfterRegExpr <- NULL
+        if (debug) cat("ScripDiff: commands not generated from .Rt file; looking for savefile: '", savefile, "'\n", sep="")
         if (!file.exists(savefile)) {
-            cat("ScripDiff: nothing to compare against for ", commandfile, "\n")
+            cat("ScripDiff: nothing to compare against for '", commandfile, "'\n", sep="")
             return(0L)
         }
     }

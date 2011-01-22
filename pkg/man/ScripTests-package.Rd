@@ -139,16 +139,18 @@ The date is <Sat Jul 10 16:20:01 2010>
         if wrapped differently over multiple lines}
       }
 
-The \code{tests} directory can also contain a CONFIG file, which can
+The \code{tests} directory can also contain a \code{CONFIG} file, which can
 specify the functions to call for testing.  The defaults are equivalent
-to the following lines in the CONFIG file:
+to the following lines in the \code{CONFIG} file:
 \preformatted{
 Depends: scriptests
 Debug: FALSE
+Rsuffix: R
 StopOnError: FALSE
 Initialize: scriptests:::initializeTests()
 Diff: scriptests:::ScripDiff()
 Finalize: scriptests:::summarizeTests() }
+The \code{CONFIG} file is optional and is not needed in ordinary usage.
 }
 \note{
 
