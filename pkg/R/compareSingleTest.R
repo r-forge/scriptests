@@ -122,7 +122,7 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
                      (if (did.gsub[2]) "* Actual output (after gsub):" else "* Actual output:"),
                      paste("", actual[seq(actual.len)], sep=""))
         } else {
-            msg <- c(msg, paste("* Output differs first at line ", which(!i)[1], ":"),
+            msg <- c(msg, paste("* Output differs first at line ", which(!i)[1], ":", sep=""),
                      paste((if (did.gsub[1]) "  target (after gsub):" else "  target:"), target[which(!i)[1]]),
                      paste((if (did.gsub[2]) "  actual (after gsub):" else "  actual:"), actual[which(!i)[1]]))
         }

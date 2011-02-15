@@ -47,6 +47,7 @@ summarizeTests <- function(debug=FALSE) {
         sink(testResultsFile)
         cat(do.call("paste", lapply(testResults, format)), sep="\n")
         sink()
+        assign(".test-summary.fail", pos=1, testResults)
     }
     lines <- do.call("paste", lapply(testResults, format))
     lines <- c(lines[-length(lines)], "### Overall", lines[length(lines)])
@@ -63,4 +64,3 @@ summarizeTests <- function(debug=FALSE) {
     cat(paste("### Test Summary: ", firstError-1, " file", (if (firstError!=2) "s")," without errors", sep=""), lines, sep="\n")
     return(totalErrors)
 }
-

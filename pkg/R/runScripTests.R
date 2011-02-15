@@ -34,6 +34,23 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
         cat("Look for clues in ", if (length(fail.files)==1) "this file" else "these files",
             if (length(test.transcript.file)) " too: ",
             paste("'", fail.files, "'", collapse=", ", sep=""), "\n", sep="")
+    if (status && exists(".test-summary.fail", where=1, inherits=FALSE) && Sys.getenv("SCRIPTESTS13OFF")=="") {
+        # output 13 lines of low-level error comparison for R CMD check to output
+        testResults <- get(".test-summary.fail", pos=1)
+        if (length(testResults)>1) {
+            oneBadFile <- gsub(":$", ".log", testResults$name[length(testResults$name)-1])
+            if (file.exists(oneBadFile)) {
+                lines <- readLines(oneBadFile)
+                if (length(lines)) {
+                    cat("***** 13 lines of low-level output here because R CMD check is limited to displaying just 13 lines, turn this off by setting environment variable SCRIPTESTS13OFF=1\n")
+                    lines <- lines[seq(max(1, length(lines)-12), length(lines))]
+                    cat(lines, sep="\n")
+                    if (length(test.transcript.file))
+                        cat("See ", test.transcript.file, ".fail for more info\n", sep="")
+                }
+            }
+        }
+    }
     if (quit && !interactive())
         q("no", status = status)
     invisible(NULL)

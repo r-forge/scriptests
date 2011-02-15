@@ -18,8 +18,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         desc <- read.dcf(file.path(pkg.dir.path, "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
     }
-    if (is.null(pkg.name))
-        pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
+    pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     problems <- list()
     # Load dependencies before we attach the environment for our package code, so that required
     # libraries come after in search path -- if the dependencies come before, we won't find them.
