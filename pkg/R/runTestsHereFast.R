@@ -17,7 +17,7 @@ runTestsHereFast <- function(pattern=".*",
     #   (5) output is captured using evalCapture() instead of reading it
     #       from a transcript
     if (is.null(pkg.name))
-        pkg.name <- read.pkg.name(path, pkg.dir)
+        pkg.name <- read.pkg.name(pkg.dir, path)
     if (!is.null(file)) {
         files <- file.path(pkg.path(path, pkg.dir), "tests", file)
         if (!all(i <- file.exists(files))) {
