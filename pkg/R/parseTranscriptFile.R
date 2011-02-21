@@ -53,6 +53,23 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
                    ifelse(regexpr("^> ", lines)>0, 1,
                           ifelse(regexpr("^\\+ ", lines)>0, 2,
                                  ifelse(regexpr("^#@", lines)>0, 4, 0))))
+    ## Look for output in the middle of comments -- where these are blank
+    ## lines, they can be reclassified as comments.
+    ## If we don't do this, it messes up block counting and results in
+    ## confusing error messages.
+    lastCode <- -1
+    for (i in seq(along=lines)) {
+        if (lastCode==3) {
+            if (lines[i]=="" || regexpr("^ *", lines)>0)
+                code[i] <- 6
+        } else {
+            lastCode <- code[i]
+        }
+    }
+    if (length(i <- which(code==6))) {
+        lines <- lines[-i]
+        code <- code[-i]
+    }
     ## Identify blocks of contiguous command+continuation, & control-output.
     ## Comments go in their own block.
     ## Insert separators between lines starting with ">"
