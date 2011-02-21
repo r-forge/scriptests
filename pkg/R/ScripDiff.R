@@ -12,8 +12,8 @@ ScripDiff <- function(commandfile, outfile=NULL, savefile=NULL, debug=FALSE, R.s
         # tests were generated from a .Rt file
         failfile <- paste(rtIn, ".fail", sep="")
         logfile <- paste(rtIn, ".log", sep="")
-        ignoreUpToRegExpr <- "> # End of RtTests preamble"
-        ignoreAfterRegExpr <- "> # End of RtTests output"
+        ignoreUpToRegExpr <- "> # End of scriptests preamble"
+        ignoreAfterRegExpr <- "> # End of scriptests output"
     } else {
         # tests were generated in a pre-existing .R file
         # if there is a corresponding .Rout.save file, use the .Rt.save

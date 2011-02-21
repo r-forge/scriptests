@@ -78,7 +78,7 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
                         if (length(pkg.name)) list(input=paste("> library('", pkg.name, "', char=TRUE)", sep=""))
                         else list(input=paste("> # could not work out package name from getwd: '", dirname(wd), "/00install.out'", sep="")),
                         list(input="> searchpaths() # seeing where these came from can be useful for debugging"),
-                        list(comment="> # End of RtTests preamble")),
+                        list(comment="> # End of scriptests preamble")),
                    tests)
 
         ## write out the commands and the desired output
@@ -116,10 +116,10 @@ initializeTests <- function(debug=FALSE, create.Rout.save=FALSE, addSelfCheck=FA
 
             })
             if (addSelfCheck) {
-                cat(file=cmdOutCon, "# End of RtTests output\n")
+                cat(file=cmdOutCon, "# End of scriptests output\n")
                 cat(file=cmdOutCon, "flush(stdout())\n")
-                cat(file=cmdOutCon, "require('RtTests', character.only=TRUE)\n")
-                cat(file=cmdOutCon, "RtTests:::checkTestOutput('", rtIn, "', '", rtSave, "')\n", sep="")
+                cat(file=cmdOutCon, "require('scriptests', character.only=TRUE)\n")
+                cat(file=cmdOutCon, "scriptests:::checkTestOutput('", rtIn, "', '", rtSave, "')\n", sep="")
             }
             close(cmdOutCon)
             if (create.Rout.save)

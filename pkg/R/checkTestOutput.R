@@ -28,7 +28,7 @@ checkTestOutput <- function(rtIn, rtSave=paste(rtIn, ".save", sep=""), debug=TRU
     if (testObjName[1] != "tests")
         tests <- get(testObjName[1])
     cat("  * Parsing actual test output from file \"", rtOut, "\" ...\n", sep="", file=stdout())
-    resList <- parseTranscriptFile(rtOut, ignoreUpToRegExpr="> # End of RtTests preamble", ignoreAfterRegExpr="> # End of RtTests output")
+    resList <- parseTranscriptFile(rtOut, ignoreUpToRegExpr="> # End of scriptests preamble", ignoreAfterRegExpr="> # End of RtTests output")
     res <- compareTranscriptAndOutput(sub(".Rout", ".Rt", rtOut), tests, resList, verbose=TRUE)
     res.summary <- summary(res)
     print(res.summary)
