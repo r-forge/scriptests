@@ -59,7 +59,8 @@
             }
             diffFun[seq(2,len=length(args))] <- args
             names(diffFun)[seq(2,len=length(args))] <- names(args)
-            cat("   Calling ", format(diffFun), "\n", sep="")
+            if (debug)
+                cat("   Calling ", format(diffFun), "\n", sep="")
             res <- try(eval(diffFun))
             if (inherits(res, "try-error")) {
                 cat("   Error evaluting ", format(diffFun), ": ", as.character(res), "\n", sep="")
