@@ -64,6 +64,7 @@ Initially, we'll start off with just the 2 files that the
 <<echo=FALSE>>=
 options(scriptests.pkg.path.saved=getOption("scriptests.pkg.path"))
 options(scriptests.pkg.path=NULL)
+options(useFancyQuotes=FALSE)
 Sys.setenv("R_NOUSERPROFILE"=1) # Inhibit personal .Rprofile
 if (file.exists("testpkg")) unlink("testpkg", recursive=TRUE)
 @
@@ -212,7 +213,7 @@ mysystem("R CMD build testpkg")
 mysystem("R CMD check testpkg_1.0-0.tar.gz")
 @
 
-When tests run without any errors, no output appears other than these three lines:
+When tests run without any errors, no output regarding tests appears other than these three lines (which should be in the output above):
 \begin{verbatim}
 * checking tests ...
   Running 'runtests.R'
@@ -241,16 +242,29 @@ file.rename("testpkg/tests/willfail.Rnorun", "testpkg/tests/willfail.Rt")
 mysystem <- function(cmd) cat(system(cmd, intern=TRUE), sep="\n")
 mysystem("R CMD build testpkg")
 mysystem("R CMD check testpkg_1.0-0.tar.gz")
-cat(readLines("testpkg.Rcheck/tests/test-summary.txt"), sep="\n")
-cat(readLines("testpkg.Rcheck/tests/plus.Rt.log"), sep="\n")
-cat(readLines("testpkg.Rcheck/tests/willfail.Rt.log"), sep="\n")
 @
+
+Note that ``R CMD check'' outputs only the last 13 lines
+when a test fails.  \texttt{scriptests} is programmed to put
+12 lines of low-level errors and some pointers to files so
+that output is still somewhat useful when automated tests
+are run on a platform which makes nothing other than the
+output of ``R CMD check'' available.  Under these
+conditions, tests are expected to all pass, and test
+summaries are less informative than the detailed description
+of why some tests failed.
 
 A transcript of the failed test is in the file
 \texttt{testpkg.Rcheck/tests/willfail.Rout} -- this file can
 be compared again the original test file
 \texttt{testpkg/tests/willfail.Rt} to fix the code or the
 test output.
+
+<<>>=
+cat(readLines("testpkg.Rcheck/tests/test-summary.txt"), sep="\n")
+cat(readLines("testpkg.Rcheck/tests/plus.Rt.log"), sep="\n")
+cat(readLines("testpkg.Rcheck/tests/willfail.Rt.log"), sep="\n")
+@
 
 \section{Interactive tests, using an installed package}
 
@@ -412,9 +426,9 @@ Put the following in your \texttt{.emacs} file to tell ESS not mess with
           (lambda ()
           (if (string-match ".[Rr]t$" (buffer-name))
              (progn
-                (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
                 (define-key ess-transcript-mode-map (kbd "RET") 'newline)
                 (toggle-read-only 0)
+                (make-variable-buffer-local 'ess-nuke-trailing-whitespace-p)
                 (setq ess-nuke-trailing-whitespace-p nil)))) t)
 \end{verbatim}
 <<echo=FALSE>>=
