@@ -18,7 +18,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         desc <- read.dcf(file.path(pkg.dir.path, "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
     }
-    pkg.name <- read.pkg.name(pkg.dir, pkg.dir.path)
+    pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     problems <- list()
     # Load dependencies before we attach the environment for our package code, so that required
     # libraries come after in search path -- if the dependencies come before, we won't find them.
@@ -214,14 +214,14 @@ pkg.path <- function(path, pkg.dir) {
     }
 }
 
-read.pkg.name <- function(pkg.dir.path, path, pkg.dir) {
-    desc.path <- file.path(pkg.dir.path, "DESCRIPTION")
-    default.pkg.name <- basename(pkg.dir.path)
+read.pkg.name <- function(path, pkg.dir) {
+    desc.path <- file.path(path, "DESCRIPTION")
+    default.pkg.name <- basename(path)
     if (default.pkg.name == "pkg") {
-        default.pkg.name <- dirname(basename(pkg.dir.path))
+        default.pkg.name <- dirname(basename(path))
         # if we didn't get a plausible pkg name this way, go back to "pkg"
         if ((default.pkg.name %in% c(".", "", "/", "\\")) || regexpr("^[a-zA-Z]:", default.pkg.name)>0)
-            default.pkg.name <- basename(pkg.dir.path)
+            default.pkg.name <- basename(path)
     }
     # cat("  Reading", desc.path, "\n")
     if (file.exists(desc.path)) {
