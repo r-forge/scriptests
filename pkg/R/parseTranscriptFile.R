@@ -60,7 +60,7 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
     lastCode <- -1
     for (i in seq(along=lines)) {
         if (lastCode==3) {
-            if (lines[i]=="" || regexpr("^ *", lines)>0)
+            if (lines[i]=="" || regexpr("^ *$", lines)>0)
                 code[i] <- 6
         } else {
             lastCode <- code[i]
