@@ -16,8 +16,9 @@ runTestsHereFast <- function(pattern=".*",
     #   (4) use of scriptests initialize/diff/finalize is hardwired in here
     #   (5) output is captured using evalCapture() instead of reading it
     #       from a transcript
+    pkg.dir.path <- pkg.path(path, pkg.dir)
     if (is.null(pkg.name))
-        pkg.name <- read.pkg.name(path, pkg.dir)
+        pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     if (!is.null(file)) {
         files <- file.path(pkg.path(path, pkg.dir), "tests", file)
         if (!all(i <- file.exists(files))) {

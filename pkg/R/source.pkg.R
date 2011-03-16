@@ -207,7 +207,9 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
 }
 
 pkg.path <- function(path, pkg.dir) {
-    if ((i <- regexpr("$PKG", path, fixed=TRUE)) >= 1) {
+    if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0) {
+        return(pkg.dir)
+    } else if ((i <- regexpr("$PKG", path, fixed=TRUE)) >= 1) {
         return(gsub("$PKG", pkg.dir, path, fixed=TRUE))
     } else {
         return(file.path(path, pkg.dir))

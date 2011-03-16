@@ -14,7 +14,8 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         return(status)
     }
 
-    pkg.name <- read.pkg.name(path, pkg.dir)
+    pkg.dir.path <- pkg.path(path, pkg.dir)
+    pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     supplied.pkg.dir <- !missing(pkg.dir)
     supplied.path <- !missing(path)
     orig.path <- path
