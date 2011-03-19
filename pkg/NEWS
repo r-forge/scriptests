@@ -1,5 +1,9 @@
 SCRIPTESTS NEWS
 
+                CHANGES in scriptests version 1.0-5 (2011-03-18)
+    o   Two minor bugfixes to do with using full argument names and finding
+     	DESCRIPTION file.
+
                 CHANGES in scriptests version 1.0-4 (2011-02-24)
     o	When running under R CMD check, make the last 13 lines of the
     	fail file contain low level output (so that output of R CMD check
