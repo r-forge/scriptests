@@ -124,7 +124,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         assign(".file.times.old", envir=envir, value=file.times)
     if (length(files) && reset.function.envirs) {
         # Reset the environments on all functions in envir to be the global env
-        for (fn in ls(envir=envir, all=TRUE)) {
+        for (fn in ls(envir=envir, all.names=TRUE)) {
             f <- get(fn, envir=envir, inherits=FALSE)
             if (is.function(f) & !identical(environment(f), globalenv())) {
                 environment(f) <- globalenv()
