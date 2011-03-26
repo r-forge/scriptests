@@ -154,24 +154,38 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
 
     # Do we need to load and DLL's or SO's?
     if (dlls=="check") {
-        # Try to find object files under <pkg.dir>.Rcheck/<pkg.name> OR <pkg.name>.Rcheck/<pkg.name> and load them
+        # Try to find object files under <pkg.dir>.Rcheck/<pkg.name>/libs/<ARCH>
+        # OR <pkg.name>.Rcheck/<pkg.name>/<ARCH> and load them
+        # <ARCH> is optionally taken from .Platform$r_arch
         dll.dir <- NULL
-        dll.dir1 <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg.dir, ".Rcheck", sep="")), pkg.name, "libs"))
-        dll.dir2 <- gsub("\\\\", "/", file.path(pkg.path(path, paste(pkg.name, ".Rcheck", sep="")), pkg.name, "libs"))
-        if (file.exists(dll.dir1)) {
-            if (file.exists(dll.dir2)) {
-                # both exist, use the more recently modified one
-                if (diff(file.info(c(dll.dir1, dll.dir2))$mtime) > 0)
-                    dll.dir <- dll.dir2
-                else
-                    dll.dir <- dll.dir1
-            } else {
-                dll.dir <- dll.dir1
+        dll.dirs <- c(pkg.path(path, pkg.name), getwd())
+        check.dirs <- paste(pkg.name, ".Rcheck", sep="")
+        if (pkg.name != pkg.dir)
+            check.dirs <- paste(pkg.dir, ".Rcheck", sep="")
+        check.dirs <- file.path(check.dirs, pkg.name)
+        dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)), rep(check.dirs, length(dll.dirs)), "libs")
+        if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
+            dll.dirs <- c(file.path(dll.dirs, .Platform$r_arch), dll.dirs)
+        if (any(i <- file.exists(dll.dirs))) {
+            dll.dirs <- dll.dirs[i]
+            # Prune directories that contain no DLL's
+            i <- sapply(dll.dirs, function(dir)
+                        length(list.files(dir, pattern=paste("*", .Platform$dynlib.ext, sep=""), ignore.case=TRUE))>0)
+        }
+        if (any(i)) {
+            dll.dirs <- dll.dirs[i]
+            if (length(dll.dirs)>1) {
+                # Multiple directories.  Look for the most recent.
+                info <- file.info(dll.dirs)
+                cat("Found multiple possible directores for DLLs:\n",
+                    paste("  ", seq(len=length(dll.dirs)), ": ", dll.dirs, "\n", sep=""),
+                    "Choosing #", which.min(info$mtime), " because it has been modified most recently\n", sep="")
+                dll.dirs <- dll.dirs[which.min(info$mtime)]
             }
-        } else if (file.exists(dll.dir2)) {
-            dll.dir <- dll.dir2
+            dll.dir <- dll.dirs
         } else {
-            cat("Looking for DLL/SO files, but directories", dll.dir1, "and", dll.dir2, "don't exist", fill=TRUE)
+            cat("Failed to find any likely directories for DLL/SO files; looked in\n",
+                paste(" ", dll.dirs, collapse="\n"), "\n", sep="")
         }
         if (!is.null(dll.dir)) {
             objfiles <- list.files(dll.dir, pattern=paste("*", .Platform$dynlib.ext, sep=""), ignore.case=TRUE)
