@@ -166,6 +166,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)), rep(check.dirs, length(dll.dirs)), "libs")
         if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
             dll.dirs <- c(file.path(dll.dirs, .Platform$r_arch), dll.dirs)
+        dll.dirs.orig <- dll.dirs
         if (any(i <- file.exists(dll.dirs))) {
             dll.dirs <- dll.dirs[i]
             # Prune directories that contain no DLL's
@@ -185,7 +186,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
             dll.dir <- dll.dirs
         } else {
             cat("Failed to find any likely directories for DLL/SO files; looked in\n",
-                paste(" ", dll.dirs, collapse="\n"), "\n", sep="")
+                paste(" ", dll.dirs.orig, collapse="\n"), "\n", sep="")
         }
         if (!is.null(dll.dir)) {
             objfiles <- list.files(dll.dir, pattern=paste("*", .Platform$dynlib.ext, sep=""), ignore.case=TRUE)
