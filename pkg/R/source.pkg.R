@@ -165,7 +165,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         check.dirs <- paste(pkg.name, ".Rcheck", sep="")
         if (pkg.name != pkg.dir)
             check.dirs <- c(check.dirs, paste(pkg.dir, ".Rcheck", sep=""))
-        check.dirs <- file.path(check.dirs, pkg.name)
+        check.dirs <- file.path(check.dirs, rep(unique(c(pkg.name, pkg.dir)), each=length(check.dirs)))
         dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)), rep(check.dirs, length(dll.dirs)), "libs")
         if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
             dll.dirs <- c(file.path(dll.dirs, .Platform$r_arch), dll.dirs)
