@@ -2,7 +2,10 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
                        pattern=".*", suffix="\\.R$", dlls=c("no", "check"),
                        pos=NA, all=FALSE, reset.function.envirs=TRUE,
                        path=getOption("scriptests.pkg.path", default=getwd())) {
-    dlls <- match.arg(dlls)
+    if (!missing(dlls) && is.logical(dlls) && isTRUE(dlls))
+        dlls <- "check"
+    else
+        dlls <- match.arg(dlls)
     if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0)
         pkg.dir.path <- pkg.dir
     else
@@ -161,7 +164,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         dll.dirs <- c(pkg.path(path, pkg.name), getwd())
         check.dirs <- paste(pkg.name, ".Rcheck", sep="")
         if (pkg.name != pkg.dir)
-            check.dirs <- paste(pkg.dir, ".Rcheck", sep="")
+            check.dirs <- c(check.dirs, paste(pkg.dir, ".Rcheck", sep=""))
         check.dirs <- file.path(check.dirs, pkg.name)
         dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)), rep(check.dirs, length(dll.dirs)), "libs")
         if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
