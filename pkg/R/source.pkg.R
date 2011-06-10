@@ -37,7 +37,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
                     cat("  Depends element '", dep, "' is already loaded\n", sep="")
                 } else {
                     cat("Doing require(", dep, ") to satisfy Depends in DESCRIPTION\n", sep="")
-                    if (!require(dep, character.only=TRUE, quietly=TRUE, warn.conflicts=FALSE, save=FALSE))
+                    if (!require(dep, character.only=TRUE, quietly=TRUE, warn.conflicts=FALSE))
                         problems <- c(problems, structure("problems loading", names=paste("dependency", dep)))
                 }
             }
