@@ -75,9 +75,10 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
     ## Insert separators between lines starting with ">"
     ## because these must be separate commands (the first having no output)
     ## Convert command+continuation to all command + separator (-1)
-    code2 <- as.vector(rbind(code, ifelse(code==1 & c(code[-1],0)==1, -1, -2)))
+    code2 <- as.vector(rbind(code, ifelse((code==1 | code==2) & c(code[-1],0)==1, -1, -2)))
     code2 <- code2[code2 != -2]
-    code2 <- replace(code2, code2==2, 1)
+    ## Now that we have continuation blocks separated (by -1), change code 2 to code 1
+    code2 <- replace(code2, code2 == 2, 1)
     runs <- rle(code2)
     i <- runs$values != -1
     runs$values <- runs$values[i]
