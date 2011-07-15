@@ -12,13 +12,13 @@
 
 }
 \usage{
-source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
+source.pkg(pkg.dir = getOption("source.pkg.dir", "pkg"),
            pattern = ".*",
            suffix = "\\\\.R$",
-           dlls = c("no", "check"),
+           dlls = c("no", "check", "build"),
            pos = NA, all = FALSE,
            reset.function.envirs=TRUE,
-           path=getOption("scriptests.pkg.path", default=getwd()))
+           path=getOption("source.pkg.path", default=getwd()))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,6 +35,8 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir"),
       \item \code{no}: don't load any DLLs
       \item \code{check}: look in
     \code{<pkg.dir>.Rcheck/<pkg.name>/libs} and  \code{<pkg.name>.Rcheck/<pkg.name>/libs}
+      \item \code{build}: look in the directory \code{build} (can be
+    created with \code{R CMD INSTALL -l build <package-tarball>})
       }
   }
 

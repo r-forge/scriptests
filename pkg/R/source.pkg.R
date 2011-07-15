@@ -1,11 +1,13 @@
-source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
-                       pattern=".*", suffix="\\.R$", dlls=c("no", "check"),
+source.pkg <- function(pkg.dir=getOption("source.pkg.dir", "pkg"),
+                       pattern=".*", suffix="\\.R$", dlls=c("no", "check", "build"),
                        pos=NA, all=FALSE, reset.function.envirs=TRUE,
-                       path=getOption("scriptests.pkg.path", default=getwd())) {
+                       path=getOption("source.pkg.path", default=getwd())) {
     if (!missing(dlls) && is.logical(dlls) && isTRUE(dlls))
         dlls <- "check"
     else
         dlls <- match.arg(dlls)
+    if (is.null(pkg.dir))
+        stop("pkg.dir is NULL")
     if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0)
         pkg.dir.path <- pkg.dir
     else
@@ -13,9 +15,9 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     if (!file.exists(pkg.dir.path))
         stop("cannot find package directory ", pkg.dir.path, " using path='", path, "'")
     if (!missing(pkg.dir))
-        options("scriptests.pkg.dir"=pkg.dir)
+        options("source.pkg.dir"=pkg.dir)
     if (!missing(path))
-        options("scriptests.pkg.path"=path)
+        options("source.pkg.path"=path)
     desc <- NULL
     if (file.exists(file.path(pkg.dir.path, "DESCRIPTION"))) {
         desc <- read.dcf(file.path(pkg.dir.path, "DESCRIPTION"))
@@ -32,15 +34,18 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
         if (is(depends, "try-error")) {
             warning("could not parse Depends field in DESCRIPTION file: ", desc$depends)
         } else {
+            already.have <- character(0)
             for (dep in setdiff(sapply(depends[[1]][-1], as.character), "R")) {
                 if (any(is.element(paste(c("pkgcode", "package"), dep, sep=":"), search()))) {
-                    cat("  Depends element '", dep, "' is already loaded\n", sep="")
+                    already.have <- c(already.have, dep)
                 } else {
                     cat("Doing require(", dep, ") to satisfy Depends in DESCRIPTION\n", sep="")
                     if (!require(dep, character.only=TRUE, quietly=TRUE, warn.conflicts=FALSE))
                         problems <- c(problems, structure("problems loading", names=paste("dependency", dep)))
                 }
             }
+            if (length(already.have))
+                cat("  Already loaded these Depends element(s):", paste(already.have, collapse=', '), "\n")
         }
     }
 
@@ -112,10 +117,10 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
             files <- files[files.order]
         }
     }
-    cat("Reading ", length(files), " .R files into env at pos ", pos, ": '", search()[pos], "'\n", sep="")
-    names(files) <- files
     problems <- list()
     if (length(files)) {
+        names(files) <- files
+        cat("Reading ", length(files), " .R files into env at pos ", pos, ": '", search()[pos], "'\n", sep="")
         problems <- c(problems, lapply(files,
                                        function(file) {
                                            cat("Sourcing ", file, "\n", sep="")
@@ -156,17 +161,25 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
     }
 
     # Do we need to load and DLL's or SO's?
-    if (dlls=="check") {
+    if (dlls=="check" || dlls=="build") {
         # Try to find object files under <pkg.dir>.Rcheck/<pkg.name>/libs/<ARCH>
         # OR <pkg.name>.Rcheck/<pkg.name>/<ARCH> and load them
         # <ARCH> is optionally taken from .Platform$r_arch
         dll.dir <- NULL
-        dll.dirs <- c(pkg.path(path, pkg.name), getwd())
-        check.dirs <- paste(pkg.name, ".Rcheck", sep="")
-        if (pkg.name != pkg.dir)
-            check.dirs <- c(check.dirs, paste(pkg.dir, ".Rcheck", sep=""))
-        check.dirs <- file.path(check.dirs, rep(unique(c(pkg.name, pkg.dir)), each=length(check.dirs)))
-        dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)), rep(check.dirs, length(dll.dirs)), "libs")
+        dll.dirs <- getwd()
+        if (basename(path)!=pkg.name)
+            dll.dirs <- c(pkg.path(path, pkg.name), dll.dirs)
+        if (dlls=='check') {
+            check.dirs <- paste(pkg.name, ".Rcheck", sep="")
+            if (pkg.name != pkg.dir)
+                check.dirs <- c(check.dirs, paste(pkg.dir, ".Rcheck", sep=""))
+        } else {
+            check.dirs <- getOption("source.build.dir", "build")
+        }
+        check.dirs <- file.path(check.dirs,
+                                rep(unique(c(pkg.name, pkg.dir)), each=length(check.dirs)))
+        dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)),
+                              rep(check.dirs, length(dll.dirs)), "libs")
         if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
             dll.dirs <- c(file.path(dll.dirs, .Platform$r_arch), dll.dirs)
         dll.dirs.orig <- dll.dirs
@@ -181,7 +194,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir"),
             if (length(dll.dirs)>1) {
                 # Multiple directories.  Look for the most recent.
                 info <- file.info(dll.dirs)
-                cat("Found multiple possible directores for DLLs:\n",
+                cat("Found multiple possible directores for DLL/SO files:\n",
                     paste("  ", seq(len=length(dll.dirs)), ": ", dll.dirs, "\n", sep=""),
                     "Choosing #", which.min(info$mtime), " because it has been modified most recently\n", sep="")
                 dll.dirs <- dll.dirs[which.min(info$mtime)]
