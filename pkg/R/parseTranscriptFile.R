@@ -49,7 +49,7 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
     ##   4: control
     ##   5: garbage: not understood
     lineType <- c("output", "command", "continuation", "comment/empty", "control", "garbage")
-    code <- ifelse(regexpr("^> ?(#|[:space:]*$)", lines)>0, 3,
+    code <- ifelse(regexpr("^> ?(#|[[:space:]]*$)", lines)>0, 3,
                    ifelse(regexpr("^> ", lines)>0, 1,
                           ifelse(regexpr("^\\+ ", lines)>0, 2,
                                  ifelse(regexpr("^#@", lines)>0, 4, 0))))
