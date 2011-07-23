@@ -1,8 +1,8 @@
 Package: scriptests
 Type: Package
 Title: Transcript-based unit tests that are easy to create and maintain
-Version: 1.0-6
-Date: 2011-06-28
+Version: 1.0-7
+Date: 2011-07-14
 Author: Tony Plate
 Maintainer: Tony Plate <tplate@acm.org>
 Description: Support for using .Rt (transcript) tests
