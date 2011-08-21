@@ -12,13 +12,13 @@
 
 }
 \usage{
-source.pkg(pkg.dir = getOption("source.pkg.dir", "pkg"),
+source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
            pattern = ".*",
            suffix = "\\\\.R$",
            dlls = c("no", "check", "build"),
            pos = NA, all = FALSE,
            reset.function.envirs=TRUE,
-           path=getOption("source.pkg.path", default=getwd()))
+           path=getOption("scriptests.pkg.path", default=getwd()))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

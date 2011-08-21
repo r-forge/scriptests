@@ -1,10 +1,10 @@
 runTestsHereFast <- function(pattern=".*",
-                             pkg.dir=getOption("source.pkg.dir"),
+                             pkg.dir=getOption("scriptests.pkg.dir"),
                              pkg.name=NULL,
                              file=NULL,
                              verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
                              test.suffix=".Rt",
-                             path=getOption("source.pkg.path", default=getwd())) {
+                             path=getOption("scriptests.pkg.path", default=getwd())) {
     # This does the similar work as runScripTests()/.runPackageTests(),
     # with these differences:
     #

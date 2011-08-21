@@ -1,7 +1,11 @@
 SCRIPTESTS NEWS
 
+                CHANGES in scriptests version 1.0-8 (2011-08-20)
+    o   Minor fixes
+
+
                 CHANGES in scriptests version 1.0-6 (2011-06-28)
-    o   Bugfixe for do parsing continuation lines and separating one
+    o   Bugfixes for do parsing continuation lines and separating one
     	block from the next in transcripts.
 
                 CHANGES in scriptests version 1.0-5 (2011-03-18)

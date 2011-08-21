@@ -1,7 +1,7 @@
-source.pkg <- function(pkg.dir=getOption("source.pkg.dir", "pkg"),
+source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
                        pattern=".*", suffix="\\.R$", dlls=c("no", "check", "build"),
                        pos=NA, all=FALSE, reset.function.envirs=TRUE,
-                       path=getOption("source.pkg.path", default=getwd())) {
+                       path=getOption("scriptests.pkg.path", default=getwd())) {
     if (!missing(dlls) && is.logical(dlls) && isTRUE(dlls))
         dlls <- "check"
     else
@@ -15,9 +15,9 @@ source.pkg <- function(pkg.dir=getOption("source.pkg.dir", "pkg"),
     if (!file.exists(pkg.dir.path))
         stop("cannot find package directory ", pkg.dir.path, " using path='", path, "'")
     if (!missing(pkg.dir))
-        options("source.pkg.dir"=pkg.dir)
+        options("scriptests.pkg.dir"=pkg.dir)
     if (!missing(path))
-        options("source.pkg.path"=path)
+        options("scriptests.pkg.path"=path)
     desc <- NULL
     if (file.exists(file.path(pkg.dir.path, "DESCRIPTION"))) {
         desc <- read.dcf(file.path(pkg.dir.path, "DESCRIPTION"))

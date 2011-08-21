@@ -20,7 +20,7 @@
   }
 }
 \usage{
-runtests(pkg.dir = getOption("scriptests.pkg.dir"),
+runtests(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
          pattern = ".*",
          file = NULL,
          full = FALSE,
