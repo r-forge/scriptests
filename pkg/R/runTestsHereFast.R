@@ -2,7 +2,7 @@ runTestsHereFast <- function(pattern=".*",
                              pkg.dir=getOption("scriptests.pkg.dir"),
                              pkg.name=NULL,
                              file=NULL,
-                             verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
+                             verbose=TRUE, envir=globalenv(), subst=NULL,
                              test.suffix=".Rt",
                              path=getOption("scriptests.pkg.path", default=getwd())) {
     # This does the similar work as runScripTests()/.runPackageTests(),
@@ -20,7 +20,7 @@ runTestsHereFast <- function(pattern=".*",
     if (is.null(pkg.name))
         pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     if (!is.null(file)) {
-        files <- file.path(pkg.path(path, pkg.dir), "tests", file)
+        files <- file
         if (!all(i <- file.exists(files))) {
             warning("ignoring non-existant files ", paste(files[!i], collapse=", "))
             files <- files[i]
@@ -35,9 +35,9 @@ runTestsHereFast <- function(pattern=".*",
                 pattern <- paste(pattern, "$", sep="")
 
         }
-        files <- list.files(file.path(pkg.path(path, pkg.dir), "tests"), pattern=pattern, full.names=TRUE, ignore.case=TRUE)
+        files <- list.files('.', pattern=pattern, full.names=TRUE, ignore.case=TRUE)
         if (length(files)==0)
-            stop("no files matched the pattern '", pattern, "' in ", file.path(pkg.dir, "tests"))
+            stop("no files matched the pattern '", pattern, "' in ", getwd())
     }
     allres <- list()
     for (file in files) {
@@ -51,7 +51,7 @@ runTestsHereFast <- function(pattern=".*",
             if (is(test$expr, "try-error"))
                 actual <- as.character(test$expr)
             else
-                actual <- evalCapture(test$expr, envir, enclos)
+                actual <- evalCapture(test$expr, envir)
             res <- compareSingleTest(test$input, test$control, test$output, test$comment, test$garbage, actual,
                                      i, file, verbose=verbose)
             res$comment <- test$comment
@@ -68,7 +68,7 @@ runTestsHereFast <- function(pattern=".*",
         allres[[file]] <- res
     }
     class(allres) <- "RtTestSetResultsList"
-    attr(allres, "dir") <- file.path(pkg.path(path, pkg.dir), "tests")
+    attr(allres, "dir") <- getwd() # file.path(pkg.path(path, pkg.dir), "tests")
     attr(allres, "pattern") <- pattern
     if (length(allres)>1)
         print(summary(allres))

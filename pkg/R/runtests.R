@@ -3,7 +3,7 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
                      full=FALSE, dir=TRUE,
                      clobber=FALSE, output.suffix=NULL, console=FALSE,
                      ...,
-                     verbose=TRUE, envir=globalenv(), enclos=envir, subst=NULL,
+                     verbose=TRUE, envir=globalenv(), subst=NULL,
                      path=getOption("scriptests.pkg.path", default=getwd())) {
     if (!interactive() && basename(getwd())=="tests") {
         if (nargs() != 0)
@@ -81,6 +81,8 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         Sys.setenv("R_LIBS_SITE"=paste(r.libs.site, collapse=";"))
         on.exit(Sys.setenv("R_LIBS_SITE"=r.libs.site.orig), add=TRUE)
     }
+    if (path=='.')
+        path <- getwd()
     if (!is.null(dir)) {
         if (file.exists(dir)) {
             if (!clobber && !dir.isStandard)
@@ -121,7 +123,7 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     if (!full) {
         old.options <- options(width=80, warn=1)
         on.exit(options(old.options), add=TRUE)
-        res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, enclos=enclos, subst=subst, path=path)
+        res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, subst=subst, path=path)
         attr(res, "dir") <- dirname(names(res)[1])
         names(res) <- basename(names(res))
         if (console || (!is.null(output.suffix) && !(is.logical(output.suffix) && !output.suffix)))

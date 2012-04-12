@@ -31,7 +31,6 @@ runtests(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
          ...,
          verbose = TRUE,
          envir = globalenv(),
-         enclos = envir,
          subst = NULL,
          path = getOption("scriptests.pkg.path", default=getwd()))
 
@@ -83,8 +82,6 @@ dumprout(res = .Last.value,
     with a warning message otherwise.)}
   \item{verbose}{ Should progress indications be printed? }
   \item{envir}{ The environment in which to run the tests. }
-  \item{enclos}{ The environment to use as the \code{enclos} argument
-    for \code{eval()} when eval'ing each expression in the test file. }
   \item{subst}{ Provides control over whether the string \code{"package:::"} is
     removed from test code.  Supply \code{subst=FALSE} to prevent any
     substitution.  The default value will remove \code{"package:::"}

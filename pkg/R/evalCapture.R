@@ -1,4 +1,4 @@
-evalCapture <- function(expr, envir=globalenv(), enclos=envir) {
+evalCapture <- function(expr, envir=globalenv()) {
     ## Try to return the output that is returned at an interactive prompt
     ## when given the contents of 'text', including error messages
     ## (only the value from the last expression in text is printed)
@@ -31,16 +31,19 @@ evalCapture <- function(expr, envir=globalenv(), enclos=envir) {
         }
         withCallingHandlers(expr, warning = wHandler)
     }
-    ## Constructed this definition of eval.with.vis() based on code in source()
-    ## and added the withWarnings() stuff to capture the warnings as well
-    eval.with.vis <- function(expr, envir = envir, enclos = envir) {
-        output <- capture.output(withWarnings(res <- .Internal(eval.with.vis(expr, envir, enclos))))
+    ## Originally used ideas from definition of eval.with.vis() based on code in source()
+    ## and added the withWarnings() stuff to capture the warnings as well.
+    ## But eval.with.vis became illegal, and found suggestion at
+    ## https://github.com/hadley/evaluate/issues/12 to
+    ## use withVisible(eval(expr, envir)) instead of .Internal(eval.with.vis(expr, envir))
+    withVisible.eval <- function(expr, envir) {
+        output <- capture.output(withWarnings(res <- withVisible(eval(expr, envir))))
         res$output <- output
         res
     }
-    res <- try(eval.with.vis(expr, envir, enclos), silent=TRUE)
+    res <- try(withVisible.eval(expr, envir), silent=TRUE)
     if (is(res, "try-error")) {
-        res[1] <- sub("^Error in eval.with.vis\\(expr, envir, enclos\\) :", "Error:", res[1], perl=TRUE)
+        res[1] <- sub("^Error in withVisible.eval\\(expr, envir\\) :", "Error:", res[1], perl=TRUE)
         res <- sub("\n$", "", res)
         # Split line at embedded newlines, important for "Error: in f(...) : \n ..."
         res <- unlist(strsplit(res, "\n"))

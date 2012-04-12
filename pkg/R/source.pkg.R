@@ -1,5 +1,5 @@
 source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
-                       pattern=".*", suffix="\\.R$", dlls=c("no", "check", "build"),
+                       pattern=".*", suffix="\\.R$", dlls=c("no", "check", "build", "src"),
                        pos=NA, all=FALSE, reset.function.envirs=TRUE,
                        path=getOption("scriptests.pkg.path", default=getwd())) {
     if (!missing(dlls) && is.logical(dlls) && isTRUE(dlls))
@@ -161,7 +161,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     }
 
     # Do we need to load and DLL's or SO's?
-    if (dlls=="check" || dlls=="build") {
+    if (dlls=="check" || dlls=="build" || dlls=='src') {
         # Try to find object files under <pkg.dir>.Rcheck/<pkg.name>/libs/<ARCH>
         # OR <pkg.name>.Rcheck/<pkg.name>/<ARCH> and load them
         # <ARCH> is optionally taken from .Platform$r_arch
@@ -173,15 +173,21 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
             check.dirs <- paste(pkg.name, ".Rcheck", sep="")
             if (pkg.name != pkg.dir)
                 check.dirs <- c(check.dirs, paste(pkg.dir, ".Rcheck", sep=""))
-        } else {
+        } else if (dlls=='build') {
             check.dirs <- getOption("source.build.dir", "build")
+        } else if (dlls=='src') {
+            # Look in <pkg.dir>/src for dlls created by a command like
+            # R CMD SHLIB --preclean pkg/src/somefile.c
+            dll.dirs <- file.path(pkg.dir, 'src')
         }
-        check.dirs <- file.path(check.dirs,
-                                rep(unique(c(pkg.name, pkg.dir)), each=length(check.dirs)))
-        dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)),
-                              rep(check.dirs, length(dll.dirs)), "libs")
-        if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
-            dll.dirs <- c(file.path(dll.dirs, .Platform$r_arch), dll.dirs)
+        if (dlls=='check' || dlls=='build') {
+            check.dirs <- file.path(check.dirs,
+                                    rep(unique(c(pkg.name, pkg.dir)), each=length(check.dirs)))
+            dll.dirs <- file.path(rep(dll.dirs, each=length(check.dirs)),
+                                  rep(check.dirs, length(dll.dirs)), "libs")
+            if (length(.Platform$r_arch) && nchar(.Platform$r_arch)>0)
+                dll.dirs <- c(file.path(dll.dirs, .Platform$r_arch), dll.dirs)
+        }
         dll.dirs.orig <- dll.dirs
         if (any(i <- file.exists(dll.dirs))) {
             dll.dirs <- dll.dirs[i]
@@ -209,9 +215,10 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
             if (length(objfiles)==0) {
                 cat("Looking for DLL/SO files, but did not find any", .Platform$dynlib.ext, "files in ", dll.dir, "\n", fill=TRUE)
             } else {
-                loadedDLLs <- sapply(unclass(getLoadedDLLs()), "[[", "path")
+                loadedDLLs <- normalizePath(sapply(unclass(getLoadedDLLs()), "[[", "path"))
                 for (dll in file.path(dll.dir, objfiles)) {
-                    if (is.element(dll, loadedDLLs)) {
+                    # should make sure we have the full path for 'dll', because loadDLLs has full paths
+                    if (is.element(normalizePath(dll), loadedDLLs)) {
                         cat("Attempting to unload DLL/SO", dll, "\n")
                         cat("Warning: this can be an unreliable operation on some systems\n")
                         res <- try(dyn.unload(dll))
