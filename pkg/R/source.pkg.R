@@ -25,6 +25,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     }
     pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     problems <- list()
+    cat('Loading R objects from package ', pkg.name, '\n', sep='')
     # Load dependencies before we attach the environment for our package code, so that required
     # libraries come after in search path -- if the dependencies come before, we won't find them.
     if (!is.null(desc$depends)) {
@@ -53,7 +54,10 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     oldpos <- match(paste("pkgcode", pkg.name, sep=":"), search())
     if (is.na(oldpos)) {
         # we do need to create a new one
+        # if we have a choice where to attach, do so before first package on search path
         if (is.na(pos))
+            pos <- min(grep('^(package|pkgcode):', search()))
+        if (!is.finite(pos))
             pos <- 2
         envir <- attach(NULL, pos=pos, name=paste("pkgcode", pkg.name, sep=":"))
     } else {
@@ -140,6 +144,19 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
             }
         }
     }
+    # Save the description, and try to get the svn version number
+    svnversion <- try(system(paste('svnversion "', pkg.dir.path, '"', sep=''), intern=TRUE), silent=TRUE)
+    if (is(svnversion, 'try-error')) {
+        warning('Failed to run svnversion: ', paste(as.character(svnversion), collapse=' '))
+        svnversion <- 'NA'
+    } else if (!is.null(attr(svnversion, 'status'))) {
+        warning('svnversion returned an error: ', paste(as.character(svnversion), collapse=' '))
+        svnversion <- 'NA'
+    }
+    if (is.null(desc))
+        desc <- list()
+    desc$svnversion <- svnversion
+    assign(".DESCRIPTION", value=desc, pos=pos)
 
     # Work out what data files to load (look for .rdata,
     # .rda, case insensitive) This does NOT cover the full
