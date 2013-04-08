@@ -18,14 +18,24 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         options("scriptests.pkg.dir"=pkg.dir)
     if (!missing(path))
         options("scriptests.pkg.path"=path)
-    desc <- NULL
+    desc <- list()
     if (file.exists(file.path(pkg.dir.path, "DESCRIPTION"))) {
         desc <- read.dcf(file.path(pkg.dir.path, "DESCRIPTION"))
         desc <- structure(as.list(as.character(desc[1,])), names=casefold(colnames(desc)))
     }
+    # Try to read the svn version number and store it in the description
+    svnversion <- try(system(paste('svnversion "', pkg.dir.path, '"', sep=''), intern=TRUE), silent=TRUE)
+    if (is(svnversion, 'try-error')) {
+        warning('Failed to run svnversion: ', paste(as.character(svnversion), collapse=' '))
+        svnversion <- 'NA'
+    } else if (!is.null(attr(svnversion, 'status'))) {
+        warning('svnversion returned an error: ', paste(as.character(svnversion), collapse=' '))
+        svnversion <- 'NA'
+    }
+    desc$svnversion <- svnversion
     pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     problems <- list()
-    cat('Loading R objects from package ', pkg.name, '\n', sep='')
+    cat('Loading R objects from package ', pkg.name, ' ', desc$version, ' SVN=', desc$svnversion, '\n', sep='')
     # Load dependencies before we attach the environment for our package code, so that required
     # libraries come after in search path -- if the dependencies come before, we won't find them.
     if (!is.null(desc$depends)) {
@@ -144,18 +154,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
             }
         }
     }
-    # Save the description, and try to get the svn version number
-    svnversion <- try(system(paste('svnversion "', pkg.dir.path, '"', sep=''), intern=TRUE), silent=TRUE)
-    if (is(svnversion, 'try-error')) {
-        warning('Failed to run svnversion: ', paste(as.character(svnversion), collapse=' '))
-        svnversion <- 'NA'
-    } else if (!is.null(attr(svnversion, 'status'))) {
-        warning('svnversion returned an error: ', paste(as.character(svnversion), collapse=' '))
-        svnversion <- 'NA'
-    }
-    if (is.null(desc))
-        desc <- list()
-    desc$svnversion <- svnversion
+    # Save the description
     assign(".DESCRIPTION", value=desc, pos=pos)
 
     # Work out what data files to load (look for .rdata,
