@@ -9,6 +9,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         dlls <- match.arg(dlls)
     if (is.null(pkg.dir))
         stop("pkg.dir is NULL")
+    path <- path.expand(path)
     if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0)
         pkg.dir.path <- pkg.dir
     else
