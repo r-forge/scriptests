@@ -13,12 +13,24 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         status <- runScripTests()
         return(status)
     }
-
-    pkg.dir.path <- pkg.path(path, pkg.dir)
-    pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
-    supplied.pkg.dir <- !missing(pkg.dir)
     supplied.path <- !missing(path)
+    supplied.pkg.dir <- !missing(pkg.dir)
     orig.path <- path
+
+    if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0) {
+        pkg.dir.path <- pkg.dir
+        pkg.dir <- basename(pkg.dir)
+        path.used <- dirname(pkg.dir)
+    } else {
+        for (path.used in path.expand(strsplit(path, ';')[[1]])) {
+            pkg.dir.path <- pkg.path(path.used, pkg.dir)
+            if (file.exists(pkg.dir.path))
+                break
+        }
+    }
+    if (!file.exists(pkg.dir.path))
+        stop("cannot find package directory ", pkg.dir.path, " using path='", path.used, "'")
+    pkg.name <- read.pkg.name(pkg.dir.path, pkg.dir)
     if (!is.null(file) && pattern!=".*")
         stop("cannot supply both 'file' and 'pattern'")
     if (is.null(subst) && !full) {
@@ -42,7 +54,7 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     }
     # Prepare to change directory if needed
     cwd <- getwd()
-    test.dir <- file.path(pkg.path(path, pkg.dir), "tests")
+    test.dir <- file.path(pkg.path(path.used, pkg.dir), "tests")
     # convert to absolute path because this function changes working directories,
     test.dir <- normalizePath(test.dir)
     if (!file.exists(test.dir))
@@ -81,8 +93,8 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         Sys.setenv("R_LIBS_SITE"=paste(r.libs.site, collapse=";"))
         on.exit(Sys.setenv("R_LIBS_SITE"=r.libs.site.orig), add=TRUE)
     }
-    if (path=='.')
-        path <- getwd()
+    if (path.used=='.')
+        path.used <- getwd()
     if (!is.null(dir)) {
         if (file.exists(dir)) {
             if (!clobber && !dir.isStandard)
@@ -123,7 +135,7 @@ runtests <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     if (!full) {
         old.options <- options(width=80, warn=1)
         on.exit(options(old.options), add=TRUE)
-        res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, subst=subst, path=path)
+        res <- runTestsHereFast(pattern=pattern, pkg.dir=pkg.dir, pkg.name=pkg.name, file=file, verbose=verbose, envir=envir, subst=subst, path=path.used)
         attr(res, "dir") <- dirname(names(res)[1])
         names(res) <- basename(names(res))
         if (console || (!is.null(output.suffix) && !(is.logical(output.suffix) && !output.suffix)))

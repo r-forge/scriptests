@@ -1,7 +1,7 @@
 SCRIPTESTS NEWS
 
-                CHANGES in scriptests version 1.0-11 (2013-04-08)
-    o   Record DESCRIPTION and add source-code-control version as a component
+                CHANGES in scriptests version 1.0-12 (2013-07-20)
+    o   Allow path in source.pkg() and runtests() to be semi-colon separated list of paths
 
                 CHANGES in scriptests version 1.0-9 (2012-04-11)
     o   Use withVisible(eval(expr, envir)) instead of .Internal(eval.with.vis)

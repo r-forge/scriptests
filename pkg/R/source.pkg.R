@@ -9,11 +9,17 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         dlls <- match.arg(dlls)
     if (is.null(pkg.dir))
         stop("pkg.dir is NULL")
-    path <- path.expand(path)
-    if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0)
+    if (regexpr("^(/|\\\\|[a-zA-Z]:)", pkg.dir) > 0) {
         pkg.dir.path <- pkg.dir
-    else
-        pkg.dir.path <- pkg.path(path, pkg.dir)
+        pkg.dir <- basename(pkg.dir)
+        path.used <- dirname(pkg.dir)
+    } else {
+        for (path.used in path.expand(strsplit(path, ';')[[1]])) {
+            pkg.dir.path <- pkg.path(path.used, pkg.dir)
+            if (file.exists(pkg.dir.path))
+                break
+        }
+    }
     if (!file.exists(pkg.dir.path))
         stop("cannot find package directory ", pkg.dir.path, " using path='", path, "'")
     if (!missing(pkg.dir))
@@ -191,8 +197,8 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         # <ARCH> is optionally taken from .Platform$r_arch
         dll.dir <- NULL
         dll.dirs <- getwd()
-        if (basename(path)!=pkg.name)
-            dll.dirs <- c(pkg.path(path, pkg.name), dll.dirs)
+        if (basename(path.used)!=pkg.name)
+            dll.dirs <- c(pkg.path(path.used, pkg.name), dll.dirs)
         if (dlls=='check') {
             check.dirs <- paste(pkg.name, ".Rcheck", sep="")
             if (pkg.name != pkg.dir)

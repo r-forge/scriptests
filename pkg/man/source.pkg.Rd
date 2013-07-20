@@ -52,7 +52,8 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
   for explanation.}
 
   \item{path}{ The file system path to the directory in which the
-    package is located.  The initial default for \code{path} is the
+    package is located.  Can be a semi-colon separated list of paths.
+    The initial default for \code{path} is the
     current directory.  By default, R source files are looked for in the
     directory found by appending \code{pkg.dir} to \code{path}, i.e.
     \code{<path>/<pkg.dir>/R/*.R}. If \code{path} contains the string

@@ -49,7 +49,8 @@ dumprout(res = .Last.value,
         \code{path} contains \code{$PKG}, the value of \code{pkg.dir}
          will be substituted for \code{$PKG}, otherwise the value of
          \code{pkg.dir} will be appended to \code{pkg.dir} to give the
-         location of the pacakge. }
+         location of the pacakge. \code{path} can be semi-colon
+         separated list of paths.}
   \item{pattern}{ A regular expression pattern of test files to be run.
     Only one of \code{pattern} and \code{file} should be supplied.}
   \item{file}{ The name of the file(s) containing tests to be run.}
