@@ -37,7 +37,9 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
       \item \code{check}: look in
     \code{<pkg.dir>.Rcheck/<pkg.name>/libs} and  \code{<pkg.name>.Rcheck/<pkg.name>/libs}
       \item \code{build}: look in the directory \code{build} (can be
-    created with \code{R CMD INSTALL -l build <package-tarball>})
+    created with \code{R CMD INSTALL -l build <package-tarball>}, and
+    before loading each time, it may be necessary to do
+    \code{dyn.unload(...)}, using the path of the DLL as printed.)
       }
   }
 
