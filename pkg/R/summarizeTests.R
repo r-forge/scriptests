@@ -47,7 +47,9 @@ summarizeTests <- function(debug=FALSE) {
         sink(testResultsFile)
         cat(do.call("paste", lapply(testResults, format)), sep="\n")
         sink()
-        assign(".test-summary.fail", pos=1, testResults)
+        assign("test-summary.fail", envir=test.status.env, testResults)
+    } else if (exists("test-summary.fail", envir=test.status.env)) {
+        remove(list="test-summary.fail", envir=test.status.env)
     }
     lines <- do.call("paste", lapply(testResults, format))
     lines <- c(lines[-length(lines)], "### Overall", lines[length(lines)])
@@ -64,3 +66,8 @@ summarizeTests <- function(debug=FALSE) {
     cat(paste("### Test Summary: ", firstError-1, " file", (if (firstError!=2) "s")," without errors", sep=""), lines, sep="\n")
     return(totalErrors)
 }
+
+# Environment to store status of a complete test run.
+# This used to be stored in object '.test-summary.fail' in the global env,
+# but that was bad practice that R CMD check --as-cran flagged.
+test.status.env <- new.env()

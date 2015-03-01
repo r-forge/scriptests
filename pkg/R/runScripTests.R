@@ -34,7 +34,8 @@ runScripTests <- function(..., initializeFun = Quote(initializeTests()),
         cat("Look for clues in ", if (length(fail.files)==1) "this file" else "these files",
             if (length(test.transcript.file)) " too: ",
             paste("'", fail.files, "'", collapse=", ", sep=""), "\n", sep="")
-    if (status && exists(".test-summary.fail", where=1, inherits=FALSE) && !(Sys.getenv("SCRIPTESTS13") %in% c("0", "F", "FALSE"))) {
+    if (status && !(Sys.getenv("SCRIPTESTS13") %in% c("0", "F", "FALSE"))
+        && exists("test-summary.fail", envir=test.status.env, inherits=FALSE)) {
         # output 13 lines of low-level error comparison for R CMD check to output
         testResults <- get(".test-summary.fail", pos=1)
         if (length(testResults)>1) {
