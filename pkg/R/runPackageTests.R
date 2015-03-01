@@ -154,8 +154,13 @@
             config <- c(config, res)
         }
 
+        depends <- character(0)
         # should we work out what the name of the package being tested, and add that too?
-        depends <- tools:::.get_requires_from_package_db(config, "Depends")
+        if (is.element('Depends', names(config))) {
+            # old code: depends <- tools:::.get_requires_from_package_db(config, "Depends")
+            depends <- unlist(strsplit(config['Depends'], ","))
+            depends <- setdiff(sub("^[[:space:]]*([[:alnum:].]+).*$", "\\1", depends), 'R')
+        }
 
         if (is.element("stoponerror", names(config))) {
             stopOnError <- try(eval(parse(text=config["stoponerror"])[[1]])!=0)
