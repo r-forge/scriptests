@@ -4,11 +4,13 @@
 \title{ Quickly load code and data of a package }
 \description{
 
-  \code{source()} all of the source files and data files in a package into a specially created
-  environment.  It also loads DLLs if requested, and if those DLLs can
-  be found.   This function is intended for use in code development,
-  in situations where code from a package can be tested without worrying
-  about imports, namespaces, etc.
+  \code{source()} all of the source files and data files in a package
+  into an environment on the search path.  If an environment is not
+  already attached by a previous invocation of \code{source.pkg()}, one
+  will be created and attached.  It also loads DLLs if requested, and if
+  those DLLs can be found.  This function is intended for use in code
+  development, in situations where code from a package can be tested
+  without worrying about imports, namespaces, etc.
 
 }
 \usage{
@@ -122,7 +124,13 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
   }
 }
 \value{
-  A list of the problems encountered when sourcing the files.
+
+  This function is executed for its side effects, which may include
+  attaching a new environment to the search path, or moving an existing
+  one, and reading function and object definitions into that
+  environment.  \code{source.pkg()} returns as its value a list of the
+  problems encountered when sourcing the files.
+
 }
 \note{
   If \code{reset.function.envirs=FALSE} is supplied, the environments on
