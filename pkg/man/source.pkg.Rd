@@ -16,7 +16,7 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
            pattern = ".*",
            suffix = "\\\\.R$",
            dlls = c("no", "check", "build", "src"),
-           pos = NA, all = FALSE,
+           unload=FALSE, pos = NA, all = FALSE,
            reset.function.envirs=TRUE,
            path=getOption("scriptests.pkg.path", default=getwd()),
            get.sccv=getOption('source.pkg.sccversion'))
@@ -44,6 +44,8 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
   }
 
   \item{pos}{ Which environment on the search path to source R code into }
+
+  \item{unload}{ Should compiled object files be unloaded? }
 
   \item{all}{ If \code{TRUE}, all files matching the pattern and suffix
   are sourced, if \code{FALSE}, only files that have changed since last

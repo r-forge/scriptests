@@ -11,8 +11,10 @@
   each test with target out, and summarize test results.
 }
 \usage{
-ScripDiff(commandfile, outfile = NULL, savefile = NULL, debug = FALSE, R.suf = "R")
-initializeTests(debug = FALSE, create.Rout.save = FALSE, addSelfCheck = FALSE, pattern = NULL, subst = NULL, R.suf = "R")
+ScripDiff(commandfile, outfile = NULL, savefile = NULL,
+          debug = FALSE, R.suf = "R")
+initializeTests(debug = FALSE, create.Rout.save = FALSE,
+                addSelfCheck = FALSE, pattern = NULL, subst = NULL, R.suf = "R")
 summarizeTests(debug = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.

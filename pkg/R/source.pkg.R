@@ -1,6 +1,6 @@
 source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
-                       pattern=".*", suffix="\\.R$", dlls=c("no", "check", "build", "src"), unload=FALSE,
-                       pos=NA, all=FALSE, reset.function.envirs=TRUE,
+                       pattern=".*", suffix="\\.R$", dlls=c("no", "check", "build", "src"),
+                       unload=FALSE, pos=NA, all=FALSE, reset.function.envirs=TRUE,
                        path=getOption("scriptests.pkg.path", default=getwd()),
                        get.sccv=getOption('source.pkg.sccversion')) {
     if (!missing(dlls) && is.logical(dlls) && isTRUE(dlls))
