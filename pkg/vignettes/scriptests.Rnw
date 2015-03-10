@@ -1,5 +1,6 @@
 \documentclass{article}
 \title{Creating a simple R package and unit tests with the scriptests package}
+%\VignetteIndexEntry{Using scriptests}
 \author{Tony Plate}
 \begin{document}
 \maketitle

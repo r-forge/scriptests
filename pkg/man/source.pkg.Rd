@@ -144,10 +144,11 @@ source.pkg(pkg.dir = getOption("scriptests.pkg.dir", "pkg"),
 }
 \references{ \itemize{
     \item Similar ideas in an R-devel post by Barry Rowlingson:
-    \url{http://n4.nabble.com/Lightweight-package-idea-td924000.html#a924000}
+    \code{http://n4.nabble.com/Lightweight-package-idea-td924000.html#a924000}
+    (link no longer active)
     \item Hadley Wickham source_package() function
-    \url{http://gist.github.com/180883}, reads DESCRIPTION, loads dependencies, respects
-    collation order
+    \code{http://gist.github.com/180883}, reads DESCRIPTION, loads dependencies, respects
+    collation order (link no longer active)
   }
 }
 \author{ Tony Plate \email{tplate@acm.org} }
