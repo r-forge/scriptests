@@ -126,7 +126,7 @@ parseTranscriptFile <- function(file, ignoreUpToRegExpr=NULL, ignoreAfterRegExpr
             text <- gsub("^[>+] ?", "", res$input, perl=TRUE)
             res$expr <- try(parse(text=text, srcfile=NULL), silent=TRUE)
             ## try to make a syntax error message look like it does at the prompt
-            if (is(res$expr, "try-error"))
+            if (inherits(res$expr, "try-error"))
                 res$expr[1] <- gsub("Error in parse\\(text = text, srcfile = NULL\\) :[ \n\t]+", "Error: ", res$expr[1], perl=TRUE)
         }
         while (j <= length(runs$values) && !is.element(runs$values[j], c(1,3))) {

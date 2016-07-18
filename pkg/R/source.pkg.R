@@ -34,7 +34,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
     # Try to read the svn version number and store it in the description
     if (!is.null(get.sccv)) {
         sccversion <- try(system(paste(get.sccv, ' "', pkg.dir.path, '"', sep=''), intern=TRUE), silent=TRUE)
-        if (is(sccversion, 'try-error')) {
+        if (inherits(sccversion, 'try-error')) {
             warning('Failed to run sccversion: ', paste(as.character(sccversion), collapse=' '))
             sccversion <- 'sccfail'
         } else if (!is.null(attr(sccversion, 'status'))) {
@@ -56,7 +56,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         # Depends is comma separated
         depends <- try(parse(text=paste("c(", gsub("\\([^()]*\\)", "", desc$depends), ")")))
         cat("Checking Depends from DESCRIPTION\n")
-        if (is(depends, "try-error")) {
+        if (inherits(depends, "try-error")) {
             warning("could not parse Depends field in DESCRIPTION file: ", desc$depends)
         } else {
             already.have <- character(0)
@@ -135,7 +135,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
         # So try to make the code work with both
         collation.order <- gsub("^[ \t,]+", "", collation.order)
         collation.order <- gsub("[ \t,]+$", "", collation.order)
-        if (is(collation.order, "try-error")) {
+        if (inherits(collation.order, "try-error")) {
             warning("could not parse COLLATE field in DESCRIPTION file: ", collate.string)
         } else {
             # Be more liberal about COLLATE than R CMD is: any files that appear
@@ -183,7 +183,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
                function(file) {
                    cat("Loading ", file, "\n", sep="")
                    res <- try(load(file, envir=envir))
-                   if (is(res, "try-error"))
+                   if (inherits(res, "try-error"))
                        return(res)
                    else
                        return(NULL)
@@ -260,7 +260,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
                         cat("Attempting to unload DLL/SO", dll, "\n")
                         cat("Warning: this can be an unreliable operation on some systems\n")
                         res <- try(dyn.unload(dll))
-                        if (is(res, "try-error")) {
+                        if (inherits(res, "try-error")) {
                             warning("failed to unload", dll, ": ", res)
                             problem <- list(as.character(res))
                             names(problem) <- paste("unloading", dll)
@@ -271,7 +271,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
                     if (!unload) {
                         cat("Attempting to load DLL/SO", dll, "\n")
                         res <- try(dyn.load(dll))
-                        if (is(res, "try-error")) {
+                        if (inherits(res, "try-error")) {
                             warning("failed to load", dll, ": ", res)
                             problem <- list(as.character(res))
                             names(problem) <- paste("loading", dll)
@@ -288,7 +288,7 @@ source.pkg <- function(pkg.dir=getOption("scriptests.pkg.dir", "pkg"),
                         cat("Attempting to unload DLL/SO", dll, "\n")
                         cat("Warning: this can be an unreliable operation on some systems\n")
                         res <- try(dyn.unload(dll))
-                        if (is(res, "try-error")) {
+                        if (inherits(res, "try-error")) {
                             warning("failed to unload", dll, ": ", res)
                             problem <- list(as.character(res))
                             names(problem) <- paste("unloading", dll)

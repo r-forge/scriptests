@@ -48,7 +48,7 @@ runTestsHereFast <- function(pattern=".*",
             cat(" (read", length(tests), "chunks)\n")
         res <- lapply(seq(along=tests), function(i) {
             test <- tests[[i]]
-            if (is(test$expr, "try-error"))
+            if (inherits(test$expr, "try-error"))
                 actual <- as.character(test$expr)
             else
                 actual <- evalCapture(test$expr, envir)

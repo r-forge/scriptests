@@ -22,7 +22,7 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
             if (regexpr('^\\#@ *gsub\\(', casefold(line, upper=FALSE))>0) {
                 expr <- try(parse(text=gsub("^\\#@ *", "", line, perl=TRUE)), silent=TRUE)
                 v <- all.vars(expr)
-                if (is(expr, "try-error")) {
+                if (inherits(expr, "try-error")) {
                     warning("parse error in test-control line '", line, "': ",
                             gsub("Error in parse\\(file, n, text, prompt\\) :[ \n\t]+", "", expr, perl=TRUE))
                 } else if (!all(is.element(v, c("target", "actual", "both")))) {
@@ -33,26 +33,26 @@ compareSingleTest <- function(input, control, target, comment, garbage, actual, 
                     warning("ignoring test-control line '", line, "' that refers to more than one of 'target', 'actual' and 'both'")
                 } else if (v=="target") {
                     res <- try(eval(do.call("substitute", list(expr[[1]], list(target=target)))), silent=TRUE)
-                    if (is(res, "try-error"))
+                    if (inherits(res, "try-error"))
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         target <- res
                     did.gsub[1] <- TRUE
                 } else if (v=="actual") {
                     res <- try(eval(do.call("substitute", list(expr[[1]], list(actual=actual)))), silent=TRUE)
-                    if (is(res, "try-error"))
+                    if (inherits(res, "try-error"))
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         actual <- res
                     did.gsub[2] <- TRUE
                 } else if (v=="both") {
                     res <- try(eval(do.call("substitute", list(expr[[1]], list(both=target)))), silent=TRUE)
-                    if (is(res, "try-error"))
+                    if (inherits(res, "try-error"))
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         target <- res
                     res <- try(eval(do.call("substitute", list(expr[[1]], list(both=actual)))), silent=TRUE)
-                    if (is(res, "try-error"))
+                    if (inherits(res, "try-error"))
                         warning("error in running gsub control line '", line, "': ", as.character(res))
                     else
                         actual <- res

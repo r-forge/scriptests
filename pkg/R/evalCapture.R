@@ -42,7 +42,7 @@ evalCapture <- function(expr, envir=globalenv()) {
         res
     }
     res <- try(withVisible.eval(expr, envir), silent=TRUE)
-    if (is(res, "try-error")) {
+    if (inherits(res, "try-error")) {
         res[1] <- sub("^Error in withVisible.eval\\(expr, envir\\) :", "Error:", res[1], perl=TRUE)
         res <- sub("\n$", "", res)
         # Split line at embedded newlines, important for "Error: in f(...) : \n ..."
