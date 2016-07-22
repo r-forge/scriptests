@@ -1,4 +1,6 @@
 SCRIPTESTS NEWS
+                CHANGES in scriptests version 1.0-16 (2016-07-20)
+    o   Updated for R-3.3.0 checks
 
                 CHANGES in scriptests version 1.0-12 (2013-07-20)
     o   Allow path in source.pkg() and runtests() to be semi-colon separated list of paths
